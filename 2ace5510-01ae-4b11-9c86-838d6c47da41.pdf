@@ -1,1 +1,2 @@
-# TODO: Download content from Azure Blob URL: https://truvelocity.blob.core.windows.net/exports/exports_output/2025/12/04/2ace5510-01ae-4b11-9c86-838d6c47da41.pdf?sv=REDACTED&ss=REDACTED&srt=REDACTED&sp=REDACTED&se=REDACTED&st=REDACTED&spr=REDACTED&sig=REDACTED
+# ERROR processing Azure Blob URL: 'GitHubConnectorStrategy' object has no attribute '_azure_client'
+# Original URL: https://truvelocity.blob.core.windows.net/exports/exports_output/2025/12/04/2ace5510-01ae-4b11-9c86-838d6c47da41.pdf?sv=REDACTED&ss=REDACTED&srt=REDACTED&sp=REDACTED&se=REDACTED&st=REDACTED&spr=REDACTED&sig=REDACTED
