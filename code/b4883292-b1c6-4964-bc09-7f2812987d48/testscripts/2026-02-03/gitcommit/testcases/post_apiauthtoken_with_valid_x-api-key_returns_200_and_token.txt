@@ -1,0 +1,46 @@
+Test Case Title: POST /api/auth/token with valid x-api-key returns 200 and token
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-1f3c1b3b-001",
+    "description": "Validate that providing a valid x-api-key in the header returns a 200 response and a valid token payload.",
+    "preconditions": [
+        "API is reachable",
+        "Valid x-api-key is available"
+    ],
+    "steps": [
+        "Send POST request to /api/auth/token with a valid x-api-key header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body is a valid JSON object (token or relevant data)"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/auth/token",
+        "headers": {
+            "x-api-key": "<REPLACE_WITH_VALID_API_KEY>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "smoke",
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "get_token_api_auth_token_post",
+        "owasp_asvs_refs": [
+            "V2",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
