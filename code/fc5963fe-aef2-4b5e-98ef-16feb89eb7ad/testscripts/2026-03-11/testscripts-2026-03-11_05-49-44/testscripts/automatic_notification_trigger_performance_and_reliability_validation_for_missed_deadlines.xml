@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Automatic Notification Trigger Reliability and Performance Validation" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for automatic notification trigger reliability and SLA compliance for missed deadlines.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Workflow Deadline Test Data" enabled="true">
+        <stringProp name="filename">workflow_deadlines.csv</stringProp>
+        <stringProp name="fileEncoding">UTF-8</stringProp>
+        <stringProp name="variableNames">workflow_id,deadline_timestamp,responsible_user_id,superior_user_id</stringProp>
+        <boolProp name="ignoreFirstLine">false</boolProp>
+        <boolProp name="quotedData">false</boolProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Missed Deadline Notification Trigger" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${__P(user_count,10)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(ramp_up,30)}</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time()}</longProp>
+        <longProp name="ThreadGroup.end_time">${__time()}</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- Step 1: Prepare test data (CSVDataSet above) -->
+        <!-- Step 2: Initiate workflow and allow deadline to lapse -->
+        <!-- Step 3: Trigger notification (API endpoint not specified) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Trigger Notification (Placeholder API)" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(domain,"your.domain.com")}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(port,443)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(protocol,"https")}</stringProp>
+          <stringProp name="HTTPSampler.path">/api/notification/trigger</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{
+  "workflow_id": "${workflow_id}",
+  "deadline_timestamp": "${deadline_timestamp}",
+  "responsible_user_id": "${responsible_user_id}",
+  "superior_user_id": "${superior_user_id}"
+}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <!-- Add authentication headers if required by API -->
+              <!-- TODO: Insert Authorization header if needed -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <!-- Step 4: Response time assertion (SLA: within 1 minute) -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Notification Trigger Response Assertion" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp>200</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Notification SLA Assertion (<=60s)" enabled="true">
+            <longProp name="DurationAssertion.duration">60000</longProp>
+          </DurationAssertion>
+          <hashTree/>
+        </hashTree>
+        <!-- Step 5: Error rate monitoring -->
+        <ResultCollector guiclass="SummaryReportGui" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <boolProp name="timestamp">true</boolProp>
+              <boolProp name="success">true</boolProp>
+              <boolProp name="label">true</boolProp>
+              <boolProp name="code">true</boolProp>
+              <boolProp name="message">true</boolProp>
+              <boolProp name="threadName">true</boolProp>
+              <boolProp name="dataType">false</boolProp>
+              <boolProp name="responseData">false</boolProp>
+              <boolProp name="assertions">true</boolProp>
+              <boolProp name="latency">true</boolProp>
+              <boolProp name="samplerData">false</boolProp>
+              <boolProp name="responseHeaders">false</boolProp>
+              <boolProp name="requestHeaders">false</boolProp>
+              <boolProp name="encoding">false</boolProp>
+              <boolProp name="fieldNames">false</boolProp>
+              <boolProp name="responseTime">true</boolProp>
+              <boolProp name="bytes">true</boolProp>
+              <boolProp name="url">true</boolProp>
+              <boolProp name="hostname">false</boolProp>
+              <boolProp name="threadCounts">true</boolProp>
+            </value>
+          </objProp>
+          <stringProp name="filename">notification_trigger_summary.csv</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">true</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <boolProp name="timestamp">true</boolProp>
+              <boolProp name="success">true</boolProp>
+              <boolProp name="label">true</boolProp>
+              <boolProp name="code">true</boolProp>
+              <boolProp name="message">true</boolProp>
+              <boolProp name="threadName">true</boolProp>
+              <boolProp name="dataType">false</boolProp>
+              <boolProp name="responseData">true</boolProp>
+              <boolProp name="assertions">true</boolProp>
+              <boolProp name="latency">true</boolProp>
+              <boolProp name="samplerData">true</boolProp>
+              <boolProp name="responseHeaders">true</boolProp>
+              <boolProp name="requestHeaders">true</boolProp>
+              <boolProp name="encoding">false</boolProp>
+              <boolProp name="fieldNames">false</boolProp>
+              <boolProp name="responseTime">true</boolProp>
+              <boolProp name="bytes">true</boolProp>
+              <boolProp name="url">true</boolProp>
+              <boolProp name="hostname">false</boolProp>
+              <boolProp name="threadCounts">true</boolProp>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
