@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Scalability Validation - Modular System 100 User Load" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for scalability validation of modular system under 100 concurrent users as per NFR</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <!-- CSV Data Set Config for user and transaction parameterization -->
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="UserSessionData" enabled="true">
+        <stringProp name="filename">user_sessions.csv</stringProp>
+        <stringProp name="fileEncoding">UTF-8</stringProp>
+        <boolProp name="ignoreFirstLine">true</boolProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="quotedData">false</boolProp>
+        <intProp name="recycle">true</intProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="100 Concurrent Users - Modular System" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">300</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time(,)}</longProp>
+        <longProp name="ThreadGroup.end_time">${__timeShift(, +1800, ,)}</longProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">1800</stringProp>
+        <stringProp name="ThreadGroup.delay">0</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- Placeholder HTTP Sampler for AMT Module -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="AMT Module Transaction" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${AMT_DOMAIN}</stringProp>
+          <stringProp name="HTTPSampler.port">${AMT_PORT}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${AMT_PROTOCOL}</stringProp>
+          <stringProp name="HTTPSampler.path">/amt/transaction</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"user_id":"${user_id}","transaction_type":"amt","data":"${amt_data}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <!-- Placeholder HTTP Sampler for RAS AMT Module -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="RAS AMT Module Transaction" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${RAS_AMT_DOMAIN}</stringProp>
+          <stringProp name="HTTPSampler.port">${RAS_AMT_PORT}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${RAS_AMT_PROTOCOL}</stringProp>
+          <stringProp name="HTTPSampler.path">/rasamt/transaction</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"user_id":"${user_id}","transaction_type":"rasamt","data":"${rasamt_data}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <!-- Placeholder HTTP Sampler for Project Administration & Set-up Module -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Project Admin Module Transaction" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${PROJ_ADMIN_DOMAIN}</stringProp>
+          <stringProp name="HTTPSampler.port">${PROJ_ADMIN_PORT}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${PROJ_ADMIN_PROTOCOL}</stringProp>
+          <stringProp name="HTTPSampler.path">/projectadmin/transaction</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"user_id":"${user_id}","transaction_type":"projectadmin","data":"${projadmin_data}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <!-- Response Assertion Template (configurable) -->
+        <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
+          <collectionProp name="Asserion.test_strings">
+            <stringProp>200</stringProp>
+          </collectionProp>
+          <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+          <boolProp name="Assertion.assume_success">false</boolProp>
+          <intProp name="Assertion.test_type">2</intProp>
+        </ResponseAssertion>
+        <hashTree/>
+        <!-- Constant Timer for pacing (think time) -->
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time" enabled="true">
+          <stringProp name="ConstantTimer.delay">2000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+      </hashTree>
+      <!-- Listeners for result collection and monitoring -->
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <boolProp name="time">true</boolProp>
+            <boolProp name="latency">true</boolProp>
+            <boolProp name="timestamp">true</boolProp>
+            <boolProp name="success">true</boolProp>
+            <boolProp name="label">true</boolProp>
+            <boolProp name="code">true</boolProp>
+            <boolProp name="message">true</boolProp>
+            <boolProp name="threadName">true</boolProp>
+            <boolProp name="dataType">true</boolProp>
+            <boolProp name="responseData">false</boolProp>
+            <boolProp name="samplerData">false</boolProp>
+            <boolProp name="assertions">true</boolProp>
+            <boolProp name="subresults">true</boolProp>
+            <boolProp name="responseHeaders">false</boolProp>
+            <boolProp name="requestHeaders">false</boolProp>
+            <boolProp name="responseDataOnError">true</boolProp>
+            <boolProp name="saveAssertionResultsFailureMessage">true</boolProp>
+          </value>
+        </objProp>
+        <stringProp name="filename">results.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <boolProp name="time">true</boolProp>
+            <boolProp name="latency">true</boolProp>
+            <boolProp name="timestamp">true</boolProp>
+            <boolProp name="success">true</boolProp>
+            <boolProp name="label">true</boolProp>
+            <boolProp name="code">true</boolProp>
+            <boolProp name="message">true</boolProp>
+            <boolProp name="threadName">true</boolProp>
+            <boolProp name="dataType">true</boolProp>
+            <boolProp name="responseData">false</boolProp>
+            <boolProp name="samplerData">false</boolProp>
+            <boolProp name="assertions">true</boolProp>
+            <boolProp name="subresults">true</boolProp>
+            <boolProp name="responseHeaders">false</boolProp>
+            <boolProp name="requestHeaders">false</boolProp>
+            <boolProp name="responseDataOnError">true</boolProp>
+            <boolProp name="saveAssertionResultsFailureMessage">true</boolProp>
+          </value>
+        </objProp>
+        <stringProp name="filename">summary_report.csv</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
