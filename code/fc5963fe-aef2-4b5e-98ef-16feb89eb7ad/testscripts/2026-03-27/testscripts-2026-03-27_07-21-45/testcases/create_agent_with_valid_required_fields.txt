@@ -1,0 +1,68 @@
+Test Case Title: Create Agent with valid required fields
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-6e8d2c6f-001",
+    "description": "Validate that creating an agent with valid slug, display_name, and category returns 200 and correct schema.",
+    "preconditions": [
+        "API is reachable",
+        "Valid bearer token available"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with valid slug, display_name, and category in JSON body and Authorization header."
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body matches expected schema"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "agent-001",
+                "constraints": "non-empty, unique"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Agent One",
+                "constraints": "non-empty"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "testing",
+                "constraints": "must be one of: usg, testing, api_doc_testing, performance_testing, deployment, req_synthesizer, ui_automation, documentation"
+            }
+        ],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "smoke",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "create_agent_api_agents__post",
+        "owasp_asvs_refs": [
+            "V2",
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
