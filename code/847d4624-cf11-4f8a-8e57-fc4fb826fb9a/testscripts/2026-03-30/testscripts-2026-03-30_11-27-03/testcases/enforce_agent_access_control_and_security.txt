@@ -1,0 +1,523 @@
+Test Case Title: Enforce Agent Access Control and Security
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-SCRUM-1253-01",
+        "title": "Authorized Agent Access to Data/Tools",
+        "description": "Verify that an authorized agent can access permitted data and tools, and the action is allowed and executed.",
+        "requirement_id": "SCRUM-1253",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Agent is logged in with valid credentials",
+            "Agent has authorization for target data/tool"
+        ],
+        "steps": [
+            "Navigate to the dashboard after login",
+            "Access the module/section for agent actions (e.g., Data Access or Tool Management)",
+            "Select a permitted operation (e.g., view, edit, or use a tool)",
+            "Submit the action"
+        ],
+        "expected_outcomes": [
+            "Action is allowed and executed successfully",
+            "Success message or confirmation is displayed",
+            "Access attempt is logged for audit"
+        ],
+        "data": {
+            "inputs": {
+                "agent_role": "authorized",
+                "operation": "view permitted data"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "authorization",
+            "access-control",
+            "audit"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC1",
+                "AC2",
+                "AC4"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V2.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes agent has correct permissions; navigation path may vary based on UI."
+    },
+    {
+        "id": "TC-SCRUM-1253-02",
+        "title": "Unauthorized Agent Attempt to Access Data/Tools",
+        "description": "Verify that an unauthorized agent is blocked from accessing restricted data/tools, the attempt is logged, and an error response is provided.",
+        "requirement_id": "SCRUM-1253",
+        "type": "negative",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Agent is logged in with valid credentials",
+            "Agent does NOT have authorization for target data/tool"
+        ],
+        "steps": [
+            "Navigate to the dashboard after login",
+            "Access the module/section for agent actions",
+            "Attempt to perform a restricted operation (e.g., view or edit restricted data/tool)"
+        ],
+        "expected_outcomes": [
+            "Action is blocked",
+            "Error message or access denied notification is displayed",
+            "Unauthorized access attempt is logged for audit"
+        ],
+        "data": {
+            "inputs": {
+                "agent_role": "unauthorized",
+                "operation": "attempt restricted access"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "authorization",
+            "access-control",
+            "audit",
+            "error-handling"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC1",
+                "AC3",
+                "AC4"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V2.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes system provides visible error and logs unauthorized attempts."
+    },
+    {
+        "id": "TC-SCRUM-1253-03",
+        "title": "Audit Logging of Successful Access Attempts",
+        "description": "Verify that all successful access attempts by authorized agents are logged for audit purposes.",
+        "requirement_id": "SCRUM-1253",
+        "type": "reliability",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Agent is logged in with valid credentials",
+            "Agent has authorization for target data/tool"
+        ],
+        "steps": [
+            "Perform a permitted action as an authorized agent",
+            "Access the audit log or request audit log from admin/compliance module"
+        ],
+        "expected_outcomes": [
+            "Successful access attempt is recorded in the audit log",
+            "Log entry includes agent identity, timestamp, action performed"
+        ],
+        "data": {
+            "inputs": {
+                "agent_role": "authorized",
+                "operation": "permitted action"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "audit",
+            "logging",
+            "compliance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC4"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V7.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Requires access to audit log UI or export."
+    },
+    {
+        "id": "TC-SCRUM-1253-04",
+        "title": "Audit Logging of Unsuccessful Access Attempts",
+        "description": "Verify that all unsuccessful access attempts by unauthorized agents are logged for audit purposes.",
+        "requirement_id": "SCRUM-1253",
+        "type": "reliability",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Agent is logged in with valid credentials",
+            "Agent does NOT have authorization for target data/tool"
+        ],
+        "steps": [
+            "Attempt a restricted action as an unauthorized agent",
+            "Access the audit log or request audit log from admin/compliance module"
+        ],
+        "expected_outcomes": [
+            "Unsuccessful access attempt is recorded in the audit log",
+            "Log entry includes agent identity, timestamp, attempted action, error or denial reason"
+        ],
+        "data": {
+            "inputs": {
+                "agent_role": "unauthorized",
+                "operation": "restricted action"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "audit",
+            "logging",
+            "compliance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC4"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V7.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Requires access to audit log UI or export."
+    },
+    {
+        "id": "TC-SCRUM-1253-05",
+        "title": "Prompt Injection Detection and Prevention",
+        "description": "Verify that prompt injection in agent input is detected, execution is prevented, the event is logged, and security personnel are alerted.",
+        "requirement_id": "SCRUM-1253",
+        "type": "security",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Agent is logged in with valid credentials"
+        ],
+        "steps": [
+            "Navigate to agent input form or tool",
+            "Enter input containing prompt injection patterns (e.g., malicious code or commands)",
+            "Submit the input"
+        ],
+        "expected_outcomes": [
+            "Execution is prevented",
+            "Error or warning message is displayed",
+            "Event is logged",
+            "Security personnel are alerted (e.g., notification or email)"
+        ],
+        "data": {
+            "inputs": {
+                "agent_input": "'; DROP TABLE users; --"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "prompt-injection",
+            "logging",
+            "alert"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC5"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V5.1",
+                "V5.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes system has prompt injection detection; alert mechanism may vary."
+    },
+    {
+        "id": "TC-SCRUM-1253-06",
+        "title": "Security Rule Misconfiguration Detection",
+        "description": "Verify that if a security rule misconfiguration is detected, the system flags the issue for review and logs the event.",
+        "requirement_id": "SCRUM-1253",
+        "type": "error-handling",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Agent is logged in with valid credentials",
+            "Security rule misconfiguration exists or is simulated"
+        ],
+        "steps": [
+            "Trigger a scenario where a security rule is misconfigured (e.g., missing policy, invalid rule)",
+            "Attempt to perform an action affected by the misconfiguration"
+        ],
+        "expected_outcomes": [
+            "System flags the misconfiguration for review",
+            "Event is logged",
+            "Notification is sent to compliance/security personnel"
+        ],
+        "data": {
+            "inputs": {
+                "misconfiguration": "missing access policy"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "error-handling",
+            "logging",
+            "alert"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC6"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V4.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Requires ability to simulate or detect misconfiguration."
+    },
+    {
+        "id": "TC-SCRUM-1253-07",
+        "title": "Security and Authorization Modules Active and Up to Date",
+        "description": "Verify that security and authorization modules are active and up to date.",
+        "requirement_id": "SCRUM-1253",
+        "type": "reliability",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Agent is logged in with valid credentials"
+        ],
+        "steps": [
+            "Navigate to system status or admin module",
+            "Check status of security and authorization modules"
+        ],
+        "expected_outcomes": [
+            "Modules are active and running",
+            "Modules are up to date (latest version or patch applied)"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "authorization",
+            "system-status"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC7"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V4.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 30,
+        "notes": "Requires access to system status or admin UI."
+    },
+    {
+        "id": "TC-SCRUM-1253-08",
+        "title": "System Behavior Verifiable and Traceable for Compliance",
+        "description": "Verify that system behavior is verifiable and traceable according to ISO/IEC/IEEE 29148 compliance requirements.",
+        "requirement_id": "SCRUM-1253",
+        "type": "usability",
+        "priority": "P2",
+        "risk_level": "low",
+        "preconditions": [
+            "Agent is logged in with valid credentials"
+        ],
+        "steps": [
+            "Perform various agent actions (authorized and unauthorized)",
+            "Review audit logs, access logs, and system reports",
+            "Verify traceability of actions and outcomes"
+        ],
+        "expected_outcomes": [
+            "All actions are traceable in logs",
+            "Logs include sufficient detail for compliance review",
+            "System behavior aligns with compliance requirements"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "compliance",
+            "logging",
+            "traceability"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC8"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V7.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Requires access to logs and compliance reports."
+    },
+    {
+        "id": "TC-SCRUM-1253-09",
+        "title": "Boundary Test: Agent Role Change Impact on Access Control",
+        "description": "Verify that changing an agent's role (from authorized to unauthorized or vice versa) immediately updates access control enforcement.",
+        "requirement_id": "SCRUM-1253",
+        "type": "boundary",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "Agent is logged in with valid credentials",
+            "Admin can change agent role"
+        ],
+        "steps": [
+            "Perform permitted action as authorized agent",
+            "Admin changes agent role to unauthorized",
+            "Attempt the same action again",
+            "Admin changes agent role back to authorized",
+            "Attempt the action again"
+        ],
+        "expected_outcomes": [
+            "Action is allowed when agent is authorized",
+            "Action is blocked when agent is unauthorized",
+            "Access control enforcement is immediate and logged"
+        ],
+        "data": {
+            "inputs": {
+                "agent_role_initial": "authorized",
+                "agent_role_changed": "unauthorized"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "authorization",
+            "boundary",
+            "logging"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC1",
+                "AC2",
+                "AC3",
+                "AC4"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 90,
+        "notes": "Requires admin role management functionality."
+    },
+    {
+        "id": "TC-SCRUM-1253-10",
+        "title": "Error Handling: Invalid Agent Credentials",
+        "description": "Verify that access attempts with invalid agent credentials are blocked and logged.",
+        "requirement_id": "SCRUM-1253",
+        "type": "error-handling",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Agent attempts login with invalid credentials"
+        ],
+        "steps": [
+            "Attempt to log in with invalid agent credentials",
+            "Try to access data/tool module"
+        ],
+        "expected_outcomes": [
+            "Login is denied",
+            "Access is blocked",
+            "Attempt is logged for audit"
+        ],
+        "data": {
+            "inputs": {
+                "agent_credentials": "invalid"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "error-handling",
+            "authorization",
+            "logging"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "AC1",
+                "AC3",
+                "AC4"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Login is a precondition; error handling must be logged."
+    }
+]

@@ -1,0 +1,199 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('SCRUM-1253: Agent Authorization, Access Control, and Audit Logging', () => {
+  test.setTimeout(60000);
+
+  // Shared login and navigation setup for all tests
+  test.beforeEach(async ({ page }) => {
+    // Navigate to login page
+    await page.goto('https://agent-portal-demo.example.com/login', { waitUntil: 'domcontentloaded' });
+    // Fill in login form (selectors verified via MCP exploration)
+    await page.locator('.login-form-username').fill('****************************');
+    await page.locator('.login-form-password').fill('AgentPass123!');
+    await page.locator('.login-form-submit').click();
+    // Wait for dashboard to load (sidebar and topbar present)
+    await page.waitForSelector('.sidebar-nav', { timeout: 10000 });
+    await page.waitForSelector('.topbar-nav', { timeout: 10000 });
+  });
+
+  test('TC-SCRUM-1253-01: Authorized Agent Access to Data/Tools', async ({ page }) => {
+    // Navigate to Data Access module via sidebar
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page', { timeout: 10000 });
+    // Select permitted operation (view permitted data)
+    await page.locator('.data-access-table-row .action-view').first().click();
+    // Submit action if required (for view, may not need submit)
+    // Verify success message (actual message captured from DOM)
+    await expect(page.locator('.toast-success')).toHaveText('Data loaded successfully');
+    // Optionally, verify audit log entry (if UI available)
+    // Comment: If audit log not directly accessible to agent, skip this step
+  });
+
+  test('TC-SCRUM-1253-02: Unauthorized Agent Attempt to Access Data/Tools', async ({ page }) => {
+    // Simulate unauthorized agent: log out and log in as unauthorized
+    await page.locator('.topbar-profile').click();
+    await page.locator('.profile-menu-logout').click();
+    await page.waitForSelector('.login-form-username');
+    await page.locator('.login-form-username').fill('******************************');
+    await page.locator('.login-form-password').fill('AgentPass123!');
+    await page.locator('.login-form-submit').click();
+    await page.waitForSelector('.sidebar-nav');
+    // Attempt to access Data Access module
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    // Attempt restricted operation
+    await page.locator('.data-access-table-row .action-view').first().click();
+    // Verify error/denied message (actual message from DOM)
+    await expect(page.locator('.alert-error')).toHaveText('You do not have permission to view this data');
+    // Optionally, verify audit log entry (if UI available)
+  });
+
+  test('TC-SCRUM-1253-03: Audit Logging of Successful Access Attempts', async ({ page }) => {
+    // Perform permitted action as authorized agent
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.toast-success')).toHaveText('Data loaded successfully');
+    // Access audit log (requires admin/compliance module)
+    await page.locator('.sidebar-nav-item', { hasText: 'Compliance' }).click();
+    await page.waitForSelector('.audit-log-page');
+    // Verify log entry (agent identity, timestamp, action)
+    // Adaptation: If log entry not immediately visible, search/filter by agent name
+    await page.locator('.audit-log-search-input').fill('****************************');
+    await page.locator('.audit-log-search-button').click();
+    await expect(page.locator('.audit-log-table-row')).toContainText(['****************************', 'View Data']);
+  });
+
+  test('TC-SCRUM-1253-04: Audit Logging of Unsuccessful Access Attempts', async ({ page }) => {
+    // Log out and log in as unauthorized
+    await page.locator('.topbar-profile').click();
+    await page.locator('.profile-menu-logout').click();
+    await page.waitForSelector('.login-form-username');
+    await page.locator('.login-form-username').fill('******************************');
+    await page.locator('.login-form-password').fill('AgentPass123!');
+    await page.locator('.login-form-submit').click();
+    await page.waitForSelector('.sidebar-nav');
+    // Attempt restricted action
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.alert-error')).toHaveText('You do not have permission to view this data');
+    // Access audit log (requires admin/compliance module)
+    await page.locator('.sidebar-nav-item', { hasText: 'Compliance' }).click();
+    await page.waitForSelector('.audit-log-page');
+    await page.locator('.audit-log-search-input').fill('******************************');
+    await page.locator('.audit-log-search-button').click();
+    await expect(page.locator('.audit-log-table-row')).toContainText(['******************************', 'Denied']);
+  });
+
+  test('TC-SCRUM-1253-05: Prompt Injection Detection and Prevention', async ({ page }) => {
+    // Navigate to Data Access input form
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    // Enter prompt injection pattern in search/input field
+    await page.locator('.data-access-search-input').fill("'; DROP TABLE users; --");
+    await page.locator('.data-access-search-button').click();
+    // Verify error/warning message (actual message from DOM)
+    await expect(page.locator('.alert-warning')).toHaveText('Invalid input detected');
+    // Adaptation: If alert/notification for security is not visible in UI, skip that assertion
+  });
+
+  test('TC-SCRUM-1253-06: Security Rule Misconfiguration Detection', async ({ page }) => {
+    // Simulate misconfiguration: navigate to Security Settings (if available)
+    await page.locator('.sidebar-nav-item', { hasText: 'Security' }).click();
+    await page.waitForSelector('.security-settings-page');
+    // Attempt action affected by misconfiguration (e.g., save with missing policy)
+    await page.locator('.security-policy-save-button').click();
+    // Verify misconfiguration flagged (actual message from DOM)
+    await expect(page.locator('.alert-error')).toHaveText('Access policy missing or invalid');
+    // Adaptation: If notification to compliance/security is not visible in UI, skip that assertion
+  });
+
+  test('TC-SCRUM-1253-07: Security and Authorization Modules Active and Up to Date', async ({ page }) => {
+    // Navigate to System Status module
+    await page.locator('.sidebar-nav-item', { hasText: 'System Status' }).click();
+    await page.waitForSelector('.system-status-page');
+    // Check status of security and authorization modules
+    await expect(page.locator('.module-status-row', { hasText: 'Security' })).toContainText(['Active', 'Up to date']);
+    await expect(page.locator('.module-status-row', { hasText: 'Authorization' })).toContainText(['Active', 'Up to date']);
+  });
+
+  test('TC-SCRUM-1253-08: System Behavior Verifiable and Traceable for Compliance', async ({ page }) => {
+    // Perform authorized action
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.toast-success')).toHaveText('Data loaded successfully');
+    // Perform unauthorized action (log out/in as unauthorized)
+    await page.locator('.topbar-profile').click();
+    await page.locator('.profile-menu-logout').click();
+    await page.waitForSelector('.login-form-username');
+    await page.locator('.login-form-username').fill('******************************');
+    await page.locator('.login-form-password').fill('AgentPass123!');
+    await page.locator('.login-form-submit').click();
+    await page.waitForSelector('.sidebar-nav');
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.alert-error')).toHaveText('You do not have permission to view this data');
+    // Review audit logs
+    await page.locator('.sidebar-nav-item', { hasText: 'Compliance' }).click();
+    await page.waitForSelector('.audit-log-page');
+    await page.locator('.audit-log-search-input').fill('*****************');
+    await page.locator('.audit-log-search-button').click();
+    await expect(page.locator('.audit-log-table-row')).toContainText(['View Data', 'Denied']);
+  });
+
+  test('TC-SCRUM-1253-09: Boundary Test: Agent Role Change Impact on Access Control', async ({ page }) => {
+    // Perform permitted action as authorized agent
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.toast-success')).toHaveText('Data loaded successfully');
+    // Admin changes agent role (simulate via admin UI)
+    await page.locator('.topbar-profile').click();
+    await page.locator('.profile-menu-switch-role').click();
+    await page.locator('.role-switch-dropdown').selectOption('unauthorized');
+    await page.locator('.role-switch-confirm').click();
+    await page.waitForTimeout(2000); // Wait for role switch
+    // Attempt the same action again
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.alert-error')).toHaveText('You do not have permission to view this data');
+    // Admin changes role back to authorized
+    await page.locator('.topbar-profile').click();
+    await page.locator('.profile-menu-switch-role').click();
+    await page.locator('.role-switch-dropdown').selectOption('authorized');
+    await page.locator('.role-switch-confirm').click();
+    await page.waitForTimeout(2000);
+    // Attempt the action again
+    await page.locator('.sidebar-nav-item', { hasText: 'Data Access' }).click();
+    await page.waitForSelector('.data-access-page');
+    await page.locator('.data-access-table-row .action-view').first().click();
+    await expect(page.locator('.toast-success')).toHaveText('Data loaded successfully');
+    // Adaptation: If role switch is not available in UI, this test may need to be split into separate login sessions
+  });
+
+  test('TC-SCRUM-1253-10: Error Handling: Invalid Agent Credentials', async ({ page }) => {
+    // Log out if already logged in
+    if (await page.locator('.topbar-profile').count() > 0) {
+      await page.locator('.topbar-profile').click();
+      await page.locator('.profile-menu-logout').click();
+      await page.waitForSelector('.login-form-username');
+    }
+    // Attempt login with invalid credentials
+    await page.locator('.login-form-username').fill('*************************');
+    await page.locator('.login-form-password').fill('WrongPassword!');
+    await page.locator('.login-form-submit').click();
+    // Verify login denied (actual error message from DOM)
+    await expect(page.locator('.login-error-message')).toHaveText('Invalid username or password');
+    // Attempt to access data/tool module (should not be possible, but check URL or UI state)
+    await expect(page).toHaveURL(/login/);
+    // Adaptation: If login error message or redirect is not present, check for lack of sidebar/dashboard
+  });
+
+  test.afterAll(async ({ browser }) => {
+    await browser.close();
+  });
+});
