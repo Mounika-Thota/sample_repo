@@ -1,0 +1,112 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Admin Invitation OAuth Configuration', () => {
+  test.setTimeout(60000);
+
+  test.beforeEach(async ({ page }) => {
+    // Navigate to login page
+    await page.goto('https://app.example.com/login', { waitUntil: 'domcontentloaded' });
+    // Wait for login form to be visible
+    await expect(page.locator('input[type="text"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]')).toBeVisible();
+    // Fill in credentials (replace with actual credentials in CI)
+    await page.fill('input[type="text"]', process.env.SUPER_ADMIN_USERNAME || 'superadmin');
+    await page.fill('input[type="password"]', process.env.SUPER_ADMIN_PASSWORD || 'password');
+    await page.click('button[type="submit"]');
+    // Wait for dashboard/main layout to load
+    await page.waitForLoadState('domcontentloaded');
+    // Dismiss cookie banner if present
+    const cookieBanner = page.locator('.cookie-banner button', { hasText: 'Accept' });
+    if (await cookieBanner.count() > 0) {
+      await cookieBanner.click();
+    }
+    // Wait for sidebar navigation to be visible
+    await expect(page.locator('nav.sidebar')).toBeVisible();
+  });
+
+  test('Happy Path: Submit Valid OAuth Configuration During Admin Invitation', async ({ page }) => {
+    // Navigate to Admin Invitation module via sidebar
+    await page.click('nav.sidebar a', { hasText: 'Admin Invitation' });
+    await page.waitForLoadState('domcontentloaded');
+    // Wait for "Invite Admin" button
+    const inviteBtn = page.locator('button', { hasText: 'Invite Admin' });
+    await expect(inviteBtn).toBeVisible();
+    await inviteBtn.click();
+    // Wait for OAuth configuration form to appear
+    await expect(page.locator('form.oauth-config')).toBeVisible();
+    // Fill in OAuth fields (adapted to actual form fields discovered)
+    await page.fill('input[name="client_id"]', 'test-client-id');
+    await page.fill('input[name="client_secret"]', 'test-client-secret');
+    await page.fill('input[name="redirect_uri"]', 'https://app.example.com/oauth/callback');
+    // Submit the form
+    await page.click('form.oauth-config button[type="submit"]');
+    // Wait for success toast/message (actual text discovered via MCP)
+    const toast = page.locator('.oxd-toast .oxd-text--toast-message');
+    await expect(toast).toHaveText('OAuth configuration saved successfully');
+  });
+
+  test('Validation: Required Fields Show Error', async ({ page }) => {
+    // Navigate to Admin Invitation module
+    await page.click('nav.sidebar a', { hasText: 'Admin Invitation' });
+    await page.waitForLoadState('domcontentloaded');
+    const inviteBtn = page.locator('button', { hasText: 'Invite Admin' });
+    await inviteBtn.click();
+    await expect(page.locator('form.oauth-config')).toBeVisible();
+    // Attempt to submit with empty fields
+    await page.fill('input[name="client_id"]', '');
+    await page.fill('input[name="client_secret"]', '');
+    await page.fill('input[name="redirect_uri"]', '');
+    await page.click('form.oauth-config button[type="submit"]');
+    // Check for error messages (actual selectors and text discovered)
+    await expect(page.locator('.oxd-input-field-error-message', { hasText: 'Client ID is required' })).toBeVisible();
+    await expect(page.locator('.oxd-input-field-error-message', { hasText: 'Client Secret is required' })).toBeVisible();
+    await expect(page.locator('.oxd-input-field-error-message', { hasText: 'Redirect URI is required' })).toBeVisible();
+  });
+
+  test('Validation: Invalid Redirect URI Format Shows Error', async ({ page }) => {
+    // Navigate to Admin Invitation module
+    await page.click('nav.sidebar a', { hasText: 'Admin Invitation' });
+    await page.waitForLoadState('domcontentloaded');
+    const inviteBtn = page.locator('button', { hasText: 'Invite Admin' });
+    await inviteBtn.click();
+    await expect(page.locator('form.oauth-config')).toBeVisible();
+    // Fill in invalid redirect URI
+    await page.fill('input[name="client_id"]', 'test-client-id');
+    await page.fill('input[name="client_secret"]', 'test-client-secret');
+    await page.fill('input[name="redirect_uri"]', 'invalid-uri');
+    await page.click('form.oauth-config button[type="submit"]');
+    // Check for error message
+    await expect(page.locator('.oxd-input-field-error-message', { hasText: 'Redirect URI must be a valid URL' })).toBeVisible();
+  });
+
+  test('Cancel Admin Invitation OAuth Configuration', async ({ page }) => {
+    // Navigate to Admin Invitation module
+    await page.click('nav.sidebar a', { hasText: 'Admin Invitation' });
+    await page.waitForLoadState('domcontentloaded');
+    const inviteBtn = page.locator('button', { hasText: 'Invite Admin' });
+    await inviteBtn.click();
+    await expect(page.locator('form.oauth-config')).toBeVisible();
+    // Click Cancel button
+    const cancelBtn = page.locator('form.oauth-config button', { hasText: 'Cancel' });
+    await expect(cancelBtn).toBeVisible();
+    await cancelBtn.click();
+    // Form should disappear
+    await expect(page.locator('form.oauth-config')).toHaveCount(0);
+  });
+
+  test('Permission: Non-Super Admin Cannot Access Admin Invitation', async ({ page }) => {
+    // Log out
+    await page.click('button', { hasText: 'Logout' });
+    await page.waitForLoadState('domcontentloaded');
+    // Log in as regular admin
+    await page.fill('input[type="text"]', process.env.ADMIN_USERNAME || 'admin');
+    await page.fill('input[type="password"]', process.env.ADMIN_PASSWORD || 'password');
+    await page.click('button[type="submit"]');
+    await page.waitForLoadState('domcontentloaded');
+    // Sidebar should NOT show Admin Invitation link
+    const adminInviteLink = page.locator('nav.sidebar a', { hasText: 'Admin Invitation' });
+    await expect(adminInviteLink).toHaveCount(0);
+  });
+
+  // Additional negative/edge cases can be added below, following the same selector strategy and defensive checks
+});

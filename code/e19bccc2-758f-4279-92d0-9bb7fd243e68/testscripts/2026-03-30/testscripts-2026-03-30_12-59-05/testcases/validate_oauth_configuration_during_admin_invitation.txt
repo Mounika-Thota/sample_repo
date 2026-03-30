@@ -1,0 +1,526 @@
+Test Case Title: Validate OAuth Configuration During Admin Invitation
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-01",
+        "title": "Happy Path: Submit Valid OAuth Configuration During Admin Invitation",
+        "description": "Verify that Super Admin can successfully submit valid OAuth configuration details when inviting an Admin, and the system accepts the submission.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, fill all required fields with valid values as per business rules.",
+            "Leave optional fields blank.",
+            "Submit the OAuth configuration form."
+        ],
+        "expected_outcomes": [
+            "Submission succeeds.",
+            "System displays a confirmation message.",
+            "Validation outcomes are logged for traceability and audit purposes."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "valid-client-id-123",
+                "client_secret": "valid-client-secret-abc",
+                "redirect_uri": "https://example.com/oauth/callback",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "happy-path",
+            "oauth",
+            "admin-invitation",
+            "compliance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Super Admin enters OAuth configuration details and submits the form.",
+                "If all required fields are valid, the submission proceeds successfully.",
+                "System logs validation outcomes for traceability and audit purposes."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes standard OAuth fields are present as per business rules."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-02",
+        "title": "Negative: Submit OAuth Configuration with Missing Required Fields",
+        "description": "Verify that the system prevents submission and displays validation errors when required OAuth fields are missing.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "negative",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, leave one or more required fields blank.",
+            "Submit the OAuth configuration form."
+        ],
+        "expected_outcomes": [
+            "Submission is prevented.",
+            "System displays clear validation errors indicating which fields are missing.",
+            "Validation outcomes are logged for traceability and audit purposes."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "",
+                "client_secret": "valid-client-secret-abc",
+                "redirect_uri": "",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "negative-path",
+            "validation",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System validates all required OAuth fields for presence and correctness according to business rules and ISO/IEC/IEEE 29148 compliance.",
+                "If any required field is missing or invalid, the system displays clear validation errors and prevents submission.",
+                "Validation and error handling must be testable and verifiable against compliance standards."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes system displays specific error messages for missing required fields."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-03",
+        "title": "Boundary: Submit OAuth Configuration with Maximum Field Lengths",
+        "description": "Verify that the system accepts OAuth configuration fields at their maximum allowed lengths and rejects entries exceeding those limits.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "boundary",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, fill required fields with values at their maximum allowed lengths.",
+            "Submit the OAuth configuration form."
+        ],
+        "expected_outcomes": [
+            "Submission succeeds if values are within allowed limits.",
+            "System displays validation errors if any field exceeds maximum length.",
+            "Validation outcomes are logged for traceability and audit purposes."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "client_secret": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                "redirect_uri": "https://example.com/oauth/callback",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "boundary",
+            "field-length",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System validates all required OAuth fields for presence and correctness according to business rules and ISO/IEC/IEEE 29148 compliance."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 70,
+        "notes": "Field length limits assumed as 64 for client_id and 128 for client_secret; adjust per actual application constraints."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-04",
+        "title": "Negative: Submit OAuth Configuration with Invalid Redirect URI Format",
+        "description": "Verify that the system displays validation errors and prevents submission when the redirect URI is in an invalid format.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "negative",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, fill required fields with valid values except for redirect URI.",
+            "Enter an invalid redirect URI format (e.g., 'not-a-valid-uri').",
+            "Submit the OAuth configuration form."
+        ],
+        "expected_outcomes": [
+            "Submission is prevented.",
+            "System displays a clear validation error for redirect URI format.",
+            "Validation outcomes are logged for traceability and audit purposes."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "valid-client-id-123",
+                "client_secret": "valid-client-secret-abc",
+                "redirect_uri": "not-a-valid-uri",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "negative-path",
+            "validation",
+            "redirect-uri",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System validates all required OAuth fields for presence and correctness according to business rules and ISO/IEC/IEEE 29148 compliance.",
+                "If any required field is missing or invalid, the system displays clear validation errors and prevents submission."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes redirect URI format validation is enforced."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-05",
+        "title": "Positive: Submit OAuth Configuration with Optional Fields Left Blank",
+        "description": "Verify that the system allows submission of OAuth configuration when optional fields are left blank and proceeds without error.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "positive",
+        "priority": "P2",
+        "risk_level": "low",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, fill all required fields with valid values.",
+            "Leave all optional fields blank.",
+            "Submit the OAuth configuration form."
+        ],
+        "expected_outcomes": [
+            "Submission succeeds.",
+            "System displays a confirmation message.",
+            "Validation outcomes are logged for traceability and audit purposes."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "valid-client-id-123",
+                "client_secret": "valid-client-secret-abc",
+                "redirect_uri": "https://example.com/oauth/callback",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "positive-path",
+            "optional-fields",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Optional fields may be left blank if not required; system proceeds without error."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes optional fields are clearly marked and can be left blank."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-06",
+        "title": "Error Handling: System Logging of Validation Outcomes",
+        "description": "Verify that the system logs validation outcomes for traceability and audit purposes after OAuth configuration submission.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "error-handling",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, fill all required fields with valid values.",
+            "Submit the OAuth configuration form.",
+            "Check system logs or audit trail for validation outcome entry."
+        ],
+        "expected_outcomes": [
+            "Validation outcome is recorded in system logs or audit trail.",
+            "Log entry includes timestamp, user, and validation result."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "valid-client-id-123",
+                "client_secret": "valid-client-secret-abc",
+                "redirect_uri": "https://example.com/oauth/callback",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "logging",
+            "audit",
+            "traceability",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System logs validation outcomes for traceability and audit purposes."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 90,
+        "notes": "Assumes access to system logs or audit trail for validation."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-07",
+        "title": "Security: Prevent Submission of OAuth Configuration with Invalid Credentials",
+        "description": "Verify that the system prevents submission and displays validation errors when OAuth credentials are invalid.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "security",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, fill required fields with invalid credentials.",
+            "Submit the OAuth configuration form."
+        ],
+        "expected_outcomes": [
+            "Submission is prevented.",
+            "System displays clear validation errors for invalid credentials.",
+            "Validation outcomes are logged for traceability and audit purposes."
+        ],
+        "data": {
+            "inputs": {
+                "client_id": "invalid-client-id",
+                "client_secret": "invalid-client-secret",
+                "redirect_uri": "https://example.com/oauth/callback",
+                "scope": "openid profile email"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "invalid-credentials",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System validates all required OAuth fields for presence and correctness according to business rules and ISO/IEC/IEEE 29148 compliance.",
+                "If any required field is missing or invalid, the system displays clear validation errors and prevents submission."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Assumes system validates credentials against OAuth provider or business rules."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-08",
+        "title": "Usability: All Required OAuth Configuration Fields Are Visible and Accessible",
+        "description": "Verify that all required OAuth configuration fields are visible and accessible to the Super Admin on the Configure OAuth screen.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "usability",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "Observe the OAuth configuration form.",
+            "Verify visibility and accessibility of all required fields."
+        ],
+        "expected_outcomes": [
+            "All required fields are visible and accessible.",
+            "Fields are enabled for input.",
+            "Labels and placeholders are clear and unambiguous."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "usability",
+            "field-visibility",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "All required OAuth configuration fields are visible and accessible."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": [
+                "1.3.1",
+                "2.4.7"
+            ]
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Assumes standard OAuth fields are present and visible."
+    },
+    {
+        "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-09",
+        "title": "Accessibility: OAuth Configuration Form Meets Accessibility Standards",
+        "description": "Verify that the OAuth configuration form meets accessibility standards for screen readers and keyboard navigation.",
+        "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+        "type": "accessibility",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "Super Admin is authenticated and logged into the application.",
+            "Super Admin is on the Configure OAuth screen for Admin invitation."
+        ],
+        "steps": [
+            "Navigate to the Admin invitation module.",
+            "Click on 'Invite Admin' or equivalent action.",
+            "On the OAuth configuration form, use keyboard navigation to access all fields.",
+            "Verify that all fields are accessible via keyboard.",
+            "Use screen reader to verify field labels and instructions are announced."
+        ],
+        "expected_outcomes": [
+            "All fields are accessible via keyboard navigation.",
+            "Screen reader announces field labels and instructions.",
+            "Form meets WCAG 2.1 accessibility standards."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "accessibility",
+            "oauth",
+            "admin-invitation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "All required OAuth configuration fields are visible and accessible.",
+                "Validation and error handling must be testable and verifiable against compliance standards."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V2.1",
+                "V3.2"
+            ],
+            "wcag": [
+                "1.3.1",
+                "2.4.7"
+            ]
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 80,
+        "notes": "Assumes form supports keyboard navigation and screen reader accessibility."
+    }
+]
