@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="WebSocket Real-Time Status Update Performance Test" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for real-time status update delivery via WebSocket Layer</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Concurrent WebSocket Users" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">30</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time()}</longProp>
+        <longProp name="ThreadGroup.end_time">${__time(+,300)}</longProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- Step 1: Connect to WebSocket Endpoint -->
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="WebSocket Connect & Subscribe" enabled="true">
+          <stringProp name="script">// Connect to WebSocket endpoint and subscribe to status updates
+// TODO: Replace ws_url with actual WebSocket endpoint from system config
+String ws_url = "ws://your.websocket.endpoint/path";
+// Simulate connection and subscription using Java WebSocket client
+// For actual execution, use JMeter WebSocket plugin or custom sampler
+</stringProp>
+          <stringProp name="language">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <!-- Step 2: Initiate Task (Trigger Status Updates) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Initiate Task" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">your.api.domain</stringProp>
+          <stringProp name="HTTPSampler.port">80</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.path">/api/tasks/create</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"taskType": "statusUpdateTest", "userId": "${user_id}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <!-- Step 3: Listen for WebSocket Status Updates (Simulated) -->
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Receive WebSocket Status Update" enabled="true">
+          <stringProp name="script">// Listen for status update message on WebSocket
+// Measure time from task initiation to update received
+// TODO: Implement actual WebSocket message listener and timer
+long start = System.currentTimeMillis();
+// Simulate receiving update
+sleep(100); // Replace with actual receive logic
+long end = System.currentTimeMillis();
+long responseTime = end - start;
+// Store responseTime for assertion
+vars.put("ws_response_time", String.valueOf(responseTime));
+</stringProp>
+          <stringProp name="language">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <!-- Step 4: Response Assertion for SLA (<=1s) -->
+        <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Response Time Assertion" enabled="true">
+          <stringProp name="script">// Assert response time is <= 1000 ms
+long rt = Long.parseLong(vars.get("ws_response_time"));
+if (rt &gt; 1000) {
+    AssertionResult.setFailure(true);
+    AssertionResult.setFailureMessage("WebSocket update response time exceeded 1s: " + rt + "ms");
+}
+</stringProp>
+          <stringProp name="language">groovy</stringProp>
+        </JSR223Assertion>
+        <hashTree/>
+        <!-- Step 5: Error Rate Assertion (<=0.1%) -->
+        <JSR223Assertion guiclass="TestBeanGUI" testclass="JSR223Assertion" testname="Error Rate Assertion" enabled="true">
+          <stringProp name="script">// TODO: Implement error rate calculation across all threads
+// If error rate &gt; 0.1%, fail assertion
+</stringProp>
+          <stringProp name="language">groovy</stringProp>
+        </JSR223Assertion>
+        <hashTree/>
+        <!-- Step 6: No Polling Assertion (Manual/Log Check) -->
+        <!-- NOTE: Polling detection must be checked via client logs or monitoring tools -->
+      </hashTree>
+      <!-- Listeners for Monitoring -->
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <boolProp name="timestamp">true</boolProp>
+            <boolProp name="success">true</boolProp>
+            <boolProp name="label">true</boolProp>
+            <boolProp name="code">true</boolProp>
+            <boolProp name="message">true</boolProp>
+            <boolProp name="threadName">true</boolProp>
+            <boolProp name="dataType">false</boolProp>
+            <boolProp name="responseData">false</boolProp>
+            <boolProp name="assertions">true</boolProp>
+            <boolProp name="latency">true</boolProp>
+            <boolProp name="samplerData">false</boolProp>
+            <boolProp name="responseHeaders">false</boolProp>
+            <boolProp name="requestHeaders">false</boolProp>
+            <boolProp name="encoding">false</boolProp>
+            <boolProp name="fieldNames">false</boolProp>
+            <boolProp name="responseTime">true</boolProp>
+            <boolProp name="idleTime">false</boolProp>
+            <boolProp name="hostname">false</boolProp>
+            <boolProp name="threadCounts">true</boolProp>
+          </value>
+        </objProp>
+        <stringProp name="filename">WebSocketStatusUpdateSummary.csv</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <boolProp name="timestamp">true</boolProp>
+            <boolProp name="success">true</boolProp>
+            <boolProp name="label">true</boolProp>
+            <boolProp name="code">true</boolProp>
+            <boolProp name="message">true</boolProp>
+            <boolProp name="threadName">true</boolProp>
+            <boolProp name="dataType">false</boolProp>
+            <boolProp name="responseData">true</boolProp>
+            <boolProp name="assertions">true</boolProp>
+            <boolProp name="latency">true</boolProp>
+            <boolProp name="samplerData">false</boolProp>
+            <boolProp name="responseHeaders">false</boolProp>
+            <boolProp name="requestHeaders">false</boolProp>
+            <boolProp name="encoding">false</boolProp>
+            <boolProp name="fieldNames">false</boolProp>
+            <boolProp name="responseTime">true</boolProp>
+            <boolProp name="idleTime">false</boolProp>
+            <boolProp name="hostname">false</boolProp>
+            <boolProp name="threadCounts">true</boolProp>
+          </value>
+        </objProp>
+        <stringProp name="filename">WebSocketStatusUpdateResults.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
