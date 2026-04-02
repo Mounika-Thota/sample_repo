@@ -1,0 +1,56 @@
+Test Case Title: POST /api/auth/token returns 422 when x-api-key is invalid type (integer)
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-3d2e2f6b-004",
+    "description": "Validate that the /api/auth/token endpoint returns a 422 status and a validation error when x-api-key header is provided as an integer instead of a string.",
+    "preconditions": [
+        "API is reachable"
+    ],
+    "steps": [
+        "Send POST request to /api/auth/token with x-api-key header set to an integer value"
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response body contains 'detail' field with validation error information",
+        "Content-Type header is application/json"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/auth/token",
+        "headers": {
+            "x-api-key": 123456,
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "get_token_api_auth_token_post",
+        "owasp_asvs_refs": [
+            "V2",
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}
