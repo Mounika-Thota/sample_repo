@@ -1,0 +1,52 @@
+Test Case Title: Configurable approval chains for leave requests
+------------------------------------------------------------
+
+{
+    "id": "TC-3176de49-09",
+    "title": "Accessibility: Approval Chain Configuration Form",
+    "description": "Verify that approval chain configuration form supports keyboard navigation and screen readers.",
+    "requirement_id": "3176de49-277c-401a-8852-4346f5e903af",
+    "type": "accessibility",
+    "priority": "P2",
+    "risk_level": "low",
+    "preconditions": [
+        "HR User is logged in"
+    ],
+    "steps": [
+        "Navigate to Leave Requests/Approvals module",
+        "Select 'Configure Approval Chains'",
+        "Open Add/Edit Approval Chain form",
+        "Check that all fields are reachable and labelled via keyboard navigation",
+        "Test screen reader announces form fields"
+    ],
+    "expected_outcomes": [
+        "Form is keyboard navigable and accessible by screen reader"
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "accessibility",
+        "approval-chain",
+        "leave-workflow"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [],
+        "nfr_refs": [
+            "Accessibility"
+        ],
+        "standards": [
+            "WAI-ARIA"
+        ],
+        "owasp_asvs": [],
+        "wcag": [
+            "2.1.1",
+            "1.3.1"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 20,
+    "notes": "General accessibility validation from UI forms."
+}
