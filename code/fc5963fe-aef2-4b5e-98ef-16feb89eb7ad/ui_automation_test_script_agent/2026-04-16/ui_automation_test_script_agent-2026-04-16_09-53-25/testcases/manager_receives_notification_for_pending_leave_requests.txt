@@ -1,0 +1,494 @@
+Test Case Title: Manager Receives Notification for Pending Leave Requests
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-US-001-01",
+        "title": "Notification Trigger for New Leave Request Routed to Manager",
+        "description": "Verify that when a direct report submits a leave request, the system creates a notification for the assigned Manager.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "User is logged in as Manager.",
+            "Direct report employee exists.",
+            "Leave module and notification preferences configured."
+        ],
+        "steps": [
+            "Login to application as Manager.",
+            "Navigate to Leave Requests module.",
+            "Have a direct report submit a leave request assigned to the Manager.",
+            "Check for notification event generated for the leave request."
+        ],
+        "expected_outcomes": [
+            "Notification for pending leave request is triggered upon assignment to Manager."
+        ],
+        "data": {
+            "inputs": {
+                "leave_type": "Annual",
+                "start_date": "2024-07-01",
+                "end_date": "2024-07-10",
+                "employee": "DirectReport1"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "notification",
+            "workflow",
+            "leave-request"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System detects a new leave request that has been assigned to the Manager according to the configured workflow.",
+                "System can demonstrate that every pending leave routed to the Manager triggers a notification event."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Direct report setup may require admin actions or backend test fixture."
+    },
+    {
+        "id": "TC-US-001-02",
+        "title": "Notification Content for Manager - Pending Leave Request Details",
+        "description": "Verify that the Manager receives a notification containing clear information and relevant details about the pending leave request.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "User is logged in as Manager.",
+            "New leave request pending Manager action."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Navigate to notifications area or preferred notification channel.",
+            "Open the notification for pending leave request.",
+            "Review notification content for request details (employee name, dates, leave type, status)."
+        ],
+        "expected_outcomes": [
+            "Notification received.",
+            "Notification displays pending request details (employee, leave type, dates, request status) clearly."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "notification",
+            "content",
+            "leave-request"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager receives the notification and can clearly identify the pending request and relevant details needed for review."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Details must be visible and actionable for Manager."
+    },
+    {
+        "id": "TC-US-001-03",
+        "title": "Notification Delivery via Manager Preferred Channel",
+        "description": "Ensure notification is sent using the Manager's preferred communication channel(s) as set in the system.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "User is logged in as Manager.",
+            "Notification preferences are set for email/system alert."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Navigate to notification settings/preferences module.",
+            "Set preferred communication channel (e.g., select both 'Email' and 'System alert').",
+            "Ensure leave request is submitted and routed to Manager.",
+            "Check for notification delivered to all selected channels within SLT window."
+        ],
+        "expected_outcomes": [
+            "Notification is delivered to all preferred channels (e.g., email inbox and system alerts)."
+        ],
+        "data": {
+            "inputs": {
+                "channels": [
+                    "Email",
+                    "System Alert"
+                ]
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "preference",
+            "notification",
+            "multichannel"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Notification is delivered using the Manager's preferred communication channel(s).",
+                "System supports multiple notification channels if Manager preference is set for more than one."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Channel delivery validation may require checking email inbox and system UI."
+    },
+    {
+        "id": "TC-US-001-04",
+        "title": "Notification Promptness - Delivered Within SLT",
+        "description": "Verify that the notification is sent promptly after leave request routing, within specified SLT (e.g., 5 minutes).",
+        "requirement_id": "US-001",
+        "type": "performance",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager login complete.",
+            "Pending leave request exists."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Submit a leave request as direct report.",
+            "Start timer as leave is routed to Manager.",
+            "Monitor notification delivery timestamp.",
+            "Validate notification is received within SLT window."
+        ],
+        "expected_outcomes": [
+            "Notification is delivered to Manager within SLT (e.g., 5 minutes) from request routing."
+        ],
+        "data": {
+            "inputs": {
+                "SLT": "5 minutes"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "performance",
+            "timely",
+            "notification"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System ensures notifications are sent promptly after a request is routed to the Manager (e.g., within a defined SLT such as 5 minutes)."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 360,
+        "notes": "Test should validate timestamp difference between routing and receipt events."
+    },
+    {
+        "id": "TC-US-001-05",
+        "title": "Multiple Channel Notification - Manager Preference",
+        "description": "Verify notification is sent via all channels if Manager preference includes multiple (e.g., email + system alert).",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager login successful.",
+            "Manager notification preference set for multiple channels."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Set notification preference for both 'Email' and 'System Alert'.",
+            "Submit a leave request assigned to Manager.",
+            "Verify that notifications are sent via each preferred channel."
+        ],
+        "expected_outcomes": [
+            "Notifications appear in all specified channels."
+        ],
+        "data": {
+            "inputs": {
+                "channels": [
+                    "Email",
+                    "System Alert"
+                ]
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "notification",
+            "multichannel",
+            "preference"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System supports multiple notification channels if Manager preference is set for more than one."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Test may require parallel checking of email and system alert."
+    },
+    {
+        "id": "TC-US-001-06",
+        "title": "Audit Log Verification for Notification Delivery",
+        "description": "Validate that all notification delivery events are recorded in audit logs for traceability.",
+        "requirement_id": "US-001",
+        "type": "reliability",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager login complete.",
+            "Notification event triggered."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Navigate to Audit Logs module (if available).",
+            "Trigger notification by submitting a leave request.",
+            "Check audit log for notification delivery event with relevant details (timestamp, channel, status)."
+        ],
+        "expected_outcomes": [
+            "Audit log entry exists after each notification delivery event with all required details."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "audit",
+            "logging",
+            "traceability",
+            "notification"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Audit logs of notification delivery events are maintained for traceability per standard.",
+                "If notification delivery fails, the system will automatically attempt to resend and log the failed attempt for auditability, in compliance with ISO/IEC/IEEE 29148."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Audit log should also record resends and failures."
+    },
+    {
+        "id": "TC-US-001-07",
+        "title": "Notification Delivery Failure and Retry Logging",
+        "description": "Verify system behavior if notification delivery fails: retry attempt and failed delivery are logged for audit.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager login complete.",
+            "Notification channel temporarily unavailable (simulate error)."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Configure notification channel to fail (e.g., simulate email server outage or block system alert).",
+            "Submit leave request to trigger notification.",
+            "Monitor logs for notification delivery failure.",
+            "Verify retry attempt is recorded and subsequent notification delivery (if recovered)."
+        ],
+        "expected_outcomes": [
+            "Failed notification delivery recorded in audit logs.",
+            "Retry attempt recorded.",
+            "Notification delivered after recovery or further failure logged."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": [
+                "Simulate channel outage (email or alert)."
+            ]
+        },
+        "tags": [
+            "error",
+            "retry",
+            "audit",
+            "notification"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If notification delivery fails, the system will automatically attempt to resend the notification and log the failed attempt for auditability, in compliance with ISO/IEC/IEEE 29148."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 90,
+        "notes": "Channel simulation may need test fixture or environment setup."
+    },
+    {
+        "id": "TC-US-001-08",
+        "title": "Notification Not Sent if Manager Preference Not Set / No Channel Available",
+        "description": "Ensure notification is not sent if Manager has no notification channels configured, and error is logged.",
+        "requirement_id": "US-001",
+        "type": "negative",
+        "priority": "P2",
+        "risk_level": "low",
+        "preconditions": [
+            "Manager login complete.",
+            "Notification preferences not set."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Clear all notification channel preferences.",
+            "Submit leave request assigned to Manager.",
+            "Check system for notification delivery failure message and error logging."
+        ],
+        "expected_outcomes": [
+            "Notification not sent.",
+            "Delivery failure is logged for audit."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "negative",
+            "preference",
+            "audit",
+            "notification"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System sends an electronic notification (such as email or system alert) to the Manager using up-to-date contact details and notification preferences."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Validates error path for missing preference."
+    },
+    {
+        "id": "TC-US-001-09",
+        "title": "Notification for Multiple Pending Leave Requests",
+        "description": "Verify that each pending leave request routed to Manager triggers a separate notification event.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager login successful.",
+            "Multiple leave requests sent by direct reports."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Have multiple direct reports submit different leave requests simultaneously.",
+            "Check notifications received for each request.",
+            "Confirm each notification is mapped to the correct request."
+        ],
+        "expected_outcomes": [
+            "Separate notifications are sent for each pending leave request.",
+            "Notifications are distinguishable and contain correct request details."
+        ],
+        "data": {
+            "inputs": {
+                "leave_requests": [
+                    {
+                        "employee": "DirectReport1",
+                        "dates": "2024-07-01 to 2024-07-05"
+                    },
+                    {
+                        "employee": "DirectReport2",
+                        "dates": "2024-07-10 to 2024-07-12"
+                    }
+                ]
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "notification",
+            "multiple",
+            "leave-request"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System can demonstrate that every pending leave routed to the Manager triggers a notification event."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 80,
+        "notes": "Validates bulk notification for simultaneous requests."
+    },
+    {
+        "id": "TC-US-001-10",
+        "title": "Accessibility Test - Notification Section",
+        "description": "Check that the notification section is accessible as per WCAG guidelines for Managers reviewing pending leave requests.",
+        "requirement_id": "US-001",
+        "type": "accessibility",
+        "priority": "P3",
+        "risk_level": "low",
+        "preconditions": [
+            "Manager login completed.",
+            "Pending leave request notification exists."
+        ],
+        "steps": [
+            "Login as Manager.",
+            "Navigate to notification area.",
+            "Verify keyboard navigation, screen reader support, and ARIA labels for notifications.",
+            "Test color contrast and font readability."
+        ],
+        "expected_outcomes": [
+            "Notification section is accessible and conforms to WCAG level AA/AAA."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "accessibility",
+            "notification",
+            "leave-request"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": [
+                "WCAG 2.1 AA"
+            ]
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Accessibility compliance required for critical sections."
+    }
+]

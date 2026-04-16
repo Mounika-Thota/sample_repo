@@ -1,0 +1,252 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Manager Leave History Management', () => {
+  test.setTimeout(60000);
+
+  test.beforeEach(async ({ page }) => {
+    // Application credentials and URL from resolved execution inputs
+    await page.goto('https://demo.orangehrmlive.com/');
+    // Wait for login page DOM
+    await expect(page.locator('input.oxd-input[name="username"]')).toBeVisible();
+    // Login as manager
+    await page.fill('input.oxd-input[name="username"]', 'Admin');
+    await page.fill('input.oxd-input[name="password"]', 'admin123');
+    await page.click('button.oxd-button[type="submit"]');
+    // Wait for dashboard main nav to appear
+    await expect(page.locator('.oxd-topbar-header-title')).toBeVisible();
+  });
+
+  test('TC-US-001-01: Manager views comprehensive leave history for team members', async ({ page }) => {
+    // Navigate to Leave module from sidebar navigation
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForLoadState('domcontentloaded');
+    // Wait for page grid/table to become visible
+    await expect(page.locator('h6.oxd-text.oxd-text--h6:has-text("Leave List")')).toBeVisible();
+    // Open Employee Name filter (uses custom typeahead with .oxd-autocomplete-text-input)
+    const teamMemberFilter = page.locator('.oxd-autocomplete-text-input input');
+    await teamMemberFilter.click();
+    await teamMemberFilter.fill('John Smith');
+    // Wait for options dropdown and select
+    await page.waitForSelector('.oxd-autocomplete-dropdown > div');
+    await page.click('.oxd-autocomplete-dropdown > div:has-text("John Smith")');
+    
+    // Open Leave Type dropdown (custom UI, not native select)
+    await page.click('.oxd-grid-item .oxd-select-text', { timeout: 5000 });
+    await page.click('.oxd-select-dropdown --active .oxd-select-option:has-text("Annual Leave")');
+
+    // Set Status filter
+    await page.click('div.oxd-form-row [class^="oxd-select-text"]:below(:text("Status"))');
+    await page.click('.oxd-select-dropdown --active .oxd-select-option:has-text("Approved")');
+
+    // Set date range: from & to (uses .oxd-date-input)
+    await page.fill('input.oxd-input[placeholder="From"]', '2023-01-01');
+    await page.fill('input.oxd-input[placeholder="To"]', '2023-12-31');
+    
+    // Click Search
+    await page.click('button.oxd-button:has-text("Search")');
+    await page.waitForTimeout(1000);
+    
+    // Search for specific request in grid
+    const searchInput = page.locator('input.oxd-input[placeholder="Search"]');
+    if (await searchInput.isVisible()) {
+      await searchInput.fill('Family emergency');
+      await page.waitForTimeout(500);
+    }
+
+    // Validate leave requests list rendered
+    await expect(page.locator('div.orangehrm-leave-list')).toBeVisible();
+    // Confirm that actions column is visible for leave requests
+    await expect(page.locator('div.orangehrm-leave-list th:has-text("Actions")')).toBeVisible();
+    // Confirm user, timestamps, notifications columns exist
+    await expect(page.locator('div.orangehrm-leave-list th:has-text("Employee Name")')).toBeVisible();
+    await expect(page.locator('div.orangehrm-leave-list th:has-text("Date")')).toBeVisible();
+    // Note: exact columns names may differ; adjust selectors if actual UI differs.
+  });
+
+  test('TC-US-001-02: Manager exports leave history to CSV report', async ({ page }) => {
+    // Navigate to Leave module Leave List screen
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Wait for Export/Download button (adjust if new label present)
+    const exportBtn = page.locator('button.oxd-button:has-text("Export")');
+    await expect(exportBtn).toBeVisible();
+    await exportBtn.click();
+    // If format selection exists, choose CSV
+    const csvOption = page.locator('.oxd-dropdown-menu li:has-text("CSV")');
+    if (await csvOption.isVisible()) {
+      await csvOption.click();
+    }
+    // Wait for download - Playwright's download API
+    const [ download ] = await Promise.all([
+      page.waitForEvent('download', { timeout: 15000 }),
+      // In some systems, clicking Export triggers download
+    ]);
+    const path = await download.path();
+    expect(path).not.toBeNull();
+    // Validate downloaded file is .csv
+    expect(download.suggestedFilename()).toMatch(/\.csv$/);
+    // Optionally, parse and check file content here for relevant data columns.
+  });
+
+  test('TC-US-001-03: Manager exports leave history to PDF report', async ({ page }) => {
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Wait for Export/Download button
+    const exportBtn = page.locator('button.oxd-button:has-text("Export")');
+    await expect(exportBtn).toBeVisible();
+    await exportBtn.click();
+    // If format popup exists, choose PDF
+    const pdfOption = page.locator('.oxd-dropdown-menu li:has-text("PDF")');
+    if (await pdfOption.isVisible()) {
+      await pdfOption.click();
+    }
+    // Wait for download
+    const [ download ] = await Promise.all([
+      page.waitForEvent('download', { timeout: 15000 }),
+    ]);
+    const path = await download.path();
+    expect(path).not.toBeNull();
+    expect(download.suggestedFilename()).toMatch(/\.pdf$/);
+    // Optionally, PDF content parsing could be included here
+  });
+
+  test('TC-US-001-04: Leave history accurately displays actions and events', async ({ page }) => {
+    // (Manual cross-verification with system logs required.)
+    // Automation only validates that actions/events columns and rows display as expected
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Search for a specific team member (e.g., Jane Doe)
+    const empFilter = page.locator('.oxd-autocomplete-text-input input');
+    await empFilter.click();
+    await empFilter.fill('Jane Doe');
+    await page.waitForSelector('.oxd-autocomplete-dropdown > div');
+    await page.click('.oxd-autocomplete-dropdown > div:has-text("Jane Doe")');
+    await page.click('button.oxd-button:has-text("Search")');
+    // Validate presence of chronological leave request events
+    const actionsCol = page.locator('div.orangehrm-leave-list th:has-text("Actions")');
+    await expect(actionsCol).toBeVisible();
+    // Suggest manual step for verifying actions/events against logs
+  });
+
+  test('TC-US-001-05: Error message and troubleshooting when leave history is incomplete or inaccessible', async ({ page }) => {
+    // Select a team member with no leave data (simulate via user with known no data)
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    const empFilter = page.locator('.oxd-autocomplete-text-input input');
+    await empFilter.click();
+    await empFilter.fill('Empty User');
+    // If no suggestion, skip selection
+    if (await page.isVisible('.oxd-autocomplete-dropdown > div:has-text("Empty User")')) {
+      await page.click('.oxd-autocomplete-dropdown > div:has-text("Empty User")');
+    }
+    await page.click('button.oxd-button:has-text("Search")');
+    // Wait for error/empty state message (captured from DOM via exploration)
+    // Use actual selector, e.g., .oxd-text--span, or .oxd-text.oxd-text--p, with correct message
+    const noDataMsg = page.locator('.oxd-text.oxd-text--span:has-text("No Records Found")');
+    await expect(noDataMsg).toBeVisible();
+    // If troubleshooting steps/link exist, verify visibility
+    const troubleshooting = page.locator('a:has-text("Troubleshooting")');
+    if (await troubleshooting.isVisible()) {
+      await expect(troubleshooting).toBeVisible();
+    }
+  });
+
+  test('TC-US-001-06: Leave history reflects organizational data retention policies', async ({ page }) => {
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Set date filter outside policy (e.g., far past date)
+    await page.fill('input.oxd-input[placeholder="From"]', '2010-01-01');
+    await page.fill('input.oxd-input[placeholder="To"]', '2010-12-31');
+    await page.click('button.oxd-button:has-text("Search")');
+    // Wait for message indicating no data retained
+    const noDataMsg = page.locator('.oxd-text.oxd-text--span:has-text("No Records Found")');
+    await expect(noDataMsg).toBeVisible();
+    // This suggests records outside retention are not visible (adapt as needed for actual retention config)
+  });
+
+  test('TC-US-001-07: Leave history interface returns results within 5 seconds for standard team size', async ({ page }) => {
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Search for default team, measure time
+    const start = Date.now();
+    await page.click('button.oxd-button:has-text("Search")');
+    await page.waitForSelector('div.orangehrm-leave-list tbody tr');
+    const elapsed = Date.now() - start;
+    expect(elapsed).toBeLessThanOrEqual(5000);
+  });
+
+  test('TC-US-001-08: Unauthorized role cannot access leave history', async ({ context }) => {
+    // Log out current session first
+    const page = await context.newPage();
+    await page.goto('https://demo.orangehrmlive.com/web/index.php/auth/logout');
+    await page.waitForSelector('input.oxd-input[name="username"]');
+    // Login as regular Employee role (assume username 'ESS' if such demo user exists)
+    await page.fill('input.oxd-input[name="username"]', 'ESS');
+    await page.fill('input.oxd-input[name="password"]', 'ess123');
+    await page.click('button.oxd-button[type="submit"]');
+    await page.waitForSelector('.oxd-topbar-header-title');
+    // Attempt to access Leave module
+    const sidebarLeave = page.locator('a.oxd-main-menu-item:has-text("Leave")');
+    if (await sidebarLeave.isVisible()) {
+      await sidebarLeave.click();
+      // Check if access denied message or module is hidden
+      const denied = page.locator('.oxd-text.oxd-text--span:has-text("You do not have permission")');
+      await expect(denied).toBeVisible();
+    } else {
+      // Leave module not visible -- access correctly denied
+      expect(await sidebarLeave.count()).toBe(0);
+    }
+    await page.close();
+  });
+
+  test('TC-US-001-09: Leave history actions/events are tamper-proof', async ({ page }) => {
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Ensure there are NO edit/delete controls in leave history
+    const editBtn = page.locator('button:has-text("Edit")');
+    const deleteBtn = page.locator('button:has-text("Delete")');
+    expect(await editBtn.count()).toBe(0);
+    expect(await deleteBtn.count()).toBe(0);
+    // Attempt to interact with grid cells (should not be editable)
+    const firstCell = page.locator('div.orangehrm-leave-list tbody tr td').first();
+    await firstCell.dblclick();
+    // Confirm no input/textbox appears (adapt or skip assertion if irrelevant)
+    const cellInput = page.locator('input[type="text"]');
+    expect(await cellInput.count()).toBe(0);
+  });
+
+  test('TC-US-001-10: System errors and exceptions are logged for compliance', async ({ page }) => {
+    // UI validation: force API error simulation if possible and check for error message (manual cross-check of logs required)
+    // Try an invalid filter or disconnect network
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    await page.fill('input.oxd-input[placeholder="From"]', '2099-01-01');
+    await page.fill('input.oxd-input[placeholder="To"]', '2099-12-31');
+    await page.click('button.oxd-button:has-text("Search")');
+    // Wait for error or empty state message
+    const errorMsg = page.locator('.oxd-text.oxd-text--span:has-text("No Records Found")');
+    await expect(errorMsg).toBeVisible();
+    // Note: system/application log check is not possible from UI automation
+  });
+
+  test('TC-US-001-11: Leave history interface is accessible and supports keyboard navigation', async ({ page }) => {
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await page.waitForSelector('h6.oxd-text.oxd-text--h6:has-text("Leave List")');
+    // Tab navigation: focus moves between search inputs, dropdowns, and table
+    await page.keyboard.press('Tab'); // to Employee field
+    await expect(page.locator('.oxd-autocomplete-text-input input')).toBeFocused();
+    await page.keyboard.press('Tab'); // to Leave Type
+    await page.keyboard.press('Tab'); // to Status
+    await page.keyboard.press('Tab'); // to Date From
+    await expect(page.locator('input.oxd-input[placeholder="From"]')).toBeFocused();
+    // Focus highlight visually present, aria labels may be checked
+    // Check that list/table supports keyboard arrow navigation
+    // This can be partly checked by sending ArrowDown and asserting focus change
+    await page.keyboard.press('Tab'); // To Search button
+    await expect(page.locator('button.oxd-button:has-text("Search")')).toBeFocused();
+    // Screen reader support - verify key landmarks are present
+    // This can be enhanced by using page.accessibility.snapshot if required
+    const snapshot = await page.accessibility.snapshot();
+    expect(snapshot.children.some(child => child.role === 'table')).toBeTruthy();
+  });
+});

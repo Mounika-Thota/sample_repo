@@ -1,0 +1,443 @@
+Test Case Title: Configure and Maintain Leave Approval Chains
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-US-001-01",
+        "title": "HR User accesses leave workflow configuration interface after authentication",
+        "description": "Verify that an HR User can log in and successfully access the leave workflow configuration module.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "HR User has valid authentication credentials",
+            "System is online and accessible"
+        ],
+        "steps": [
+            "Navigate to HR application main URL",
+            "Log in using HR User credentials",
+            "Locate and select the 'Leave Workflow Configuration' from the navigation menu"
+        ],
+        "expected_outcomes": [
+            "User is authenticated and redirected to dashboard/main page",
+            "'Leave Workflow Configuration' interface is accessible and visible"
+        ],
+        "data": {
+            "inputs": {
+                "username": "hr_user_demo",
+                "password": "********"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "access",
+            "navigation",
+            "leave workflow"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "HR User can access the leave workflow configuration interface after successful authentication and authorization."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 30,
+        "notes": "General access test, login is treated only as precondition due to tool failure."
+    },
+    {
+        "id": "TC-US-001-02",
+        "title": "Create a new approval chain based on organizational template",
+        "description": "HR User initiates creation of a new leave approval chain using an available template.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "HR User is authenticated",
+            "Leave workflow configuration interface is open"
+        ],
+        "steps": [
+            "Click 'Create New Approval Chain' button",
+            "Select an organizational template from available options",
+            "Confirm selection"
+        ],
+        "expected_outcomes": [
+            "New approval chain is created based on selected template",
+            "Workflow designer interface shows the new chain"
+        ],
+        "data": {
+            "inputs": {
+                "template": "Standard Reporting Hierarchy"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "creation",
+            "template",
+            "workflow"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "HR User can create new approval chains by selecting or defining templates that match organizational reporting structures."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Assumes standard templates are present for selection."
+    },
+    {
+        "id": "TC-US-001-03",
+        "title": "Configure multi-level approval workflow with designated approvers",
+        "description": "HR User configures various levels in the approval chain and assigns hierarchy-based approvers.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "HR User is authenticated",
+            "Approval chain creation interface is open"
+        ],
+        "steps": [
+            "Add multiple approval levels to workflow",
+            "Assign approvers for each level based on organizational hierarchy",
+            "Save changes"
+        ],
+        "expected_outcomes": [
+            "Approval workflow configuration shows multiple levels with assigned approvers"
+        ],
+        "data": {
+            "inputs": {
+                "levels": 3,
+                "approvers": [
+                    "Supervisor",
+                    "Department Head",
+                    "HR Manager"
+                ]
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "multi-level",
+            "configuration"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "HR User can configure multi-level approval workflows, specifying at each level the appropriate approver(s) based on the hierarchy."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Validates multi-level workflow behavior."
+    },
+    {
+        "id": "TC-US-001-04",
+        "title": "Set up escalation protocol for unavailable approvers",
+        "description": "HR User configures escalation protocol so leave requests escalate if not approved within defined period.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "HR User is authenticated",
+            "Approval chain configuration interface is open"
+        ],
+        "steps": [
+            "Select an approval level",
+            "Configure escalation settings (e.g., escalate to next authority after X days/hours)",
+            "Save escalation protocol"
+        ],
+        "expected_outcomes": [
+            "Escalation protocol is applied and visible in workflow",
+            "Escalation settings reference next higher authority as configured"
+        ],
+        "data": {
+            "inputs": {
+                "escalation_period": 48,
+                "escalate_to": "Next Authority"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "escalation",
+            "system rules"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "HR User can set up escalation protocols for cases where approvers are unavailable (e.g., escalating to the next higher authority after a defined period)."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Valid escalation flow for unavailable approvers."
+    },
+    {
+        "id": "TC-US-001-05",
+        "title": "Update existing approval chain by editing approval levels",
+        "description": "HR User updates approval levels in an existing chain, changing roles or adding new approvers.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "HR User is authenticated",
+            "At least one approval chain exists"
+        ],
+        "steps": [
+            "Select existing approval chain",
+            "Edit a level (add/remove approver, change role)",
+            "Save updates"
+        ],
+        "expected_outcomes": [
+            "Changes are reflected in the chain",
+            "Updated configuration is saved successfully"
+        ],
+        "data": {
+            "inputs": {
+                "chain_id": "LeaveChain01",
+                "edited_levels": [
+                    "Add Finance Approver"
+                ]
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "edit",
+            "update"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "HR User can update or duplicate existing approval chains, including editing levels, changing roles, and cloning configurations for other departments."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Test covers editing approval chain and saving changes."
+    },
+    {
+        "id": "TC-US-001-06",
+        "title": "Validate business rules for approval chain configuration",
+        "description": "System validates approval chain to ensure it meets organizational constraints and business rules.",
+        "requirement_id": "US-001",
+        "type": "boundary",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "HR User has created/edited an approval chain"
+        ],
+        "steps": [
+            "Attempt to add more levels than the maximum allowed",
+            "Try skipping a mandatory hierarchy level",
+            "Attempt to configure incorrect escalation protocol"
+        ],
+        "expected_outcomes": [
+            "System prevents saving of invalid configuration",
+            "Precise error messages are shown, prompting correction of issues"
+        ],
+        "data": {
+            "inputs": {
+                "levels": 10,
+                "mandatory_level_missing": true,
+                "incorrect_escalation": true
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "validation",
+            "boundary",
+            "error"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System validates that the approval chain adheres to business rules",
+                "If system validation fails due to missing or inconsistent hierarchy information, the HR User is shown a precise error message and prompted to correct the configuration.",
+                "All validation errors, exceptions, or constraint violations result in meaningful error messages that guide the user to resolve issues."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "Boundary and negative path for business rules validation."
+    },
+    {
+        "id": "TC-US-001-07",
+        "title": "Access denied for HR User without necessary permissions",
+        "description": "Verify that HR User is denied access if lacking permissions for leave workflow configuration.",
+        "requirement_id": "US-001",
+        "type": "security",
+        "priority": "P1",
+        "risk_level": "high",
+        "preconditions": [
+            "HR User is authenticated",
+            "HR User lacks leave configuration permissions"
+        ],
+        "steps": [
+            "Attempt to navigate to leave workflow configuration interface"
+        ],
+        "expected_outcomes": [
+            "Access is denied",
+            "Informative error message is displayed"
+        ],
+        "data": {
+            "inputs": {
+                "permission": false
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "access control"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If HR User lacks the necessary permissions, access is denied and an informative message is displayed."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "4.1.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 25,
+        "notes": "Security and permission validation."
+    },
+    {
+        "id": "TC-US-001-08",
+        "title": "Logging of updates and workflow changes for audit compliance",
+        "description": "System logs every modification to approval chains with user and timestamp in line with audit requirements.",
+        "requirement_id": "US-001",
+        "type": "reliability",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "HR User is authenticated",
+            "Approval chain is changed or updated"
+        ],
+        "steps": [
+            "Update approval chain",
+            "Check audit log for record of change with user and timestamp"
+        ],
+        "expected_outcomes": [
+            "Audit log entry exists for modification",
+            "Log records initiating user and timestamp"
+        ],
+        "data": {
+            "inputs": {
+                "edited_chain": "LeaveChain02"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "audit",
+            "logging",
+            "compliance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Updates and changes are logged for audit and traceability in compliance with ISO/IEC/IEEE 29148.",
+                "Modifications to workflows are traceable to the initiating user and timestamp for compliance purposes."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "2.1.4"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 35,
+        "notes": "Ensures traceability and audit compliance."
+    },
+    {
+        "id": "TC-US-001-09",
+        "title": "System response time for loading and saving workflows meets business SLA",
+        "description": "Measure system performance for loading and saving leave workflow configurations.",
+        "requirement_id": "US-001",
+        "type": "performance",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "HR User is authenticated"
+        ],
+        "steps": [
+            "Navigate to leave workflow configuration interface",
+            "Create new approval chain",
+            "Save workflow and measure time taken",
+            "Reload configuration interface and measure load time"
+        ],
+        "expected_outcomes": [
+            "Configuration save and interface load times are within SLA (e.g., under 2000 ms)"
+        ],
+        "data": {
+            "inputs": {
+                "sla_duration": 2000
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "performance",
+            "sla"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System response times for loading and saving configurations do not exceed performance expectations as defined by business SLAs."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Checks if system meets performance expectations."
+    }
+]

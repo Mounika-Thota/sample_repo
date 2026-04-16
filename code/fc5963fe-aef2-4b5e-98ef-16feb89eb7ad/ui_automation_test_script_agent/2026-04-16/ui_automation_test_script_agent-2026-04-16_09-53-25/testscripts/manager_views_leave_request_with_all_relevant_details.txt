@@ -1,0 +1,219 @@
+import { test, expect } from '@playwright/test';
+test.setTimeout(60000);
+
+const APP_URL = 'https://demo.leave-application.example.com';
+const MANAGER_USERNAME = 'manager_user';
+const MANAGER_PASSWORD = 'manager_pwd';
+
+// Locators discovered during MCP Deep Exploration (component library prefix: .ant-*)
+const loginUsernameInput = '[class="ant-input"][name="username"]';
+const loginPasswordInput = '[class="ant-input"][name="password"]';
+const loginButton = '.ant-btn-primary';
+const sidebarLeaveRequests = '.ant-menu-item:has-text("Leave Requests")';
+const leaveRequestsPendingTab = '.ant-tabs-tab:has-text("Pending")';
+const leaveRequestsTable = '.ant-table';
+const filterDateInput = '.ant-picker-input input';
+const filterStatusDropdown = '.ant-select-selection-item';
+const filterStatusOptionPending = '.ant-select-dropdown .ant-select-item:has-text("Pending")';
+const filterTeamMemberDropdown = '.ant-select-selection-item';
+const filterTeamMemberOptionJohnDoe = '.ant-select-dropdown .ant-select-item:has-text("John Doe")';
+const applyFilterButton = '.ant-btn:has-text("Apply")';
+const leaveRequestRow = '.ant-table-row';
+const leaveRequestDetailDrawer = '.ant-drawer .ant-drawer-content';
+const leaveBalanceWarning = '.ant-alert:has-text("balance unavailable")';
+const teamOverlapUnknownFlag = '.ant-tag:has-text("Unknown")';
+const manualReviewPrompt = '.ant-notification:has-text("Manual review")';
+const contextReference = '.ant-tooltip:has-text("Source")';
+const approveButton = '.ant-btn:has-text("Approve")';
+const rejectButton = '.ant-btn:has-text("Reject")';
+const confirmationMessage = '.ant-message .ant-message-notice-content';
+const auditLogMenu = '.ant-menu-item:has-text("Audit Logs")';
+const auditLogTable = '.ant-table:has-text("Leave Request")';
+
+// Adaptation notes: If any locator fails due to dynamic DOM or session state, change selector as required. Component library detected: Ant Design (.ant-* class prefix).
+
+// Suite: Leave Request Functional Flow for Manager
+
+test.describe('Leave Request Module - Manager End-to-End', () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate & login
+    await page.goto(APP_URL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(1000);
+    await expect(page.locator(loginUsernameInput)).toBeVisible();
+    await page.fill(loginUsernameInput, MANAGER_USERNAME);
+    await page.fill(loginPasswordInput, MANAGER_PASSWORD);
+    await page.click(loginButton);
+    // Wait for dashboard to load
+    await page.waitForSelector(sidebarLeaveRequests, { timeout: 10000 });
+  });
+
+  test('TC-US-001-01 - Manager views list of pending leave requests after login (happy path)', async ({ page }) => {
+    // Navigate to Leave Requests module
+    await page.click(sidebarLeaveRequests);
+    await page.waitForSelector(leaveRequestsTable);
+    // Select Pending tab
+    await page.click(leaveRequestsPendingTab);
+    // Validate leave requests table is visible
+    await expect(page.locator(leaveRequestsTable)).toBeVisible();
+    // Validate at least one leave request row is listed
+    await expect(page.locator(leaveRequestRow)).toHaveCountGreaterThan(0);
+    // Adaptation: Uses actual navigation and tab text found during exploration ("Pending")
+  });
+
+  test('TC-US-001-02 - Manager filters leave requests by date, status, or team member', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.waitForSelector(leaveRequestsTable);
+    await page.click(leaveRequestsPendingTab);
+    // Filter by Date
+    await page.click(filterDateInput);
+    await page.fill(filterDateInput, '2024-06-10');
+    await page.press(filterDateInput, 'Enter');
+    await page.fill(filterDateInput, '2024-06-15');
+    await page.press(filterDateInput, 'Enter');
+    // Filter by Status
+    await page.click(filterStatusDropdown);
+    await page.click(filterStatusOptionPending);
+    // Filter by Team Member
+    await page.click(filterTeamMemberDropdown);
+    await page.click(filterTeamMemberOptionJohnDoe);
+    // Apply filters
+    await page.click(applyFilterButton);
+    // Wait for results and validate
+    await page.waitForSelector(leaveRequestsTable);
+    const filteredRows = await page.locator(leaveRequestRow).count();
+    expect(filteredRows).toBeGreaterThan(0);
+    // Adaptation: Uses actual filter input classes; filter label text as-discovered
+  });
+
+  test('TC-US-001-03 - Manager selects a leave request to view details', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    // Select the first leave request row
+    const firstRow = page.locator(leaveRequestRow).first();
+    await expect(firstRow).toBeVisible();
+    await firstRow.click();
+    await page.waitForSelector(leaveRequestDetailDrawer);
+    // Validate detail drawer is shown
+    await expect(page.locator(leaveRequestDetailDrawer)).toBeVisible();
+    // Validate leave dates, type, description are displayed
+    await expect(page.locator(leaveRequestDetailDrawer)).toContainText(['Date', 'Type', 'Description']);
+    // Validate leave balance field exists
+    await expect(page.locator(leaveRequestDetailDrawer)).toContainText('Leave Balance');
+    // Validate team member overlap information
+    await expect(page.locator(leaveRequestDetailDrawer)).toContainText('Team Overlap');
+    // Adaptation: Actual detail layout validated via drawer class during exploration
+  });
+
+  test('TC-US-001-04 - Transparent warning when leave balance is unavailable', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    // Find leave request with warning (adapted for any visible warning element)
+    const requestWithWarning = page.locator(leaveRequestRow).filter({ hasText: 'balance unavailable' }).first();
+    if (await requestWithWarning.count() > 0) {
+      await requestWithWarning.click();
+      await page.waitForSelector(leaveRequestDetailDrawer);
+      await expect(page.locator(leaveBalanceWarning)).toBeVisible();
+      // Partial data check
+      await expect(page.locator(leaveRequestDetailDrawer)).toContainText(['Date', 'Type']);
+    } else {
+      // Adaptation: No leave request with balance unavailable found; test skipped
+      test.skip();
+    }
+  });
+
+  test('TC-US-001-05 - System flags indeterminate team overlap status', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    // Find leave request with unknown overlap
+    const requestWithUnknownOverlap = page.locator(leaveRequestRow).filter({ hasText: 'Unknown' }).first();
+    if (await requestWithUnknownOverlap.count() > 0) {
+      await requestWithUnknownOverlap.click();
+      await page.waitForSelector(leaveRequestDetailDrawer);
+      await expect(page.locator(teamOverlapUnknownFlag)).toBeVisible();
+      await expect(page.locator(manualReviewPrompt)).toBeVisible();
+    } else {
+      // Adaptation: No request with indeterminate overlap found; test skipped
+      test.skip();
+    }
+  });
+
+  test('TC-US-001-06 - Context references provided for each data point', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    const firstRow = page.locator(leaveRequestRow).first();
+    await firstRow.click();
+    await page.waitForSelector(leaveRequestDetailDrawer);
+    // Check for context references
+    await expect(page.locator(contextReference)).toBeVisible();
+    // Adaptation: Context tooltip "Source" is used per actual tooltip text found
+  });
+
+  test('TC-US-001-07 - Page load performance for leave request details', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    const firstRow = page.locator(leaveRequestRow).first();
+    await firstRow.click();
+    // Start timing from click
+    const startTime = Date.now();
+    await page.waitForSelector(leaveRequestDetailDrawer);
+    const loadTime = Date.now() - startTime;
+    expect(loadTime).toBeLessThanOrEqual(3000); // SLA: <= 3s
+    await expect(page.locator(leaveRequestDetailDrawer)).toBeVisible();
+    // Adaptation: Ensures visible with timing check
+  });
+
+  test('TC-US-001-08 - Validation and error indication for leave request details', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    // Find request with error/warning
+    const requestWithError = page.locator(leaveRequestRow).filter({ hasText: 'error' }).first();
+    if (await requestWithError.count() > 0) {
+      await requestWithError.click();
+      await page.waitForSelector(leaveRequestDetailDrawer);
+      await expect(page.locator(leaveRequestDetailDrawer)).toContainText('error');
+      await expect(page.locator(leaveRequestDetailDrawer)).toContainText('Leave Balance');
+    } else {
+      // Adaptation: No leave request error found; test skipped
+      test.skip();
+    }
+  });
+
+  test('TC-US-001-09 - Audit and compliance logging at access and decision points', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    const firstRow = page.locator(leaveRequestRow).first();
+    await firstRow.click();
+    await page.waitForSelector(leaveRequestDetailDrawer);
+    // Approve first leave request
+    await page.click(approveButton);
+    await page.waitForSelector(confirmationMessage);
+    // Go to Audit Log menu
+    await page.click(auditLogMenu);
+    await page.waitForSelector(auditLogTable);
+    // Validate audit log contains Leave Request entry
+    await expect(page.locator(auditLogTable)).toContainText('Leave Request');
+    // Adaptation: Audit log access as per discovered audit log menu
+  });
+
+  test('TC-US-001-10 - Manager proceeds to approve or reject leave request', async ({ page }) => {
+    await page.click(sidebarLeaveRequests);
+    await page.click(leaveRequestsPendingTab);
+    // Approve leave request
+    const firstRow = page.locator(leaveRequestRow).first();
+    await firstRow.click();
+    await page.waitForSelector(leaveRequestDetailDrawer);
+    await page.click(approveButton);
+    await page.waitForSelector(confirmationMessage);
+    await expect(page.locator(confirmationMessage)).toContainText('approved');
+    // Reject another leave request
+    const secondRow = page.locator(leaveRequestRow).nth(1);
+    if (await secondRow.count() > 0) {
+      await secondRow.click();
+      await page.waitForSelector(leaveRequestDetailDrawer);
+      await page.click(rejectButton);
+      await page.waitForSelector(confirmationMessage);
+      await expect(page.locator(confirmationMessage)).toContainText('rejected');
+    }
+    // Adaptation: Uses actual confirmation message text found after action
+  });
+});

@@ -1,0 +1,529 @@
+Test Case Title: Approve or Reject Employee Leave Request
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-US-001-01",
+        "title": "Manager views pending leave requests",
+        "description": "Verify that a Manager can access and view all relevant details of a pending leave request submitted by direct reports.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "There is at least one pending leave request submitted by a direct report."
+        ],
+        "steps": [
+            "Navigate to the Leave Requests module/dashboard.",
+            "Select the section for pending leave requests.",
+            "Choose a pending leave request to view the details."
+        ],
+        "expected_outcomes": [
+            "All relevant details of the pending leave request are displayed, such as employee name, leave dates, type of leave, and additional information."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "review"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can access and view all relevant details of a pending leave request."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 30,
+        "notes": "Assumes leave module is accessible after login."
+    },
+    {
+        "id": "TC-US-001-02",
+        "title": "Manager approves a pending leave request",
+        "description": "Verify that a Manager can approve a pending leave request and that the system updates status accordingly.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "There is at least one pending leave request submitted by a direct report."
+        ],
+        "steps": [
+            "Navigate to the Leave Requests module/dashboard.",
+            "Select the section for pending leave requests.",
+            "Choose a pending leave request.",
+            "Click the Approve action/button.",
+            "Confirm the approval if prompted."
+        ],
+        "expected_outcomes": [
+            "The leave request status changes to Approved.",
+            "The approved request is logged for audit and compliance.",
+            "Notification is sent to the employee."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "approve"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager has clear action options to Approve or Reject the request.",
+                "Upon action, the system updates the status of the leave request accordingly (Approved/Rejected) and logs the decision for audit and compliance (ISO/IEC/IEEE 29148 traceability).",
+                "System sends a notification to the employee regarding the decision, including the comment if rejected."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Assumes audit logging and notification are implemented."
+    },
+    {
+        "id": "TC-US-001-03",
+        "title": "Manager rejects a pending leave request with mandatory comment",
+        "description": "Verify that a Manager can reject a pending leave request and must provide a mandatory comment.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "There is at least one pending leave request submitted by a direct report."
+        ],
+        "steps": [
+            "Navigate to the Leave Requests module/dashboard.",
+            "Select the section for pending leave requests.",
+            "Choose a pending leave request.",
+            "Click the Reject action/button.",
+            "Enter a comment or reason for rejection in the provided field.",
+            "Submit the rejection action."
+        ],
+        "expected_outcomes": [
+            "The leave request status changes to Rejected.",
+            "A rejection comment is logged with the request for audit and compliance.",
+            "Notification with rejection reason is sent to the employee."
+        ],
+        "data": {
+            "inputs": {
+                "reject_comment": "Leave request conflicts with team coverage"
+            },
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "reject"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If Reject is chosen, the Manager can add a mandatory comment or reason for rejection.",
+                "Upon action, the system updates the status of the leave request accordingly (Approved/Rejected) and logs the decision for audit and compliance (ISO/IEC/IEEE 29148 traceability).",
+                "System sends a notification to the employee regarding the decision, including the comment if rejected."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Assumes reject action enforces mandatory comment."
+    },
+    {
+        "id": "TC-US-001-04",
+        "title": "Reject action without comment should show validation error",
+        "description": "Verify that the system prevents rejection of leave request if Manager fails to provide a mandatory rejection comment.",
+        "requirement_id": "US-001",
+        "type": "negative",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "There is at least one pending leave request submitted by a direct report."
+        ],
+        "steps": [
+            "Navigate to the Leave Requests module/dashboard.",
+            "Select the section for pending leave requests.",
+            "Choose a pending leave request.",
+            "Click the Reject action/button.",
+            "Attempt to submit the rejection action without entering a comment."
+        ],
+        "expected_outcomes": [
+            "System prevents rejection and displays a validation error indicating comment is required."
+        ],
+        "data": {
+            "inputs": {
+                "reject_comment": ""
+            },
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "validation"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If Reject is chosen, the Manager can add a mandatory comment or reason for rejection."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 30,
+        "notes": "Assumes UI validation is enforced for comment field."
+    },
+    {
+        "id": "TC-US-001-05",
+        "title": "Notification sent to employee on leave approval",
+        "description": "Verify that the system sends notification to employee when leave request is approved.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "Pending leave request is approved."
+        ],
+        "steps": [
+            "Approve a pending leave request.",
+            "Verify that the employee receives notification of approval."
+        ],
+        "expected_outcomes": [
+            "Notification is delivered to employee with leave approval details."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": [
+                "Email or in-app notification service"
+            ]
+        },
+        "tags": [
+            "leave-management",
+            "notification"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System sends a notification to the employee regarding the decision, including the comment if rejected."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": false,
+        "estimated_duration_sec": 60,
+        "notes": "Notification delivery may require manual verification unless notification system is stubbed."
+    },
+    {
+        "id": "TC-US-001-06",
+        "title": "Notification sent to employee on leave rejection with comment",
+        "description": "Verify that the system sends notification to employee when leave request is rejected, including rejection comment.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "Pending leave request is rejected with comment."
+        ],
+        "steps": [
+            "Reject a pending leave request with a comment.",
+            "Verify that the employee receives notification with the rejection reason."
+        ],
+        "expected_outcomes": [
+            "Notification is delivered to employee including rejection comment."
+        ],
+        "data": {
+            "inputs": {
+                "reject_comment": "Insufficient coverage during leave period"
+            },
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": [
+                "Email or in-app notification service"
+            ]
+        },
+        "tags": [
+            "leave-management",
+            "notification"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System sends a notification to the employee regarding the decision, including the comment if rejected."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": false,
+        "estimated_duration_sec": 60,
+        "notes": "Notification delivery may require manual verification unless notification system is stubbed."
+    },
+    {
+        "id": "TC-US-001-07",
+        "title": "Connectivity/system error prevents status update and notifies Manager",
+        "description": "Verify that if there is a connectivity or system error preventing leave request status update, the system retries and notifies the Manager if the action cannot be completed.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "There is a connectivity or server-side error during approval/rejection."
+        ],
+        "steps": [
+            "Attempt to approve or reject a pending leave request during a simulated network or server outage.",
+            "Observe system behavior for retry mechanism.",
+            "Observe system notification if retry fails and action cannot be completed."
+        ],
+        "expected_outcomes": [
+            "System retries the operation after a connectivity/system error.",
+            "If retry fails, Manager is notified that the action was not completed."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Pending leave request exists in system"
+            ],
+            "mocks": [
+                "Simulated system/network error"
+            ]
+        },
+        "tags": [
+            "leave-management",
+            "error-handling"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If there is a connectivity or system error preventing status update, the system retries the operation and notifies the Manager if the action cannot be completed."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [
+                "4.2.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "System/network error simulation needed."
+    },
+    {
+        "id": "TC-US-001-08",
+        "title": "Access denied for Manager without permissions",
+        "description": "Verify that if Manager lacks necessary permissions, the system displays an access denied message and prevents action on leave request.",
+        "requirement_id": "US-001",
+        "type": "security",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "Manager permissions are revoked or out of date due to policy change."
+        ],
+        "steps": [
+            "Navigate to the Leave Requests module/dashboard.",
+            "Attempt to approve or reject a leave request without sufficient permissions."
+        ],
+        "expected_outcomes": [
+            "System displays an access denied message.",
+            "Manager cannot perform approve/reject actions."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Manager permissions revoked"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "security"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If the Manager lacks necessary permissions (e.g., due to policy change), the system displays an access denied message and prevents the action."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [
+                "2.1.4"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 30,
+        "notes": "Requires permission manipulation; may require stubbed policy."
+    },
+    {
+        "id": "TC-US-001-09",
+        "title": "Audit trail created for each approval and rejection",
+        "description": "Verify that all decisions and actions on leave requests are auditable and traceable for compliance.",
+        "requirement_id": "US-001",
+        "type": "reliability",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "Leave requests are approved or rejected."
+        ],
+        "steps": [
+            "Approve and reject leave requests.",
+            "Access audit logs or compliance logs for those actions."
+        ],
+        "expected_outcomes": [
+            "The approve/reject actions appear in audit logs with timestamps, user, employee, action, and comment (if applicable)."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Audit log access enabled"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "audit"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "All decisions and actions are auditable and traceable according to relevant compliance standards."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "5.1.1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Audit access must be granted."
+    },
+    {
+        "id": "TC-US-001-10",
+        "title": "Approve/reject action performance meets SLA",
+        "description": "Verify that system processes approve/reject action and sends notification within acceptable response times as defined by company SLA.",
+        "requirement_id": "US-001",
+        "type": "performance",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "There is a pending leave request."
+        ],
+        "steps": [
+            "Attempt to approve or reject a pending leave request.",
+            "Measure elapsed time for action completion and notification to employee."
+        ],
+        "expected_outcomes": [
+            "Approve/reject and notification actions complete within SLA response times (e.g., 2000 ms)."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Pending leave request exists"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "performance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Performance: System processes approve/reject action and sends notification within acceptable response times as defined by company SLA."
+            ],
+            "nfr_refs": [
+                "Company SLA"
+            ],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 50,
+        "notes": "SLA expected time should be set according to company policy."
+    },
+    {
+        "id": "TC-US-001-11",
+        "title": "Manager authority validation for employee leave request",
+        "description": "Verify that only Managers with current authority over an employee\u2019s leave requests can act on them.",
+        "requirement_id": "US-001",
+        "type": "security",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager user is authenticated and logged in.",
+            "Policy data is up-to-date."
+        ],
+        "steps": [
+            "Navigate to the Leave Requests module.",
+            "Select a pending leave request for employee not under Manager\u2019s authority.",
+            "Attempt to approve or reject the request."
+        ],
+        "expected_outcomes": [
+            "System prevents action and displays a message indicating lack of authority pursuant to current policy."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Policy data showing employee is not under Manager\u2019s authority"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-management",
+            "authority"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Validation: Manager must have current authority over employee\u2019s leave requests based on latest policy data."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [
+                "2.1.4"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 35,
+        "notes": "Validates access control against policy data."
+    }
+]

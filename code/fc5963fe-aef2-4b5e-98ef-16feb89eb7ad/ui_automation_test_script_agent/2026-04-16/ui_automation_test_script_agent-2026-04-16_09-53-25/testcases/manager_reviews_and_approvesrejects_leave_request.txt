@@ -1,0 +1,377 @@
+Test Case Title: Manager reviews and approves/rejects leave request
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-f63c0b20-01",
+        "title": "Manager views pending leave requests notification",
+        "description": "Verify that a manager receives a notification for pending leave requests routed to them.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged into the application",
+            "At least one leave request has been submitted by a team member and routed to the manager"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to the Leave Requests/Approvals module",
+            "Check for notification or indicator showing pending leave requests"
+        ],
+        "expected_outcomes": [
+            "Pending leave request notification or indicator is visible to the manager"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Leave request submitted and routed to manager"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "notification",
+            "manager"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager receives notification of pending leave requests"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 50,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-02",
+        "title": "Manager reviews leave request details",
+        "description": "Verify the manager can view complete leave request details including balance and overlap status.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged into the application",
+            "At least one leave request is pending their approval"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to the Leave Requests/Approvals module",
+            "Select a pending leave request",
+            "View all leave request details, including leave balance and overlap status"
+        ],
+        "expected_outcomes": [
+            "Leave request details page displays all relevant information, including leave balance and overlap status"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Pending leave request with overlap and balance attributes"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "details",
+            "manager"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can view details of leave request including balance and overlap status"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-03",
+        "title": "Manager approves leave request (happy path)",
+        "description": "Validate that the manager can approve a leave request and system updates the status with notification sent to employee.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager is logged into the application",
+            "At least one leave request is pending their approval"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to the Leave Requests/Approvals module",
+            "Select a pending leave request",
+            "Click Approve",
+            "Verify leave status updates",
+            "Check for notification sent to employee"
+        ],
+        "expected_outcomes": [
+            "Leave request status changes to 'Approved'",
+            "Employee receives notification"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Manager",
+                "Pending leave request"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "approval",
+            "manager"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can approve the request",
+                "System updates leave status and sends notification to employee"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 70,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-04",
+        "title": "Manager rejects leave request",
+        "description": "Validate that the manager can reject a leave request, leave status updates and notification is sent to employee.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager is logged into the application",
+            "At least one leave request is pending their approval"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to the Leave Requests/Approvals module",
+            "Select a pending leave request",
+            "Click Reject",
+            "Verify leave status updates",
+            "Check for notification sent to employee"
+        ],
+        "expected_outcomes": [
+            "Leave request status changes to 'Rejected'",
+            "Employee receives notification"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Manager",
+                "Pending leave request"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "rejection",
+            "manager"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can reject the request",
+                "System updates leave status and sends notification to employee"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 70,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-05",
+        "title": "Leave history includes approved and rejected requests",
+        "description": "Verify the leave history for team members is updated with manager's actions (approved/rejected).",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged into the application",
+            "At least one leave request has been approved or rejected"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to Leave History module",
+            "Select a team member",
+            "Review leave history for approved and rejected leaves"
+        ],
+        "expected_outcomes": [
+            "Leave history reflects approved and rejected leave requests with accurate timestamps and status"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Leave requests processed by manager"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "history",
+            "manager"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Leave history is tracked"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-06",
+        "title": "System validation: balance/overlapping edge cases",
+        "description": "Negative test to ensure leave cannot be approved if balance not sufficient or leave overlaps inappropriately with other team leave.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "negative",
+        "priority": "P1",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager is logged into the application",
+            "Leave request violating balance or overlap constraints routed to manager"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to Leave Requests/Approvals module",
+            "Select leave request with insufficient balance or overlapping constraint violation",
+            "Attempt to approve the request"
+        ],
+        "expected_outcomes": [
+            "System displays validation error and blocks leave approval"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Leave request with constraint violation"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "validation",
+            "manager",
+            "negative"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can approve or reject the request"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 60,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-07",
+        "title": "UI accessibility: Manager leave approval screen",
+        "description": "Check that the leave approval/rejection UI meets accessibility standards.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "accessibility",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged into the application",
+            "Leave Requests/Approvals module is accessible"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to Leave Requests/Approvals module",
+            "Check for keyboard navigation support",
+            "Verify ARIA labels and screenreader compatibility for approval/rejection actions",
+            "Check color contrast for notifications and action buttons"
+        ],
+        "expected_outcomes": [
+            "UI meets WCAG accessibility guidelines (keyboard accessible, screenreader support, color contrast)"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "accessibility"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": [
+                "WCAG 2.1 AA"
+            ]
+        },
+        "automation_candidate": false,
+        "estimated_duration_sec": 100,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    },
+    {
+        "id": "TC-f63c0b20-08",
+        "title": "Performance: Leave approvals responsiveness",
+        "description": "Verify the leave approvals module loads within acceptable response time and actions complete quickly.",
+        "requirement_id": "f63c0b20-57e0-435d-9ac5-48bd2bb183be",
+        "type": "performance",
+        "priority": "P3",
+        "risk_level": "low",
+        "preconditions": [
+            "Manager is logged into the application"
+        ],
+        "steps": [
+            "Login as manager",
+            "Navigate to Leave Requests/Approvals module",
+            "Measure page/module load time",
+            "Approve/reject a leave request",
+            "Measure response time for approval/rejection action"
+        ],
+        "expected_outcomes": [
+            "Page/module load completes within performance target (e.g., <2000ms)",
+            "Approval/rejection responses occur in <1000ms"
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "performance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": false,
+        "estimated_duration_sec": 70,
+        "notes": "General scenario; actual application access was not possible due to domain resolution error."
+    }
+]

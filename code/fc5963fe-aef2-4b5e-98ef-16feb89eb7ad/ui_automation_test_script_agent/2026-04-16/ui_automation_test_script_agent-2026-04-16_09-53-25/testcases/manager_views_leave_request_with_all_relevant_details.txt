@@ -1,0 +1,438 @@
+Test Case Title: Manager Views Leave Request with All Relevant Details
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-US-001-01",
+        "title": "Manager views list of pending leave requests after login",
+        "description": "Verify that a manager user can navigate to the pending leave requests module and see the list of requests.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager account exists",
+            "Manager has access to login credentials",
+            "Leave request module is enabled for the manager"
+        ],
+        "steps": [
+            "Login to the application with Manager credentials",
+            "Navigate to the dashboard/home page",
+            "Locate and click on the 'Leave Requests' or similar module",
+            "Select the 'Pending' tab or filter to view pending leave requests"
+        ],
+        "expected_outcomes": [
+            "Leave request module loads successfully",
+            "Pending leave requests are displayed as a list/table",
+            "No errors on page load"
+        ],
+        "data": {
+            "inputs": {
+                "username": "manager_user",
+                "password": "manager_pwd"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "leave",
+            "navigation",
+            "core-flow"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager successfully navigates to the list of pending leave requests."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 20,
+        "notes": "Based on generic web application practice due to connectivity error; module name subject to live app."
+    },
+    {
+        "id": "TC-US-001-02",
+        "title": "Manager filters leave requests by date, status, or team member",
+        "description": "Verify filtering options are available and functional in the leave request module.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged in",
+            "Pending leave requests are available"
+        ],
+        "steps": [
+            "Navigate to the pending leave requests page",
+            "Select filter by 'Date' and choose a date range",
+            "Select filter by 'Status' and choose 'Pending'",
+            "Select filter by 'Team Member' and choose a team member",
+            "Apply each filter and observe results"
+        ],
+        "expected_outcomes": [
+            "Results update according to applied filters",
+            "Only relevant leave requests are displayed",
+            "No errors or incorrect results shown"
+        ],
+        "data": {
+            "inputs": {
+                "filter_date": "2024-06-10 to 2024-06-15",
+                "filter_status": "Pending",
+                "filter_team_member": "John Doe"
+            }
+        },
+        "tags": [
+            "filtering",
+            "search"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can filter leave requests by date, status, or team member."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Filter labels and options assumed; adapt to actual UI."
+    },
+    {
+        "id": "TC-US-001-03",
+        "title": "Manager selects a leave request to view details",
+        "description": "Verify full details are displayed when a manager selects a leave request, including request info, employee leave balance, and team member overlaps.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager has filtered/requested leave requests",
+            "Leave request exists in the list"
+        ],
+        "steps": [
+            "Click on a pending leave request from the list",
+            "Observe the details section/popup/page"
+        ],
+        "expected_outcomes": [
+            "Request details (dates, type, description) displayed",
+            "Employee's current leave balance is shown",
+            "Team member overlap information displayed"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "detail-view"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager selects a leave request and system displays: full request details (dates, type, description), employee\u2019s up-to-date leave balance, and any team member overlaps for the requested period."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 20,
+        "notes": "Actual layout/fields subject to module discovery."
+    },
+    {
+        "id": "TC-US-001-04",
+        "title": "Transparent warning when leave balance is unavailable",
+        "description": "Verify that a transparent warning is displayed if leave balance is unavailable, and partial data is shown.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Leave request with unavailable balance exists"
+        ],
+        "steps": [
+            "Select a leave request with missing leave balance info",
+            "Review warnings/messages on the details section"
+        ],
+        "expected_outcomes": [
+            "Transparent warning about unavailable leave balance is displayed",
+            "Partial data is shown for review",
+            "No other details affected"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "error",
+            "warning"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If leave balance information is unavailable, a transparent warning is displayed and partial data is shown for review."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 20,
+        "notes": "Use synthetic/mocked leave requests; warning element subject to real app."
+    },
+    {
+        "id": "TC-US-001-05",
+        "title": "System flags indeterminate team overlap status",
+        "description": "Test for handling indeterminate team overlap: flag as 'unknown' and prompt for manual review.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Leave request with indeterminate team overlap exists"
+        ],
+        "steps": [
+            "Select leave request where team overlap status cannot be determined",
+            "Verify system flags \u2018unknown\u2019 overlap",
+            "Observe prompt for Manager to manually review"
+        ],
+        "expected_outcomes": [
+            "Team overlap flagged as 'unknown'",
+            "Prompt for manual review appears",
+            "All other details remain accessible"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "error",
+            "manual"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If team overlap status is indeterminate, the system flags as \u2018unknown\u2019 and prompts the Manager for additional manual review."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 20,
+        "notes": "Scenario requires synthetic leave requests with indeterminate overlap."
+    },
+    {
+        "id": "TC-US-001-06",
+        "title": "Context references provided for each data point",
+        "description": "Verify system provides traceability/context references for leave request details as per compliance.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P2",
+        "risk_level": "low",
+        "preconditions": [
+            "Leave request details displayed"
+        ],
+        "steps": [
+            "Select and view leave request details",
+            "Check for source/context/reference shown for each critical data point"
+        ],
+        "expected_outcomes": [
+            "Context references for request dates, leave balance, and team overlap are visible",
+            "References can be traced for compliance"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "traceability",
+            "compliance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "All details presented are traceable and verifiable in alignment with ISO/IEC/IEEE 29148\u2014system should provide context references for data points."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 15,
+        "notes": "Format and location of context refs subject to module exploration."
+    },
+    {
+        "id": "TC-US-001-07",
+        "title": "Page load performance for leave request details",
+        "description": "Verify leave request details display within performance SLA (e.g., <3 seconds).",
+        "requirement_id": "US-001",
+        "type": "performance",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "Leave request details page exists"
+        ],
+        "steps": [
+            "Select a leave request for details",
+            "Measure time taken for details to fully load and display"
+        ],
+        "expected_outcomes": [
+            "Details are loaded and visible within 3 seconds"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "performance",
+            "timing"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System performance for retrieval is within agreed SLAs (e.g., loads within 3 seconds)."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 10,
+        "notes": "SLA interpreted as 3 seconds max for visible details."
+    },
+    {
+        "id": "TC-US-001-08",
+        "title": "Validation and error indication for leave request details",
+        "description": "Validate all checks are performed; errors and warnings are indicated without loss of critical information.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Leave request with validation errors exists"
+        ],
+        "steps": [
+            "Review leave request details following selection",
+            "Check for validation errors, warnings, and their clarity",
+            "Check that critical information remains accessible"
+        ],
+        "expected_outcomes": [
+            "Errors/warnings clearly presented",
+            "Critical info is not lost or hidden"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "validation",
+            "core-flow"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "All validation checks are performed, errors and warnings are clearly indicated without loss of critical information."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 20,
+        "notes": "Assumes UI displays errors/warnings contextually."
+    },
+    {
+        "id": "TC-US-001-09",
+        "title": "Audit and compliance logging at access and decision points",
+        "description": "Verify system logs manager\u2019s access and decision actions for audit purposes.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P2",
+        "risk_level": "medium",
+        "preconditions": [
+            "Audit/compliance logs are enabled"
+        ],
+        "steps": [
+            "Access pending leave request module",
+            "Select leave request and view details",
+            "Approve or reject the leave request",
+            "Check system for logs regarding access and action"
+        ],
+        "expected_outcomes": [
+            "Logs contain records for module access and approve/reject action",
+            "Log entries meet compliance formatting"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "audit",
+            "compliance"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System logs all access and decision points for audit and compliance verification."
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 25,
+        "notes": "Audit log format subject to live app; requires access or validation via admin/log UI."
+    },
+    {
+        "id": "TC-US-001-10",
+        "title": "Manager proceeds to approve or reject leave request",
+        "description": "Validate the manager\u2019s ability to take further action (approve/reject) after viewing leave request details.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Leave request details have been reviewed"
+        ],
+        "steps": [
+            "Select a pending leave request and view its details",
+            "Click on 'Approve' button",
+            "Verify status update and confirmation",
+            "Select another leave request",
+            "Click on 'Reject' button",
+            "Verify rejection status and confirmation"
+        ],
+        "expected_outcomes": [
+            "Approve action updates request status to approved",
+            "Reject action updates request status to rejected",
+            "Appropriate system confirmation messages displayed"
+        ],
+        "data": {
+            "inputs": {}
+        },
+        "tags": [
+            "action",
+            "core-flow"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Manager can proceed to take further action (such as approve/reject) after viewing the details."
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 30,
+        "notes": "Assumes approve/reject actions available on details page."
+    }
+]

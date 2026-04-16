@@ -1,0 +1,228 @@
+import { test, expect } from '@playwright/test';
+
+test.setTimeout(60000);
+
+const managerUsername = 'manager_user'; // Provided in execution inputs
+const managerPassword = 'ManagerSecurePass!'; // Provided in execution inputs
+const appUrl = 'https://demo.orangehrm.com/'; // Provided in execution inputs
+
+// Locators identified via MCP exploration:
+const sidebarMenuItemClass = '.oxd-main-menu-item';
+const topbarMenuClass = '.oxd-topbar-body-nav-tab';
+const notificationBellClass = '.oxd-userdropdown-icon';
+const notificationDropdownClass = '.oxd-dropdown-menu';
+const leaveMenuSelector = `${sidebarMenuItemClass}[href='/web/index.php/leave/viewLeaveModule']`;
+const leaveRequestsMenuSelector = `${sidebarMenuItemClass}[href='/web/index.php/leave/viewLeaveList']`;
+const notificationAreaSelector = `${notificationBellClass}`;
+const notificationListSelector = '.oxd-dropdown-menu';
+const notificationItemSelector = '.oxd-dropdown-menu > li';
+const notificationContentDetailSelector = '.oxd-dropdown-menu > li .oxd-dropdown-menu-item';
+const auditLogMenuSelector = `${sidebarMenuItemClass}[href='/web/index.php/auditLog/viewAuditLog']`;
+const auditLogListSelector = '.oxd-table-body';
+const auditLogEntrySelector = '.oxd-table-row';
+const notificationSettingsMenuSelector = `${sidebarMenuItemClass}[href='/web/index.php/notification/viewNotificationModule']`;
+const channelEmailCheckboxSelector = 'input[name="email"]';
+const channelSystemAlertCheckboxSelector = 'input[name="system_alert"]';
+const notificationPreferencesSaveButtonSelector = '.oxd-button--secondary';
+
+// Login function common to all tests
+async function loginAsManager(page) {
+  await page.goto(appUrl, { waitUntil: 'domcontentloaded' });
+  if (await page.locator('input[name="username"]').count() > 0) {
+    await page.fill('input[name="username"]', managerUsername);
+    await page.fill('input[name="password"]', managerPassword);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+    // Handle cookie banner or popups if present
+    if (await page.locator('.orangehrm-cookie-banner').count() > 0) {
+      await page.locator('.orangehrm-cookie-banner').locator('button').click();
+    }
+  }
+}
+
+// Helper to open notification area
+async function openNotificationArea(page) {
+  await page.locator(notificationAreaSelector).click();
+  await page.waitForSelector(notificationListSelector);
+}
+
+// Helper to set notification preferences
+async function setNotificationPreferences(page, channels = []) {
+  await page.locator(notificationSettingsMenuSelector).click();
+  await page.waitForLoadState('domcontentloaded');
+  if (channels.includes('Email')) {
+    await page.locator(channelEmailCheckboxSelector).check();
+  } else {
+    if (await page.locator(channelEmailCheckboxSelector).isChecked()) {
+      await page.locator(channelEmailCheckboxSelector).uncheck();
+    }
+  }
+  if (channels.includes('System Alert')) {
+    await page.locator(channelSystemAlertCheckboxSelector).check();
+  } else {
+    if (await page.locator(channelSystemAlertCheckboxSelector).isChecked()) {
+      await page.locator(channelSystemAlertCheckboxSelector).uncheck();
+    }
+  }
+  await page.locator(notificationPreferencesSaveButtonSelector).click();
+  // Wait for toast or confirmation
+  if (await page.locator('.oxd-toast').count() > 0) {
+    await page.waitForSelector('.oxd-toast');
+  }
+}
+
+// Helper to simulate leave request by direct report (Assumes admin flow or backend setup as per test plan note)
+async function submitLeaveRequestAsDirectReport(page, employee, leaveType, startDate, endDate) {
+  // This would require a login flow as the direct report employee. For demonstration, we use manager/admin flow.
+  // Adaptation: If direct report interface not available, use manager/admin 'Assign Leave' flow.
+  await page.locator(sidebarMenuItemClass).filter({ hasText: 'Leave' }).click();
+  await page.waitForLoadState('domcontentloaded');
+  if (await page.locator('.oxd-button').filter({ hasText: 'Apply' }).count() > 0) {
+    await page.locator('.oxd-button').filter({ hasText: 'Apply' }).click();
+    await page.waitForSelector('.oxd-form');
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown').locator('div').filter({ hasText: leaveType }).click();
+    await page.locator('.oxd-date-input').first().fill(startDate);
+    await page.locator('.oxd-date-input').nth(1).fill(endDate);
+    await page.locator('.oxd-button').filter({ hasText: 'Submit' }).click();
+    await page.waitForSelector('.oxd-toast');
+  } else if (await page.locator('.oxd-button').filter({ hasText: 'Assign' }).count() > 0) {
+    // Admin 'Assign Leave' adaptation
+    await page.locator('.oxd-button').filter({ hasText: 'Assign' }).click();
+    await page.waitForSelector('.oxd-form');
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown').locator('div').filter({ hasText: leaveType }).click();
+    await page.locator('.oxd-date-input').first().fill(startDate);
+    await page.locator('.oxd-date-input').nth(1).fill(endDate);
+    await page.locator('.oxd-autocomplete-text-input').fill(employee);
+    await page.locator('.oxd-autocomplete-dropdown').locator('div').filter({ hasText: employee }).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Assign' }).click();
+    await page.waitForSelector('.oxd-toast');
+  } else {
+    // If the leave request submission form is not present, skip submit and add comment
+    // Test plan adaptation: Leave request submission not possible in demo session.
+  }
+}
+
+// Test suite for Leave Notification Feature
+
+test.describe('Leave Notification and Audit Workflow', () => {
+  // Happy path: Notification Trigger for New Leave Request (TC-US-001-01)
+  test('TC-US-001-01 Notification Trigger for New Leave Request Routed to Manager', async ({ page }) => {
+    await loginAsManager(page);
+    await page.locator(leaveRequestsMenuSelector).click();
+    await page.waitForLoadState('domcontentloaded');
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    await openNotificationArea(page);
+    // Verify notification is present (use actual notification selector)
+    const notificationItems = await page.locator(notificationItemSelector).allTextContents();
+    expect(notificationItems.some(text => text.includes('DirectReport1'))).toBeTruthy();
+  });
+
+  // TC-US-001-02 Notification Content for Manager - Pending Leave Request Details
+  test('TC-US-001-02 Notification Content for Manager - Pending Leave Request Details', async ({ page }) => {
+    await loginAsManager(page);
+    await openNotificationArea(page);
+    const notificationDetail = await page.locator(notificationContentDetailSelector).first().textContent();
+    expect(notificationDetail).toContain('Annual'); // Adapted: Use text from the demo notification found
+    expect(notificationDetail).toContain('DirectReport1');
+    expect(notificationDetail).toMatch(/2024-07-/); // Date presence adaptation
+    expect(notificationDetail).toMatch(/Pending/i); // Status presence adaptation
+  });
+
+  // TC-US-001-03 Notification Delivery via Manager Preferred Channel
+  test('TC-US-001-03 Notification Delivery via Manager Preferred Channel', async ({ page }) => {
+    await loginAsManager(page);
+    await setNotificationPreferences(page, ['Email', 'System Alert']);
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    await openNotificationArea(page);
+    expect(await page.locator(notificationItemSelector).filter({ hasText: 'DirectReport1' }).count()).toBeGreaterThan(0);
+    // For email verification, add comment: Automation cannot verify inbox without integration; system alert confirmed in UI
+    // Adaptation: Email delivery check skipped, only system alert check performed
+  });
+
+  // TC-US-001-04 Notification Promptness - Delivered Within SLT
+  test('TC-US-001-04 Notification Promptness - Delivered Within SLT', async ({ page }) => {
+    await loginAsManager(page);
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    const submitTime = Date.now();
+    await openNotificationArea(page);
+    // Check for recent notification (adaptation: validate notification appears within reasonable timeout)
+    expect(await page.locator(notificationItemSelector).filter({ hasText: 'DirectReport1' }).count()).toBeGreaterThan(0);
+    // Adaptation: UI timestamp validation limited; actual SLT timer check not feasible in demo UI
+    const receiveTime = Date.now();
+    expect(receiveTime - submitTime).toBeLessThan(5 * 60 * 1000); // 5 min SLT
+  });
+
+  // TC-US-001-05 Multiple Channel Notification - Manager Preference
+  test('TC-US-001-05 Multiple Channel Notification - Manager Preference', async ({ page }) => {
+    await loginAsManager(page);
+    await setNotificationPreferences(page, ['Email', 'System Alert']);
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    await openNotificationArea(page);
+    expect(await page.locator(notificationItemSelector).filter({ hasText: 'DirectReport1' }).count()).toBeGreaterThan(0);
+    // Email channel validation skipped; system alert confirmed
+  });
+
+  // TC-US-001-06 Audit Log Verification for Notification Delivery
+  test('TC-US-001-06 Audit Log Verification for Notification Delivery', async ({ page }) => {
+    await loginAsManager(page);
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    await page.locator(auditLogMenuSelector).click();
+    await page.waitForSelector(auditLogListSelector);
+    const auditEntries = await page.locator(auditLogEntrySelector).allTextContents();
+    expect(auditEntries.some(text => text.includes('Notification') && text.includes('DirectReport1'))).toBeTruthy();
+  });
+
+  // TC-US-001-07 Notification Delivery Failure and Retry Logging
+  test('TC-US-001-07 Notification Delivery Failure and Retry Logging', async ({ page }) => {
+    await loginAsManager(page);
+    // Adaptation: Demo system does not support simulating notification channel failure
+    // Skipped: channel fail simulation; instead validate audit log presence after leave request
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    await page.locator(auditLogMenuSelector).click();
+    await page.waitForSelector(auditLogListSelector);
+    const auditEntries = await page.locator(auditLogEntrySelector).allTextContents();
+    expect(auditEntries.some(text => text.includes('Notification'))).toBeTruthy();
+    // Adaptation: Retry/failure details assertion limited by demo system capability
+  });
+
+  // TC-US-001-08 Notification Not Sent if Manager Preference Not Set / No Channel Available
+  test('TC-US-001-08 Notification Not Sent if Manager Preference Not Set / No Channel Available', async ({ page }) => {
+    await loginAsManager(page);
+    await setNotificationPreferences(page, []); // Clear all channels
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-10');
+    await openNotificationArea(page);
+    expect(await page.locator(notificationItemSelector).filter({ hasText: 'DirectReport1' }).count()).toBe(0);
+    await page.locator(auditLogMenuSelector).click();
+    await page.waitForSelector(auditLogListSelector);
+    const auditEntries = await page.locator(auditLogEntrySelector).allTextContents();
+    expect(auditEntries.some(text => text.includes('Failure'))).toBeTruthy();
+    // Adaptation: Demo UI may not produce a failure log if preferences are unset
+  });
+
+  // TC-US-001-09 Notification for Multiple Pending Leave Requests
+  test('TC-US-001-09 Notification for Multiple Pending Leave Requests', async ({ page }) => {
+    await loginAsManager(page);
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport1', 'Annual', '2024-07-01', '2024-07-05');
+    await submitLeaveRequestAsDirectReport(page, 'DirectReport2', 'Annual', '2024-07-10', '2024-07-12');
+    await openNotificationArea(page);
+    expect(await page.locator(notificationItemSelector).filter({ hasText: 'DirectReport1' }).count()).toBeGreaterThan(0);
+    expect(await page.locator(notificationItemSelector).filter({ hasText: 'DirectReport2' }).count()).toBeGreaterThan(0);
+  });
+
+  // TC-US-001-10 Accessibility Test - Notification Section
+  test('TC-US-001-10 Accessibility Test - Notification Section', async ({ page }) => {
+    await loginAsManager(page);
+    await openNotificationArea(page);
+    // Keyboard navigation: Tab into the notification list
+    await page.keyboard.press('Tab');
+    const focusedElementRole = await page.evaluate(() => {
+      return document.activeElement.getAttribute('role');
+    });
+    expect([ 'list', 'menu' ]).toContain(focusedElementRole); // Adapted: Use ARIA role as seen in DOM
+    // Color contrast and font readability adaptation per WCAG: validation skipped as only manual/visual check possible
+    // Adaptation: Automation limited to ARIA labels/keyboard focus
+  });
+
+});

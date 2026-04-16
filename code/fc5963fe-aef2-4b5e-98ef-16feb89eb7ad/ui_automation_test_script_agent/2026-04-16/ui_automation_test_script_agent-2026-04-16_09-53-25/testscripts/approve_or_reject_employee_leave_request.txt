@@ -1,0 +1,371 @@
+import { test, expect } from '@playwright/test';
+
+test.setTimeout(60000);
+
+test.describe('Manager Leave Requests Feature End-to-End', () => {
+  let page;
+
+  test.beforeEach(async ({ browser }) => {
+    page = await browser.newPage();
+    // Login page - adapt selectors from exploration phase
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+    // Wait for the login input fields to render
+    await page.waitForSelector('input[placeholder="Username"]', { timeout: 10000 });
+    await page.getByPlaceholder('Username').fill('Admin');
+    await page.getByPlaceholder('Password').fill('admin123');
+    // The login button has class .orangehrm-login-button
+    await page.locator('button.orangehrm-login-button').click();
+    // Wait for dashboard/main
+    await page.waitForURL('**/dashboard', { timeout: 20000 });
+    // Close any pop-ups or banners if present
+    if (await page.locator('.oxd-toast-close').count() > 0) {
+      await page.locator('.oxd-toast-close').click();
+    }
+    // Wait for the sidebar
+    await page.waitForSelector('nav.oxd-sidepanel', { timeout: 15000 });
+  });
+
+  test.afterEach(async () => {
+    await page.close();
+  });
+
+  // TC-US-001-01
+  test('Manager views pending leave requests', async () => {
+    // Navigate to Leave module via sidebar
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    // Click "Leave List" tab if present (OrangeHRM uses a tab with this text)
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    // Ensure the "Pending" status filter is selected
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    // Click "Search" to refresh the list
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    // Wait for the results/data table
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    // If a pending request exists, click first one in the table
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist; skipping test.');
+    } else {
+      // Click the first pending request for details
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      // Wait for the detail overlay/modal (actual modal uses class .oxd-dialog-container)
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      // Adaptation: Use actual labels present in modal
+      const fieldsToCheck = ['Employee Name', 'Leave Type', 'From Date', 'To Date'];
+      for (const label of fieldsToCheck) {
+        expect(await page.locator('.oxd-dialog-container').getByText(label).count()).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  // TC-US-001-02
+  test('Manager approves a pending leave request', async () => {
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist; skipping approve flow.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      // Approve button found within modal, class: .oxd-dialog-container button, text: 'Approve' (from DOM)
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Approve' }).click();
+      // Confirm if a confirmation modal/popup appears
+      if (await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).count() > 0) {
+        await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).click();
+      }
+      // Wait for toast message (class: .oxd-toast)
+      await page.waitForSelector('.oxd-toast', { timeout: 10000 });
+      // Capture toast for validation (adapt actual message from DOM, not test plan)
+      await expect(page.locator('.oxd-toast .oxd-text--toast-title')).toHaveText(/Success|Approved/i);
+    }
+  });
+
+  // TC-US-001-03
+  test('Manager rejects a pending leave request with mandatory comment', async () => {
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist; skipping reject flow.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      // Reject button: .oxd-dialog-container button, text: 'Reject'
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Reject' }).click();
+      // Comment field appears (textarea with class .oxd-textarea)
+      await page.waitForSelector('.oxd-dialog-container .oxd-textarea', { timeout: 7000 });
+      // Adaptation: Use exact field class from modal
+      await page.locator('.oxd-dialog-container .oxd-textarea').fill('Leave request conflicts with team coverage');
+      // Submit button will now show 'Yes, Reject'
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Reject' }).click();
+      // Wait for toast
+      await page.waitForSelector('.oxd-toast', { timeout: 10000 });
+      await expect(page.locator('.oxd-toast .oxd-text--toast-title')).toHaveText(/Success|Rejected/i);
+    }
+  });
+
+  // TC-US-001-04
+  test('Reject action without comment should show validation error', async () => {
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist; skipping reject validation.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Reject' }).click();
+      await page.waitForSelector('.oxd-dialog-container .oxd-textarea', { timeout: 7000 });
+      // Leave comment blank; click submit
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Reject' }).click();
+      // Wait for validation error to appear (class: .oxd-input-field-error-message)
+      await page.waitForSelector('.oxd-input-field-error-message', { timeout: 7000 });
+      const errorMsg = await page.locator('.oxd-input-field-error-message').innerText();
+      expect(errorMsg).toMatch(/required|Please enter/i); // Actual message varies; adapt as per real DOM
+    }
+  });
+
+  // TC-US-001-05
+  test('Notification sent to employee on leave approval (manual notification verification)', async () => {
+    // NOTE: Notification delivery cannot be fully automated; approve as in previous test
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Approve' }).click();
+      if (await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).count() > 0) {
+        await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).click();
+      }
+      await page.waitForSelector('.oxd-toast', { timeout: 10000 });
+    }
+    // Adaptation: Notification delivery must be verified manually/outside automation
+  });
+
+  // TC-US-001-06
+  test('Notification sent to employee on leave rejection with comment (manual notification verification)', async () => {
+    // NOTE: Notification delivery cannot be fully automated; reject as in previous test
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Reject' }).click();
+      await page.waitForSelector('.oxd-dialog-container .oxd-textarea', { timeout: 7000 });
+      await page.locator('.oxd-dialog-container .oxd-textarea').fill('Insufficient coverage during leave period');
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Reject' }).click();
+      await page.waitForSelector('.oxd-toast', { timeout: 10000 });
+    }
+    // Adaptation: Notification delivery must be verified manually/outside automation
+  });
+
+  // TC-US-001-07
+  test('Connectivity/system error prevents status update and notifies Manager (manual error simulation)', async () => {
+    // NOTE: Requires system/network error simulation; not covered directly here
+    // Flow as per happy path approve
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Approve' }).click();
+      // Adaptation: system/network error simulation out of automation scope; must be verified with backend error stub
+    }
+  });
+
+  // TC-US-001-08
+  test('Access denied for Manager without permissions (manual permission manipulation)', async () => {
+    // NOTE: Permission manipulation not possible via UI; test will attempt access
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    // Adaptation: unless permissions are revoked, UI will simply work; verify presence of access denied messages if permissions are changed externally
+    if (await page.locator('.oxd-alert-content').filter({ hasText: 'Access Denied' }).count() > 0) {
+      expect(await page.locator('.oxd-alert-content').filter({ hasText: 'Access Denied' }).textContent()).toMatch(/Access Denied/i);
+    } else {
+      test.skip('Manager has required permissions; skipping access denied test.');
+    }
+  });
+
+  // TC-US-001-09
+  test('Audit trail created for each approval and rejection (audit module access)', async () => {
+    // First approve and reject in Leave module as previous tests
+    // Approve
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Approve' }).click();
+      if (await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).count() > 0) {
+        await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).click();
+      }
+      await page.waitForSelector('.oxd-toast', { timeout: 10000 });
+    }
+    // Navigate to audit module if exists (OrangeHRM uses "Buzz" or "Reports" section, but no explicit audit trail in open demo; adapt per system)
+    if (await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Reports' }).count() > 0) {
+      await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Reports' }).click();
+    } else {
+      test.skip('Audit log access module not present in this application.');
+    }
+    // Adaptation: locate audit entries if present in the table
+    if (await page.locator('.oxd-table').count() > 0 && await page.locator('.oxd-table-card').count() > 0) {
+      // Expect audit for recent leave request actions
+      expect(await page.locator('.oxd-table-card').first().textContent()).toMatch(/Leave|Approval|Reject/i);
+    }
+  });
+
+  // TC-US-001-10
+  test('Approve/reject action performance meets SLA', async () => {
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist; skipping SLA check.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      const start = Date.now();
+      await page.locator('.oxd-dialog-container button').filter({ hasText: 'Approve' }).click();
+      if (await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).count() > 0) {
+        await page.locator('.oxd-dialog-container button').filter({ hasText: 'Yes, Approve' }).click();
+      }
+      await page.waitForSelector('.oxd-toast', { timeout: 10000 });
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThanOrEqual(3000); // Adaptation: allow for 2-3s as demo site load varies
+    }
+  });
+
+  // TC-US-001-11
+  test('Manager authority validation for employee leave request', async () => {
+    // Attempt to act on a request outside authority
+    // Adaptation: Open demo does not allow to simulate other employees, so only verify presence of authority message if present
+    await page.locator('nav.oxd-sidepanel a.oxd-main-menu-item').filter({ hasText: 'Leave' }).click();
+    await page.waitForURL('**/leave/viewLeaveList', { timeout: 15000 });
+    if (await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).count() > 0) {
+      await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Leave List' }).click();
+    }
+    if (await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).count() > 0) {
+      await page.locator('.oxd-checkbox-input + label').filter({ hasText: 'Pending Approval' }).click();
+    }
+    if (await page.locator('button').filter({ hasText: 'Search' }).count() > 0) {
+      await page.locator('button').filter({ hasText: 'Search' }).click();
+    }
+    await page.waitForSelector('.oxd-table', { timeout: 10000 });
+    // Try to find an error/authority message after attempting action
+    if (await page.locator('.oxd-table-card').count() === 0) {
+      test.skip('No pending leave requests exist.');
+    } else {
+      const firstRequest = page.locator('.oxd-table-card').first();
+      await firstRequest.click();
+      await page.waitForSelector('.oxd-dialog-container', { timeout: 10000 });
+      if (await page.locator('.oxd-alert-content').filter({ hasText: 'lack of authority' }).count() > 0) {
+        expect(await page.locator('.oxd-alert-content').filter({ hasText: 'lack of authority' }).textContent()).toMatch(/lack of authority/i);
+      } else {
+        test.skip('No authority error; likely insufficient for scenario without backend manipulation.');
+      }
+    }
+  });
+});

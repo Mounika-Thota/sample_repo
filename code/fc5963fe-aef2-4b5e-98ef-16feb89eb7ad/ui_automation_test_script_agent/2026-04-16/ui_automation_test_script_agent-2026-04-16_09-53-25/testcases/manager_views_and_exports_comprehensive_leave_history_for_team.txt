@@ -1,0 +1,541 @@
+Test Case Title: Manager Views and Exports Comprehensive Leave History for Team
+------------------------------------------------------------
+
+[
+    {
+        "id": "TC-US-001-01",
+        "title": "Manager views comprehensive leave history for team members",
+        "description": "Validate that a Manager can access the leave history interface and view a chronological, filterable, and searchable record for one or more team members.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged into the application with valid credentials.",
+            "Manager has at least one direct report with leave requests in the system."
+        ],
+        "steps": [
+            "Navigate to the Leave History module via the application main menu or dashboard.",
+            "Select one or more team members from the filter or selection interface.",
+            "Apply chronological sorting if available.",
+            "Apply filter conditions as available (by date, type, status).",
+            "Use the search function to locate a specific leave request.",
+            "Observe the list/grid of leave requests, with actions and events."
+        ],
+        "expected_outcomes": [
+            "Leave history for selected team members is displayed chronologically.",
+            "Actions (approved, rejected, modified) are visible for each request.",
+            "Filters and search return expected results.",
+            "User, timestamps, and notifications are displayed."
+        ],
+        "data": {
+            "inputs": {
+                "team_member": "John Smith",
+                "filter": "Leave Type: Annual; Status: Approved",
+                "search": "Keyword: Family emergency"
+            },
+            "fixtures": [
+                "Leave requests exist for team members"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "leave-history",
+            "filter",
+            "search",
+            "audit",
+            "manager"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "The Manager can request the leave history for one or more team members",
+                "The system displays a chronological, filterable, and searchable record of all leave requests"
+            ],
+            "nfr_refs": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "standards": [
+                "company data retention"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Assumes Leave History module is present and accessible to users with Manager role."
+    },
+    {
+        "id": "TC-US-001-02",
+        "title": "Manager exports leave history to CSV report",
+        "description": "Validate that the Manager can export the leave history as a CSV report for audit purposes.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is on the leave history interface displaying relevant data."
+        ],
+        "steps": [
+            "Locate and click the 'Export' or 'Download' button.",
+            "Select 'CSV' format if format selection is available.",
+            "Wait for file to be generated and download prompt to appear.",
+            "Save the CSV report.",
+            "Open the CSV and validate that all relevant leave history data is present."
+        ],
+        "expected_outcomes": [
+            "Export completes successfully.",
+            "CSV file is downloaded.",
+            "CSV file contains all displayed leave history data: requests, actions, users, timestamps."
+        ],
+        "data": {
+            "inputs": {
+                "export_format": "CSV"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "export",
+            "leave-history",
+            "CSV",
+            "audit"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Export functionality is available to generate and download the leave history as a report in at least one standard format"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 35,
+        "notes": "Verify with downloadable CSV file; format selection may be enforced or default."
+    },
+    {
+        "id": "TC-US-001-03",
+        "title": "Manager exports leave history to PDF report",
+        "description": "Validate that the Manager can export the leave history as a PDF report for audit purposes.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is on the leave history interface displaying relevant data."
+        ],
+        "steps": [
+            "Locate and click the 'Export' or 'Download' button.",
+            "Select 'PDF' format if format selection is available.",
+            "Wait for file to be generated and download prompt to appear.",
+            "Save the PDF report.",
+            "Open the PDF and validate that all relevant leave history data is present."
+        ],
+        "expected_outcomes": [
+            "Export completes successfully.",
+            "PDF file is downloaded.",
+            "PDF file contains all displayed leave history data: requests, actions, users, timestamps."
+        ],
+        "data": {
+            "inputs": {
+                "export_format": "PDF"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "export",
+            "leave-history",
+            "PDF",
+            "audit"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Export functionality is available to generate and download the leave history as a report in at least one standard format"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 35,
+        "notes": "Verify with downloadable PDF file; format selection may be enforced or default."
+    },
+    {
+        "id": "TC-US-001-04",
+        "title": "Leave history accurately displays actions and events",
+        "description": "Validate that all actions and events for each leave request are chronologically displayed and accurate, matching system logs.",
+        "requirement_id": "US-001",
+        "type": "positive",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager is logged in and has access to leave history.",
+            "System logs are available for cross-verification."
+        ],
+        "steps": [
+            "View leave history for a specific team member.",
+            "Identify actions (approval, rejection, modification) and event sequence.",
+            "Extract event logs (as available) for comparison."
+        ],
+        "expected_outcomes": [
+            "Displayed leave history corresponds with system logs.",
+            "All actions/events, users, and timestamps are correct and present."
+        ],
+        "data": {
+            "inputs": {
+                "team_member": "Jane Doe"
+            },
+            "fixtures": [
+                "System log export"
+            ],
+            "mocks": []
+        },
+        "tags": [
+            "audit",
+            "leave-history",
+            "chronology",
+            "logs"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "The leave history accurately reflects all actions and events"
+            ],
+            "nfr_refs": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": false,
+        "estimated_duration_sec": 60,
+        "notes": "Requires access to back-end logs for validation; manual cross-verification may be necessary."
+    },
+    {
+        "id": "TC-US-001-05",
+        "title": "Error message and troubleshooting when leave history is incomplete or inaccessible",
+        "description": "Validate that an informative error message and troubleshooting guidance is shown if leave history data cannot be accessed or is incomplete.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged in and selects team member(s) for whom leave data is missing or unavailable."
+        ],
+        "steps": [
+            "Navigate to leave history for a team member without leave data, or simulate data inaccessibility.",
+            "Observe system behavior: error message and troubleshooting steps."
+        ],
+        "expected_outcomes": [
+            "System displays clear, informative error message.",
+            "Troubleshooting steps or links are provided."
+        ],
+        "data": {
+            "inputs": {
+                "team_member": "Empty User"
+            },
+            "fixtures": [],
+            "mocks": [
+                "Simulate leave history API failure or empty data response"
+            ]
+        },
+        "tags": [
+            "error",
+            "leave-history",
+            "usability"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "If leave history data is incomplete or inaccessible, the system displays an error message and provides informative troubleshooting steps"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Simulated data gap or API error may require stubbing or configuration."
+    },
+    {
+        "id": "TC-US-001-06",
+        "title": "Leave history reflects organizational data retention policies",
+        "description": "Validate that the leave history interface only displays records according to company data retention policy (e.g., records older than policy limit are not shown).",
+        "requirement_id": "US-001",
+        "type": "boundary",
+        "priority": "P1",
+        "risk_level": "low",
+        "preconditions": [
+            "Manager is logged in.",
+            "Leave history exists for members with events older than retention policy period."
+        ],
+        "steps": [
+            "Navigate to leave history interface.",
+            "Filter or search for records older than retention policy limits.",
+            "Verify if such records are displayed."
+        ],
+        "expected_outcomes": [
+            "Records are only displayed within retention period limit.",
+            "Older records are inaccessible or not visible."
+        ],
+        "data": {
+            "inputs": {
+                "date_filter": "Older Than Policy Limit"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "data-retention",
+            "boundary",
+            "leave-history"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "All leave request actions and events are logged and preserved according to organizational data retention policies"
+            ],
+            "nfr_refs": [
+                "company data retention"
+            ],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Requires historical data setup to validate retention logic."
+    },
+    {
+        "id": "TC-US-001-07",
+        "title": "Leave history interface returns results within 5 seconds for standard team size",
+        "description": "Validate acceptable performance of leave history query (response time < 5 seconds) for standard manager team size.",
+        "requirement_id": "US-001",
+        "type": "performance",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager is logged in.",
+            "Standard team size leave history exists."
+        ],
+        "steps": [
+            "Navigate to leave history and request for the default team.",
+            "Measure time taken from request to data display."
+        ],
+        "expected_outcomes": [
+            "Leave history is displayed within 5 seconds."
+        ],
+        "data": {
+            "inputs": {
+                "team_size": "10"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "performance",
+            "leave-history"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "The leave history interface is responsive and maintains acceptable performance"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 45,
+        "notes": "Measure performance using automation timers."
+    },
+    {
+        "id": "TC-US-001-08",
+        "title": "Unauthorized role cannot access leave history",
+        "description": "Validate that users without Manager (or equivalent) role cannot access leave history interface.",
+        "requirement_id": "US-001",
+        "type": "security",
+        "priority": "P0",
+        "risk_level": "high",
+        "preconditions": [
+            "User with Employee or unauthorized role is logged in."
+        ],
+        "steps": [
+            "Attempt to navigate to the Leave History module.",
+            "Observe system behavior."
+        ],
+        "expected_outcomes": [
+            "Access denied message or absence of leave history interface.",
+            "Unauthorized user cannot view or export leave history."
+        ],
+        "data": {
+            "inputs": {
+                "role": "Employee"
+            },
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "authorization"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "Access to leave history is restricted to authorized roles only"
+            ],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [
+                "1.1.2"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 35,
+        "notes": "Verify absence or blocking of interface for unauthorized roles."
+    },
+    {
+        "id": "TC-US-001-09",
+        "title": "Leave history actions/events are tamper-proof",
+        "description": "Validate that leave history records cannot be edited, deleted, or altered by Manager or other authorized users.",
+        "requirement_id": "US-001",
+        "type": "security",
+        "priority": "P1",
+        "risk_level": "high",
+        "preconditions": [
+            "Manager is logged in.",
+            "Leave history is displayed."
+        ],
+        "steps": [
+            "Attempt to edit or delete actions/events from leave history interface.",
+            "Check for presence of modification controls.",
+            "Observe response if attempted modification is made."
+        ],
+        "expected_outcomes": [
+            "Records are read-only; no edit/delete controls present.",
+            "Attempts at modification are blocked or denied."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "security",
+            "audit",
+            "tamper-proof"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "The system must maintain a full, accurate, and tamper-proof record"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [
+                "V1"
+            ],
+            "wcag": []
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Attempt UI and API tampering if possible."
+    },
+    {
+        "id": "TC-US-001-10",
+        "title": "System errors and exceptions are logged for compliance",
+        "description": "Validate that any errors or exceptions on leave history interface are logged properly for compliance/audit purposes.",
+        "requirement_id": "US-001",
+        "type": "error-handling",
+        "priority": "P0",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager or authorized user performs error-inducing action on leave history interface."
+        ],
+        "steps": [
+            "Trigger an error in leave history (e.g., invalid filter, API timeout).",
+            "Verify error message is displayed to user.",
+            "Retrieve system or application logs for audit.",
+            "Verify presence of error log entry."
+        ],
+        "expected_outcomes": [
+            "Error is displayed to user.",
+            "Error is logged in system/application logs with relevant details."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [
+                "Access system logs"
+            ],
+            "mocks": [
+                "Simulate error via API"
+            ]
+        },
+        "tags": [
+            "error",
+            "audit",
+            "logging"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [
+                "System errors or exceptions are logged for troubleshooting and compliance auditing"
+            ],
+            "nfr_refs": [],
+            "standards": [
+                "ISO/IEC/IEEE 29148"
+            ],
+            "owasp_asvs": [],
+            "wcag": []
+        },
+        "automation_candidate": false,
+        "estimated_duration_sec": 45,
+        "notes": "Log verification may require backend/system access."
+    },
+    {
+        "id": "TC-US-001-11",
+        "title": "Leave history interface is accessible and supports keyboard navigation",
+        "description": "Validate accessibility compliance of leave history interface including keyboard navigation and screen reader support.",
+        "requirement_id": "US-001",
+        "type": "accessibility",
+        "priority": "P1",
+        "risk_level": "medium",
+        "preconditions": [
+            "Manager is logged in.",
+            "Leave history interface is available."
+        ],
+        "steps": [
+            "Use keyboard to navigate and interact with leave history filters, search, and export controls.",
+            "Verify focus states for all UI elements.",
+            "Test with screen reader software, ensuring all key controls and data are announced."
+        ],
+        "expected_outcomes": [
+            "Leave history interface is fully navigable via keyboard.",
+            "UI elements have visible focus.",
+            "Screen reader accurately announces data and controls."
+        ],
+        "data": {
+            "inputs": {},
+            "fixtures": [],
+            "mocks": []
+        },
+        "tags": [
+            "accessibility",
+            "leave-history"
+        ],
+        "traceability": {
+            "acceptance_criteria_refs": [],
+            "nfr_refs": [],
+            "standards": [],
+            "owasp_asvs": [],
+            "wcag": [
+                "2.1.1",
+                "1.3.1"
+            ]
+        },
+        "automation_candidate": true,
+        "estimated_duration_sec": 40,
+        "notes": "Assumes interface follows accessibility best practices; manual and automated tools can be used."
+    }
+]
