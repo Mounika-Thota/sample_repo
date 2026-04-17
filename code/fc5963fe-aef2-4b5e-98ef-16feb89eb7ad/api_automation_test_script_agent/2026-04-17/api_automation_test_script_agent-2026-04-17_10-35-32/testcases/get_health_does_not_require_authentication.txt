@@ -1,0 +1,55 @@
+Test Case Title: GET /health does not require authentication
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-7b6cf9d0-002",
+    "description": "Validate that the health endpoint is publicly accessible because the operation declares no security requirements.",
+    "preconditions": [
+        "API base URL is known and reachable"
+    ],
+    "steps": [
+        "Send a GET request to /health without Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "No authentication challenge required for success (no mandatory WWW-Authenticate to access)"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/health",
+        "headers": {
+            "Accept": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "security",
+        "tags": [
+            "smoke",
+            "regression",
+            "security"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "<openapi_document_id>",
+        "owasp_asvs_refs": [
+            "V2"
+        ],
+        "risk_level": "low",
+        "automation_candidate": true,
+        "requirements_traceability": [
+            {
+                "standard": "ISO/IEC/IEEE 29148",
+                "clause_or_topic": "Requirement completeness/consistency",
+                "mapping": "Confirms behavior matches declared empty security requirements"
+            },
+            {
+                "standard": "OWASP ASVS",
+                "clause_or_topic": "V2 - Authentication",
+                "mapping": "Validates endpoint access control aligns with specification (public endpoint)"
+            }
+        ]
+    }
+}
