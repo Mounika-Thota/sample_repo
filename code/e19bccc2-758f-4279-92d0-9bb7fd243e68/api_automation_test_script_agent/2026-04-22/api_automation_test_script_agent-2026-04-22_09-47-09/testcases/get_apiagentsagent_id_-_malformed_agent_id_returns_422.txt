@@ -1,0 +1,56 @@
+Test Case Title: GET /api/agents/{agent_id} - Malformed Agent ID Returns 422
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-ab9c4c2e-005",
+    "description": "Verify that providing a malformed or invalid agent_id parameter returns a 422 validation error.",
+    "preconditions": [
+        "API is reachable",
+        "Valid token available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/@@INVALID_ID@@ with valid Bearer token"
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response content-type is application/json",
+        "Response body matches HTTPValidationError format with detail field"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "boundary",
+        "tags": [
+            "regression",
+            "boundary"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "get_agent_api_agents__agent_id__get",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

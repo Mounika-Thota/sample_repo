@@ -1,0 +1,51 @@
+Test Case Title: GET /api/agents/ with skip at upper boundary
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2e798b8e-06",
+    "description": "Check that skip parameter is handled correctly at large boundary, e.g., skip=10000.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?skip=10000 with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body is empty array if no agents to return"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "integer",
+                "required": false,
+                "example": 10000
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "boundary",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "api-agents-get",
+        "owasp_asvs_refs": [
+            "V5"
+        ],
+        "risk_level": "low",
+        "automation_candidate": true
+    }
+}

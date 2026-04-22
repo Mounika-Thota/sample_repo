@@ -1,0 +1,58 @@
+Test Case Title: DELETE /api/agents/{agent_id} - Security: Injection Attacks in agent_id
+------------------------------------------------------------
+
+{
+    "id": "TC-DELETE-f2e6c865-008",
+    "description": "Validate the endpoint is resilient to SQL/command injection using crafted agent_id values.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send DELETE request to /api/agents/' OR '1'='1 with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 422 or 404",
+        "No unwanted system behavior or exposure",
+        "Error response matches validation schema"
+    ],
+    "automation_metadata": {
+        "method": "DELETE",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422,
+            404
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "security",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "delete_agent_api_agents__agent_id__delete",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}

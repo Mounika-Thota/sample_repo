@@ -1,0 +1,44 @@
+Test Case Title: GET /api/agents/{agent_id} - Invalid Bearer Token Returns 401
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-ab9c4c2e-003",
+    "description": "Verify that using an invalid or expired Bearer token results in an unauthorized (401) response.",
+    "preconditions": [
+        "API is reachable",
+        "Agent with ID <REPLACE_WITH_AGENT_ID> exists"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/<REPLACE_WITH_AGENT_ID> with an invalid Bearer token"
+    ],
+    "expected_outcome": [
+        "Status 401",
+        "Response content-type is application/json",
+        "Error message indicates invalid or expired token"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer INVALIDTOKEN"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            401
+        ],
+        "expected_response_schema": {},
+        "test_type": "security",
+        "tags": [
+            "security",
+            "negative"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "get_agent_api_agents__agent_id__get",
+        "owasp_asvs_refs": [
+            "V2"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}

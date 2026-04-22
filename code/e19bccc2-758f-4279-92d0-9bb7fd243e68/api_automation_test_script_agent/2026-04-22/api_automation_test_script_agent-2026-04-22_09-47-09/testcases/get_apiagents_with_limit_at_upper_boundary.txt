@@ -1,0 +1,50 @@
+Test Case Title: GET /api/agents/ with limit at upper boundary
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2e798b8e-07",
+    "description": "Check that limit parameter is handled correctly at upper boundary, e.g., limit=1000.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?limit=1000 with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body is JSON array/list of up to 1000 agents"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": 1000
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "boundary",
+        "tags": [
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "api-agents-get",
+        "owasp_asvs_refs": [
+            "V5"
+        ],
+        "risk_level": "low",
+        "automation_candidate": true
+    }
+}

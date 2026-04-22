@@ -1,0 +1,56 @@
+Test Case Title: DELETE /api/agents/{agent_id} - Error Format and Logging Consistency
+------------------------------------------------------------
+
+{
+    "id": "TC-DELETE-f2e6c865-007",
+    "description": "Validate error response matches the specified schema for errors and is consistent.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send DELETE request to /api/agents/<REPLACE_WITH_INVALID_AGENT_ID> with Authorization header"
+    ],
+    "expected_outcome": [
+        "Error response matches specified HTTPValidationError schema",
+        "Contains detail, loc, msg, and type fields"
+    ],
+    "automation_metadata": {
+        "method": "DELETE",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422,
+            404
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "usability",
+        "tags": [
+            "regression",
+            "consistency"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "delete_agent_api_agents__agent_id__delete",
+        "owasp_asvs_refs": [
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

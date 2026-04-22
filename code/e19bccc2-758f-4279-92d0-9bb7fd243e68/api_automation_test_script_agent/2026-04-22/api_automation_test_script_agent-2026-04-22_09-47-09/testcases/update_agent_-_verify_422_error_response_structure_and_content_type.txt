@@ -1,0 +1,65 @@
+Test Case Title: Update Agent - Verify 422 error response structure and content type
+------------------------------------------------------------
+
+{
+    "id": "TC-PUT-55cdd53a-014",
+    "description": "Ensure validation errors return a consistent schema and 'application/json' content type.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send PUT request with invalid data to /api/agents/<REPLACE_WITH_AGENT_ID>.",
+        "Check response content-type and schema on 422 error."
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response body matches documented HTTPValidationError schema",
+        "Response header Content-Type=application/json"
+    ],
+    "automation_metadata": {
+        "method": "PUT",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "category",
+                "type": "string",
+                "required": false,
+                "example": "invalid_enum_value",
+                "constraints": "enum constraint"
+            }
+        ],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "usability",
+        "tags": [
+            "sanity",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "update_agent_api_agents__agent_id__put",
+        "owasp_asvs_refs": [
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}

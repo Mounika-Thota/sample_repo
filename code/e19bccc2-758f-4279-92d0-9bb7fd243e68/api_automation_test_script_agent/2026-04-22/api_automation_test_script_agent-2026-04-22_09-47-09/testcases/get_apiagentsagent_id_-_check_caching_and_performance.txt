@@ -1,0 +1,46 @@
+Test Case Title: GET /api/agents/{agent_id} - Check Caching and Performance
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-ab9c4c2e-007",
+    "description": "Validate that the endpoint responds within acceptable latency and supports caching headers if applicable.",
+    "preconditions": [
+        "API is reachable",
+        "Valid token available",
+        "Agent with ID <REPLACE_WITH_AGENT_ID> exists"
+    ],
+    "steps": [
+        "Send repeated GET requests to /api/agents/<REPLACE_WITH_AGENT_ID> with valid Bearer token",
+        "Capture response times and headers"
+    ],
+    "expected_outcome": [
+        "p95 latency is less than 500ms",
+        "Response contains Cache-Control or ETag headers if applicable",
+        "All responses are identical in content"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "performance",
+        "tags": [
+            "performance",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "get_agent_api_agents__agent_id__get",
+        "owasp_asvs_refs": [
+            "V5"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

@@ -1,0 +1,64 @@
+Test Case Title: GET /api/agents/ with invalid skip parameter (string instead of integer)
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2e798b8e-02",
+    "description": "Validate error response when skip query parameter is a string, violating schema.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?skip=invalid with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response body contains error detail about validation",
+        "Error response follows HTTPValidationError schema"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "string",
+                "required": false,
+                "example": "invalid"
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "query",
+                        "skip"
+                    ],
+                    "msg": "value is not a valid integer",
+                    "type": "type_error.integer"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression",
+            "boundary"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "api-agents-get",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

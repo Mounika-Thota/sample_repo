@@ -1,0 +1,58 @@
+Test Case Title: GET /api/agents/ with skip and limit for pagination
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2e798b8e-01",
+    "description": "Validate that querying /api/agents/ with custom skip and limit returns correct paged results.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?skip=10&limit=15 with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body is JSON array/list of agents with up to 15 results",
+        "Content-Type header is 'application/json'"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "integer",
+                "required": false,
+                "example": 10
+            },
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": 15
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "api-agents-get",
+        "owasp_asvs_refs": [
+            "V2"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

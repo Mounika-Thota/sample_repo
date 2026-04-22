@@ -1,0 +1,46 @@
+Test Case Title: DELETE /api/agents/{agent_id} - Unauthorized Access
+------------------------------------------------------------
+
+{
+    "id": "TC-DELETE-f2e6c865-001",
+    "description": "Ensure the endpoint returns an authentication error when the Authorization header is missing.",
+    "preconditions": [
+        "API is reachable",
+        "Agent exists with id <REPLACE_WITH_AGENT_ID>"
+    ],
+    "steps": [
+        "Send DELETE request to /api/agents/<REPLACE_WITH_AGENT_ID> without Authorization header"
+    ],
+    "expected_outcome": [
+        "Status code is 401 or equivalent",
+        "Response contains error message indicating authentication failure"
+    ],
+    "automation_metadata": {
+        "method": "DELETE",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            401
+        ],
+        "expected_response_schema": {
+            "detail": "string"
+        },
+        "test_type": "security",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "delete_agent_api_agents__agent_id__delete",
+        "owasp_asvs_refs": [
+            "V2",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}

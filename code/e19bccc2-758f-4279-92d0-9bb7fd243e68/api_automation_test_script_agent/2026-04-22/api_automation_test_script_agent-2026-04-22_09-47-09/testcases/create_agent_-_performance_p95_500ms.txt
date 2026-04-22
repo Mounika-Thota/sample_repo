@@ -1,0 +1,66 @@
+Test Case Title: Create Agent - Performance (p95 < 500ms)
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-7dead6b2-008",
+    "description": "Validate POST /api/agents/ returns response within 500ms for valid requests.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with valid body and measure response time"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response time p95 < 500ms"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "performance-agent",
+                "constraints": "valid string"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Performance Agent",
+                "constraints": "valid string"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "performance_testing",
+                "constraints": "valid enum"
+            }
+        ],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "performance",
+        "tags": [
+            "performance",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "/api/agents/POST",
+        "owasp_asvs_refs": [
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

@@ -1,0 +1,59 @@
+Test Case Title: GET /api/agents/ returns agents list with default pagination
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2e798b8e-00",
+    "description": "Validate /api/agents/ returns list of agents with 200 status and default skip=0, limit=100.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/ with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body is JSON array/list of agents",
+        "Content-Type header is 'application/json'"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "integer",
+                "required": false,
+                "example": 0
+            },
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": 100
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "smoke",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "api-agents-get",
+        "owasp_asvs_refs": [
+            "V2",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

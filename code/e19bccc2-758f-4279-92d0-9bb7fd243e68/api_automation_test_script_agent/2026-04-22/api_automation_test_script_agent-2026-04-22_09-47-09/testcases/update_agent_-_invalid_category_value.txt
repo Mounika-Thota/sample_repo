@@ -1,0 +1,65 @@
+Test Case Title: Update Agent - Invalid category value
+------------------------------------------------------------
+
+{
+    "id": "TC-PUT-55cdd53a-008",
+    "description": "Validate update fails with 422 if 'category' field is not one of allowed enum values or null.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available",
+        "Agent with <REPLACE_WITH_AGENT_ID> exists"
+    ],
+    "steps": [
+        "Send PUT request to /api/agents/<REPLACE_WITH_AGENT_ID> with Authorization header and body with category='invalid_category'."
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Error response conforms to validation error schema"
+    ],
+    "automation_metadata": {
+        "method": "PUT",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "category",
+                "type": "string",
+                "required": false,
+                "example": "invalid_category",
+                "constraints": "Allowed: usg, testing, api_doc_testing, performance_testing, deployment, req_synthesizer, ui_automation, documentation, null"
+            }
+        ],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "update_agent_api_agents__agent_id__put",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
