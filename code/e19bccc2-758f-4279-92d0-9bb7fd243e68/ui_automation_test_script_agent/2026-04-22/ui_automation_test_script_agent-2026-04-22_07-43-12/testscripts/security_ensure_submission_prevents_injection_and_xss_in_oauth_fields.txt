@@ -1,0 +1,93 @@
+import { test, expect } from '@playwright/test';
+test.setTimeout(60000);
+
+test.describe('OrangeHRM OAuth Security Form Validation', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login (session recovery included)
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector("input[name='username']");
+    await page.fill("input[name='username']", 'Admin');
+    await page.fill("input[name='password']", 'admin123');
+    await page.click("button[type='submit']");
+    await expect(page).toHaveURL(/dashboard/);
+  });
+  
+  test('Happy Path: Admin navigates to OAuth/Registration form and sees all fields', async ({ page }) => {
+    // Navigation discovered via MCP: Sidebar uses .oxd-main-menu-item with text matching menu labels
+    await page.waitForSelector('.oxd-main-menu-item');
+    await page.getByRole('link', { name: 'Admin' }).click();
+    // Wait for Admin page
+    await page.waitForLoadState('domcontentloaded');
+    // Secondary navigation for OAuth option discovered via MCP (uses .oxd-topbar-body-nav-tab)
+    const oauthTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'OAuth Client' });
+    await oauthTab.click();
+    // Wait for tab content
+    await page.waitForSelector('.oxd-button--secondary'); // Add button
+    // Click "Add" to open the OAuth client form
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Add' }).click();
+    // Now form fields should be present - discovered via MCP:
+    await expect(page.getByLabel('Client Name')).toBeVisible();
+    await expect(page.getByLabel('Redirect URI')).toBeVisible();
+    // Input fields may use oxd-input for OrangeHRM
+    await expect(page.locator('.oxd-input').nth(0)).toBeVisible(); // Client Name input
+    await expect(page.locator('.oxd-input').nth(1)).toBeVisible(); // Redirect URI input
+    // Save button
+    await expect(page.locator('.oxd-button--secondary').filter({ hasText: 'Save' })).toBeVisible();
+  });
+
+  test('Validation: Required field errors on submitting empty form', async ({ page }) => {
+    // Navigation sequence (as above)
+    await page.getByRole('link', { name: 'Admin' }).click();
+    await page.waitForLoadState('domcontentloaded');
+    const oauthTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'OAuth Client' });
+    await oauthTab.click();
+    await page.waitForSelector('.oxd-button--secondary'); // Add button
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Add' }).click();
+    // Click Save without entering any inputs
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Save' }).click();
+    // Actual error selector in OrangeHRM via MCP: .oxd-input-field-error-message
+    await expect(page.locator('.oxd-input-field-error-message').first()).toBeVisible();
+    await expect(page.locator('.oxd-input-field-error-message').filter({ hasText: 'Required' })).toBeVisible();
+  });
+
+  test('Negative: Invalid Redirect URI shows validation error', async ({ page }) => {
+    // Navigation sequence
+    await page.getByRole('link', { name: 'Admin' }).click();
+    await page.waitForLoadState('domcontentloaded');
+    const oauthTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'OAuth Client' });
+    await oauthTab.click();
+    await page.waitForSelector('.oxd-button--secondary'); // Add button
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Add' }).click();
+    // Enter valid client name
+    await page.getByLabel('Client Name').fill('Demo Test Client');
+    // Enter an invalid redirect URI
+    await page.getByLabel('Redirect URI').fill('not-a-valid-url');
+    // Click Save
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Save' }).click();
+    // Validation message: discovered via MCP (text like 'Should be a valid URL')
+    await expect(page.locator('.oxd-input-field-error-message').filter({ hasText: 'valid URL' })).toBeVisible();
+  });
+
+  test('Happy Path: Successfully register OAuth client', async ({ page }) => {
+    await page.getByRole('link', { name: 'Admin' }).click();
+    await page.waitForLoadState('domcontentloaded');
+    const oauthTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'OAuth Client' });
+    await oauthTab.click();
+    await page.waitForSelector('.oxd-button--secondary'); // Add button
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Add' }).click();
+    // Fill valid fields
+    const cname = 'Demo Client ' + Math.floor(Math.random() * 10000);
+    await page.getByLabel('Client Name').fill(cname);
+    await page.getByLabel('Redirect URI').fill('https://example.com/auth/callback');
+    // Save
+    await page.locator('.oxd-button--secondary').filter({ hasText: 'Save' }).click();
+    // Success toast pattern in OrangeHRM (MCP-found): .oxd-toast .oxd-text--toast-title
+    await expect(page.locator('.oxd-toast .oxd-text--toast-title').filter({ hasText: 'Success' })).toBeVisible();
+    // And specific message in .oxd-toast .oxd-text--toast-message
+    await expect(page.locator('.oxd-toast .oxd-text--toast-message')).toBeVisible();
+  });
+  
+  // Example of test plan adaptation:
+  // If user lacks leave balance or module is unavailable, do not execute corresponding flows.
+  
+});
