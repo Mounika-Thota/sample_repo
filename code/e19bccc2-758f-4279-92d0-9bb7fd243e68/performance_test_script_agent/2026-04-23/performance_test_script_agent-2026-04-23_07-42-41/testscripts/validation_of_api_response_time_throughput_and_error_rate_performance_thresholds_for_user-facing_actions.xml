@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="User-Facing API Performance Threshold Validation" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for validation of API response time, throughput, and error rate metrics for all user-facing actions as per NFR SLA</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <!-- Thread Group for Load Profile: ramp-up to 100 tps, sustained steady-state -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="User-Facing API Load Profile" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">-1</stringProp>
+        </elementProp>
+        <!-- Configure number of users to achieve target TPS; e.g., 100 thread users -->
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">60</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time(,)} </longProp>
+        <longProp name="ThreadGroup.end_time">${__time(,)} </longProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <!-- Hold time for steady-state (e.g., 600 seconds = 10 mins) -->
+        <stringProp name="ThreadGroup.duration">600</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- Data parameterization (Uncomment and configure if required by API endpoints) -->
+        <!-- 
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="User Data CSV" enabled="true">
+          <stringProp name="filename">user_api_data.csv</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">all</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        -->
+
+        <!-- Section: HTTP Samplers for each user-facing API endpoint (Populate one sampler for each API as defined in provided API specification) -->
+        <!-- === BEGIN ENDPOINT TEMPLATE === -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="[API Endpoint - REPLACE WITH REAL ENDPOINT NAME]" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${API_HOST}</stringProp>
+          <stringProp name="HTTPSampler.port">${API_PORT}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${API_PROTOCOL}</stringProp>
+          <stringProp name="HTTPSampler.path">/path/to/user-facing-action <!-- REPLACE with actual path from API spec --></stringProp>
+          <stringProp name="HTTPSampler.method">GET <!-- or POST/PUT/DELETE as defined in API spec --></stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <!-- If body needed: set postBodyRaw to true and include request payload in Arguments -->
+        </HTTPSamplerProxy>
+        <hashTree>
+          <!-- Header Manager (adjust as needed based on API requirements) -->
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <!--
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Authorization</stringProp>
+                <stringProp name="Header.value">Bearer ${AUTH_TOKEN}</stringProp>
+              </elementProp>
+              -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <!-- Response assertion: SLA response time upper bound, status code check -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Status Code 2xx Assertion" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp>2</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <!-- JSR223 Assertion for Response Time SLA (Average, P95, P99) - rely on result files for percentiles; for average/max check below -->
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Response time &lt;= 2s Assertion" enabled="true">
+            <stringProp name="DurationAssertion.duration">2000</stringProp>
+          </DurationAssertion>
+          <hashTree/>
+        </hashTree>
+        <!-- Repeat HTTPSamplerProxy block for each endpoint documented in API specification -->
+        <!-- === END ENDPOINT TEMPLATE === -->
+
+        <!-- Backend Listener for realtime metrics aggregation (optional, requires InfluxDB/Grafana or similar) -->
+        <!-- 
+        <BackendListener guiclass="BackendListenerGui" testclass="BackendListener" testname="Backend Metrics Collector" enabled="true">
+          <stringProp name="classname">org.apache.jmeter.visualizers.backend.influxdb.InfluxdbBackendListenerClient</stringProp>
+          <elementProp name="arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="influxdbUrl" elementType="Argument">
+                <stringProp name="Argument.value">http://your-influxdb:8086/write?db=jmeter</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <stringProp name="Argument.name">influxdbUrl</stringProp>
+              </elementProp>
+              <!-- add more InfluxDB or custom properties -->
+            </collectionProp>
+          </elementProp>
+        </BackendListener>
+        <hashTree/>
+        -->
+
+        <!-- Listener: Aggregate Report for high-level stats -->
+        <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <label>true</label>
+              <code>true</code>
+              <message>false</message>
+              <threadName>true</threadName>
+              <dataType>false</dataType>
+              <success>true</success>
+              <bytes>true</bytes>
+              <grpThreads>false</grpThreads>
+              <allThreads>false</allThreads>
+              <url>true</url>
+              <fieldNames>false</fieldNames>
+              <fileName>false</fileName>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>false</fieldNames>
+              <assertionResultsFailureMessage>false</assertionResultsFailureMessage>
+              <hostname>false</hostname>
+              <threadCounts>false</threadCounts>
+            </value>
+          </objProp>
+          <stringProp name="filename">API_Performance_AggregateReport.jtl</stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <!-- Listener: View Results Tree (primarily for debugging; disable for headless/load runs) -->
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <success>true</success>
+              <threadName>true</threadName>
+              <bytes>true</bytes>
+              <url>true</url>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
