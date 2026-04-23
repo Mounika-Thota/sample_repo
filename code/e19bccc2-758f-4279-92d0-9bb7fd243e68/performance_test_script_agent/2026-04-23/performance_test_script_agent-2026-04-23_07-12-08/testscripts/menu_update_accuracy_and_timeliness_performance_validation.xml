@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Menu Update Accuracy and Timeliness Performance Validation" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for end-to-end validation of menu update reliability, accuracy, and system performance in accordance with NFR-REL-001.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+
+      <!-- Test Data: Parameterized Menu Items -->
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Menu Items CSV Data" enabled="true">
+        <stringProp name="filename">menu_items.csv</stringProp>
+        <stringProp name="fileEncoding">utf-8</stringProp>
+        <stringProp name="variableNames">item_id,item_name,new_item_name,price,new_price,availability,new_availability</stringProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="quotedData">false</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">shareMode.all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Concurrent Menu Updaters" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">10</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">5</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">30</stringProp>
+        <longProp name="ThreadGroup.start_time">${__timeShift(,now)}</longProp>
+        <longProp name="ThreadGroup.end_time">${__timeShift(,now,86400)}</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        
+        <!-- Menu Update: Change Item Name, Price, Availability (API details must be updated as per API specification) -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Update Menu Item" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(api_host)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(api_port,443)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(api_protocol,https)}</stringProp>
+          <!-- TODO: Replace /api/menu/items/${item_id} with actual API path per API Spec -->
+          <stringProp name="HTTPSampler.path">/api/menu/items/${item_id}</stringProp>
+          <stringProp name="HTTPSampler.method">PUT</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{ "name": "${new_item_name}", "price": "${new_price}", "availability": "${new_availability}" }</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <!-- TODO: Add authentication/authorization header as required by API spec -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Menu Update Status Code Check" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp>200</stringProp>
+              <stringProp>204</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+        </hashTree>
+
+        <!-- Pause/Think Time for realism -->
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time - 2s" enabled="true">
+          <stringProp name="ConstantTimer.delay">2000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+
+        <!-- Menu Retrieval to Validate Changes Propagate -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Get Menu Item" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(api_host)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(api_port,443)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(api_protocol,https)}</stringProp>
+          <!-- TODO: Replace /api/menu/items/${item_id} with actual API path per API Spec -->
+          <stringProp name="HTTPSampler.path">/api/menu/items/${item_id}</stringProp>
+          <stringProp name="HTTPSampler.method">GET</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Accept</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <!-- TODO: Add authentication/authorization header as required by API spec -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <!-- Response Assertion: Confirm update reflected (placeholder, implement with JSON Assertion or JSR223 as needed) -->
+          <!-- TODO: Insert JSON Assertion or JSR223 Assertion script for comparing name, price, and availability to CSV values -->
+        </hashTree>
+        
+        <!-- Optional: Add pause to simulate user pacing -->
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time - 1s" enabled="true">
+          <stringProp name="ConstantTimer.delay">1000</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+      </hashTree>
+
+      <!-- Listeners: Summary + JTL Output -->
+      <ResultCollector guiclass="SummaryReportGui" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <responseData>false</responseData>
+            <assertions>true</assertions>
+            <subresults>false</subresults>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <sampleCount>true</sampleCount>
+            <responseMessage>true</responseMessage>
+            <bytes>true</bytes>
+            <sentBytes>false</sentBytes>
+            <grpThreads>true</grpThreads>
+            <allThreads>true</allThreads>
+            <url>true</url>
+          </value>
+        </objProp>
+        <stringProp name="filename">results_summary.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <responseData>false</responseData>
+            <assertions>true</assertions>
+            <subresults>false</subresults>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <sampleCount>true</sampleCount>
+            <responseMessage>true</responseMessage>
+            <bytes>true</bytes>
+            <sentBytes>false</sentBytes>
+            <grpThreads>true</grpThreads>
+            <allThreads>true</allThreads>
+            <url>true</url>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <!-- TODO: Integrate external resource utilization monitoring (CPU, Memory) as required by scenario/NFR using appropriate plugins or system monitoring tools. -->
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Registration Input Validation and Error Handling Reliability Test" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for comprehensive verification of registration input validation and error handling under concurrent user load as per NFR-004.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <!-- Thread Group for Registration Reliability Test -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Concurrent Registration Input Validation" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">${loop_count}</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">${user_count}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${ramp_up}</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time(,)}</longProp>
+        <longProp name="ThreadGroup.end_time">${__time(,)}</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- CSV Data Set Config for Parameterization of Registration Inputs -->
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="RegistrationTestData" enabled="true">
+          <stringProp name="filename">registration_test_data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">username,password,email,expected_result_type,expected_error_key</stringProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">all</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <!-- Registration API HTTP Request Sampler -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Registration Request" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${registration_domain}</stringProp>
+          <stringProp name="HTTPSampler.port">${registration_port}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${registration_protocol}</stringProp>
+          <stringProp name="HTTPSampler.path">${registration_path}</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{"username":"${username}", "password":"${password}", "email":"${email}"}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <!-- Assertion: Validate Response According to Test Data -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Registration Validation Assertion" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <!-- If expected_result_type is error, assert presence of expected_error_key in response -->
+              <stringProp>${expected_error_key}</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+            <!-- Contains Assertion: response must include error key for duplicates/invalid, or be blank for success -->
+          </ResponseAssertion>
+          <hashTree/>
+          <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="Registration Error Rate Tracker" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">// Track error rate for registration
+if (!vars.getObject("error_count")) vars.putObject("error_count", new AtomicInteger(0))
+if (!vars.getObject("total_count")) vars.putObject("total_count", new AtomicInteger(0))
+
+def is_error = false
+if (vars.get("expected_result_type") == "valid") {
+    // Expect success; fail if response contains expected_error_key
+    if (prev.getResponseDataAsString().contains(vars.get("expected_error_key"))) is_error = true
+} else {
+    // Expect error for invalid/duplicate
+    if (!prev.getResponseDataAsString().contains(vars.get("expected_error_key"))) is_error = true
+}
+if (is_error) vars.getObject("error_count").incrementAndGet()
+vars.getObject("total_count").incrementAndGet()
+</stringProp>
+          </JSR223PostProcessor>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <!-- Simple Data Writer Summary Listener for Error Reporting -->
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <boolProp name="time">true</boolProp>
+            <boolProp name="latency">true</boolProp>
+            <boolProp name="connect">false</boolProp>
+            <boolProp name="success">true</boolProp>
+            <boolProp name="label">true</boolProp>
+            <boolProp name="responseCode">true</boolProp>
+            <boolProp name="responseMessage">true</boolProp>
+            <boolProp name="threadName">true</boolProp>
+            <boolProp name="dataType">true</boolProp>
+            <boolProp name="assertionResultsFailureMessage">true</boolProp>
+            <boolProp name="bytes">true</boolProp>
+            <boolProp name="sentBytes">false</boolProp>
+            <boolProp name="url">true</boolProp>
+            <boolProp name="fileName">false</boolProp>
+            <boolProp name="hostname">true</boolProp>
+            <boolProp name="sampleCount">true</boolProp>
+            <boolProp name="idleTime">false</boolProp>
+            <!-- Minimal set to ensure version compatibility as per requirements -->
+          </value>
+        </objProp>
+        <stringProp name="filename">registration_test_results.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
