@@ -1,0 +1,52 @@
+Test Case Title: GET /api/agents/ with high limit parameter for performance
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2f1c1c7e-009",
+    "description": "Validate that GET /api/agents/ with a high limit parameter returns results within acceptable latency (p95 < 500ms).",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available",
+        "System contains at least 1000 agents"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?limit=1000 with valid Authorization header",
+        "Measure response time"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response time is less than 500ms (p95)",
+        "Response body contains no more than 1000 agents"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": 1000
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "performance",
+        "tags": [
+            "performance",
+            "boundary"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "list_agents_api_agents__get",
+        "owasp_asvs_refs": [],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

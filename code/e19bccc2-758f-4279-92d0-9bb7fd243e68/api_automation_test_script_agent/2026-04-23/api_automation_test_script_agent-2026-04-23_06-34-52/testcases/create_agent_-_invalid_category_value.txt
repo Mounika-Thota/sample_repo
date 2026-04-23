@@ -1,0 +1,78 @@
+Test Case Title: Create Agent - Invalid Category Value
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-7f2b9c6b-005",
+    "description": "Validate error response when category is not one of the allowed enum values.",
+    "preconditions": [
+        "API is reachable",
+        "Valid bearer token available"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with slug, display_name, and invalid category value."
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response body contains detail with validation error for invalid category"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "agent-005",
+                "constraints": "non-empty, unique"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Agent Five",
+                "constraints": "non-empty"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "invalid_category",
+                "constraints": "not in enum"
+            }
+        ],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "create_agent_api_agents__post",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

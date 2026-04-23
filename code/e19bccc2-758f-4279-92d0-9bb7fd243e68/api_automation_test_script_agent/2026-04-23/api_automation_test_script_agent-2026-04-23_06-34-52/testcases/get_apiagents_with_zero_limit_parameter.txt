@@ -1,0 +1,51 @@
+Test Case Title: GET /api/agents/ with zero limit parameter
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2f1c1c7e-006",
+    "description": "Validate that GET /api/agents/ returns an empty list or appropriate response when limit parameter is set to zero.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?limit=0 with valid Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response body contains zero agents"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": 0
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "boundary",
+        "tags": [
+            "boundary",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "list_agents_api_agents__get",
+        "owasp_asvs_refs": [
+            "V5"
+        ],
+        "risk_level": "low",
+        "automation_candidate": true
+    }
+}

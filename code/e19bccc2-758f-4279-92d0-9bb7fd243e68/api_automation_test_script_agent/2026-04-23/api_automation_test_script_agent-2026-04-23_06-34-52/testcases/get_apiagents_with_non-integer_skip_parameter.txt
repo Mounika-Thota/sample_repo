@@ -1,0 +1,63 @@
+Test Case Title: GET /api/agents/ with non-integer skip parameter
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2f1c1c7e-007",
+    "description": "Validate that GET /api/agents/ returns a 422 validation error when skip parameter is not an integer.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?skip=abc with valid Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response body contains validation error details"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "string",
+                "required": false,
+                "example": "abc"
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "validation",
+            "negative"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "list_agents_api_agents__get",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}

@@ -1,0 +1,70 @@
+Test Case Title: GET /api/agents/ returns consistent error format for invalid input
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2f1c1c7e-010",
+    "description": "Validate that GET /api/agents/ returns errors in a consistent format as defined in the OpenAPI spec when invalid parameters are provided.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?skip=abc&limit=xyz with valid Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response body matches the HTTPValidationError schema"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "string",
+                "required": false,
+                "example": "abc"
+            },
+            {
+                "name": "limit",
+                "type": "string",
+                "required": false,
+                "example": "xyz"
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "string",
+                        "integer"
+                    ],
+                    "msg": "string",
+                    "type": "string"
+                }
+            ]
+        },
+        "test_type": "usability",
+        "tags": [
+            "validation",
+            "error-format",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "list_agents_api_agents__get",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}
