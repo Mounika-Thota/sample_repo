@@ -1,0 +1,58 @@
+Test Case Title: Security: Ensure Submission Prevents Injection and XSS in OAuth Fields
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-08",
+    "description": "Verify form rejects OAuth fields containing script tags or common injection characters, and no script or external execution occurs.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "security",
+    "priority": "P1",
+    "risk_level": "high",
+    "preconditions": [
+        "User is authenticated as Super Admin",
+        "On Configure OAuth screen"
+    ],
+    "steps": [
+        "Enter JavaScript or injection payloads (e.g., <script>alert(1)</script> or ' OR '1'='1) into each OAuth field",
+        "Attempt to submit the form"
+    ],
+    "expected_outcomes": [
+        "Submission is rejected with validation error",
+        "No scripts execute on page",
+        "No unescaped payload is visible anywhere"
+    ],
+    "data": {
+        "inputs": {
+            "client_id": "<script>alert(1)</script>",
+            "client_secret": "' OR '1'='1",
+            "authorization_url": "javascript:alert(document.cookie)",
+            "token_url": "https://auth.example.com/oauth2/token",
+            "scopes": "<img src=x onerror=alert(1)>"
+        }
+    },
+    "tags": [
+        "security",
+        "xss",
+        "injection",
+        "iso_29148",
+        "owasp_asvs"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "System validates all required OAuth fields for presence and correctness according to business rules and ISO/IEC/IEEE 29148 compliance.",
+            "If any required field is missing or invalid, the system displays clear validation errors and prevents submission."
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V5.2",
+            "V6.1"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 50,
+    "notes": "Test each field individually. No script should execute."
+}
