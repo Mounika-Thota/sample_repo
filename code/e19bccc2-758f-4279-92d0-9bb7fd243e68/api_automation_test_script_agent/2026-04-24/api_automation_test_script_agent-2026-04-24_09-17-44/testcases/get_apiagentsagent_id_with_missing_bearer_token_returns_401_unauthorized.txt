@@ -1,0 +1,42 @@
+Test Case Title: GET /api/agents/{agent_id} with missing Bearer token returns 401 Unauthorized
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-2e2e0c6c-002",
+    "description": "Validate that a GET request to /api/agents/{agent_id} without an Authorization header returns HTTP 401 Unauthorized.",
+    "preconditions": [
+        "API is reachable",
+        "Agent with ID <REPLACE_WITH_AGENT_ID> exists"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/<REPLACE_WITH_AGENT_ID> without Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 401",
+        "Error message indicating missing or invalid authentication"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/{agent_id}",
+        "headers": {},
+        "query_parameters": [],
+        "body_parameters": [],
+        "expected_status_codes": [
+            401
+        ],
+        "expected_response_schema": {},
+        "test_type": "security",
+        "tags": [
+            "regression",
+            "security"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "get_agent_api_agents__agent_id__get",
+        "owasp_asvs_refs": [
+            "V2",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
