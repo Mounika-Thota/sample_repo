@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Audit Logging Reliability Script for Order State Changes" enabled="true">
+      <stringProp name="TestPlan.comments">Performance test for order audit logging reliability and compliance. Update API endpoint and authentication details as per documentation.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <!-- Thread Group: 50 Users, Each Assert One State Change Per Second-->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Order State Change Load" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">600</stringProp><!-- 10 minutes x 60s = 600 iterations -->
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">50</stringProp><!-- 50 users -->
+        <stringProp name="ThreadGroup.ramp_time">30</stringProp><!-- Ramp up in 30 secs -->
+        <longProp name="ThreadGroup.start_time">{{start_time}}</longProp>
+        <longProp name="ThreadGroup.end_time">{{end_time}}</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- Test Data Source: orders.csv with columns orderId,state_from,state_to-->
+        <CSVDataSet guiclass="CSVDataSetGui" testclass="CSVDataSet" testname="Order Data Feeder" enabled="true">
+          <stringProp name="filename">orders.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="variableNames">orderId,state_from,state_to</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">all</stringProp>
+        </CSVDataSet>
+        <hashTree/>
+        <!-- State Change API Request: Placeholder endpoint -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Order State Change API" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <!-- Parameters to be updated as per real API spec -->
+              <elementProp name="orderId" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${orderId}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="state_from" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${state_from}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="state_to" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${state_to}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">{{YOUR_API_DOMAIN}}</stringProp>
+          <stringProp name="HTTPSampler.port">{{YOUR_API_PORT}}</stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
+          <stringProp name="HTTPSampler.path">/api/order/statechange</stringProp><!-- Update as per API spec -->
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{
+  "orderId": "${orderId}",
+  "state_from": "${state_from}",
+  "state_to": "${state_to}"
+}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <!-- Header Manager: Edit as needed -->
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="Content-Type" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              <!-- Add authentication headers as per API spec -->
+              <!-- <elementProp name="Authorization" elementType="Header">
+                <stringProp name="Header.name">Authorization</stringProp>
+                <stringProp name="Header.value">Bearer {{TOKEN}}</stringProp>
+              </elementProp> -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <!-- Response Time Assertion <= 5000ms -->
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Max Response Time (5s)" enabled="true">
+            <longProp name="DurationAssertion.duration">5000</longProp>
+          </DurationAssertion>
+          <hashTree/>
+          <!-- Response Assertion: HTTP 2xx (Success) -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Audit Log Entry Created" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp>2</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp><!-- "Contains" -->
+          </ResponseAssertion>
+          <hashTree/>
+        </hashTree>
+        <!-- Optional: Backend Validation Sampler (manual/Scripted, use BackendCheck if JDBC/API available) -->
+        <!-- Placeholder for backend audit log verification; add JDBC/API sampler as per system spec -->
+      </hashTree>
+      <!-- Listener: Aggregate Report -->
+      <ResultCollector guiclass="SummaryReportGui" testclass="ResultCollector" testname="Audit Logging Performance Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>false</dataType>
+            <responseData>false</responseData>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <assertions>true</assertions>
+            <subresults>false</subresults>
+            <sampleCount>true</sampleCount>
+            <idleTime>false</idleTime>
+            <hostname>false</hostname>
+            <variables>false</variables>
+          </value>
+        </objProp>
+        <stringProp name="filename">audit_logging_performance_report.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <!-- Listener: View Results Tree (for GUI debugging, disable for CI/CD runs) -->
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>false</dataType>
+            <responseData>false</responseData>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <assertions>true</assertions>
+            <subresults>false</subresults>
+            <sampleCount>true</sampleCount>
+            <idleTime>false</idleTime>
+            <hostname>false</hostname>
+            <variables>false</variables>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
