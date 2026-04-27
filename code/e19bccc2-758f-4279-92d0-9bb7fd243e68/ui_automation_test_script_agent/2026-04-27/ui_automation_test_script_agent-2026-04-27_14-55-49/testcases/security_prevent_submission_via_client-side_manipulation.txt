@@ -1,0 +1,47 @@
+Test Case Title: Security: Prevent Submission via Client-Side Manipulation
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-08",
+    "description": "Verify that OAuth form validation also enforces rules server-side and is not bypassable by disabling browser-side checks.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "security",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "Super Admin is authenticated and on the OAuth configuration screen."
+    ],
+    "steps": [
+        "Use browser tools or automation to bypass field validations (e.g., remove 'required' and 'pattern' attributes).",
+        "Attempt form submission with invalid/incomplete fields.",
+        "Observe the server response."
+    ],
+    "expected_outcomes": [
+        "Server rejects invalid/incomplete submission.",
+        "Appropriate error or validation messages are returned.",
+        "No incomplete data is registered.",
+        "Event is logged as invalid submission."
+    ],
+    "data": {
+        "inputs": {
+            "Manipulated": "client-side validation disabled"
+        }
+    },
+    "tags": [
+        "security",
+        "server-validation",
+        "ISO_IEC_IEEE_29148",
+        "OWASP_ASVS"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "Validation and error handling must be testable and verifiable against compliance standards."
+        ],
+        "owasp_asvs": [
+            "V5.1 Server-side Input Validation"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 70,
+    "notes": ""
+}
