@@ -1,0 +1,65 @@
+Test Case Title: Happy Path: Valid OAuth Configuration Submission
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-01",
+    "description": "Verify that Super Admin can successfully submit valid OAuth configuration details during Admin invitation, and the system stores and processes the data as expected.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "positive",
+    "priority": "P0",
+    "risk_level": "medium",
+    "preconditions": [
+        "Super Admin user (Olivia) has valid credentials.",
+        "Super Admin is logged in to the OrangeHRM application.",
+        "Navigate to the Admin/Invite Admin section.",
+        "OAuth configuration screen is accessible."
+    ],
+    "steps": [
+        "Login as Super Admin using provided credentials.",
+        "Navigate through the sidebar/menu to reach the Admin section.",
+        "Select the option to invite/admin and access the OAuth configuration form.",
+        "Enter all required valid OAuth details per field (e.g. Client ID, Client Secret, Auth URL, Token URL).",
+        "Optionally fill any optional fields.",
+        "Submit the OAuth configuration form."
+    ],
+    "expected_outcomes": [
+        "Form submission is accepted.",
+        "OAuth configuration details are registered successfully.",
+        "System transitions to the next step, confirming success.",
+        "A traceable log entry for the successful validation is recorded."
+    ],
+    "data": {
+        "inputs": {
+            "ClientID": "oauth-client-123",
+            "ClientSecret": "abcXYZ987",
+            "AuthURL": "https://login.partner.com/oauth2/auth",
+            "TokenURL": "https://login.partner.com/oauth2/token",
+            "OptionalFields": "blank or filled"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "positive",
+        "OAuth",
+        "AdminInvitation",
+        "ISO_IEC_IEEE_29148",
+        "OWASP_ASVS"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "Super Admin enters OAuth configuration details and submits the form.",
+            "If all required fields are valid, the submission proceeds successfully."
+        ],
+        "nfr_refs": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2.1 Data Validation"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 60,
+    "notes": "Assumes standard OAuth fields visible on the invite form and mapped to backend processing."
+}

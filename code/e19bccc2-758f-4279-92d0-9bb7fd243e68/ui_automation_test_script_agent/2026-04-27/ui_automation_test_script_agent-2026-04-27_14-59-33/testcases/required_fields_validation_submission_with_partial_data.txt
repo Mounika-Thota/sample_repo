@@ -1,0 +1,47 @@
+Test Case Title: Required Fields Validation: Submission with Partial Data
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-03",
+    "description": "Validate that partial completion of required OAuth fields results in specific field-level validation errors and prevents submission.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "negative",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "Super Admin is logged in and on the OAuth configuration screen."
+    ],
+    "steps": [
+        "Fill in only some required OAuth fields (e.g., fill in Client ID only, leave others blank).",
+        "Attempt to submit the OAuth configuration form."
+    ],
+    "expected_outcomes": [
+        "Submission is prevented.",
+        "Clear error messages are shown for missing required fields.",
+        "No partial/incomplete configuration is processed.",
+        "Validation error outcome is logged."
+    ],
+    "data": {
+        "inputs": {
+            "ClientID": "oauth-client-124",
+            "ClientSecret": "",
+            "AuthURL": "",
+            "TokenURL": ""
+        }
+    },
+    "tags": [
+        "negative",
+        "validation",
+        "required-fields",
+        "ISO_IEC_IEEE_29148"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "System validates all required OAuth fields for presence.",
+            "If any required field is missing or invalid, the system displays clear validation errors and prevents submission."
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 50,
+    "notes": ""
+}

@@ -1,0 +1,42 @@
+Test Case Title: Audit Traceability: Validation Logging
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-07",
+    "description": "Verify that validation outcomes (both successful and failed submissions) are logged for traceability and audit purposes.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "reliability",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "Super Admin is logged in and on the OAuth configuration screen.",
+        "Access to system audit/logs."
+    ],
+    "steps": [
+        "Attempt both a successful and a failed OAuth configuration submission.",
+        "Review system audit/log records for validation outcomes corresponding to each submission."
+    ],
+    "expected_outcomes": [
+        "All validation events (success and error) are recorded in system logs.",
+        "Logs contain sufficient details for traceability (field errors, user action, timestamps)."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "audit",
+        "traceability",
+        "logging",
+        "ISO_IEC_IEEE_29148"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "System logs validation outcomes for traceability and audit purposes."
+        ]
+    },
+    "automation_candidate": false,
+    "estimated_duration_sec": 90,
+    "notes": "Requires access to log subsystem; verification may be manual unless exposed in UI."
+}

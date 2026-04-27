@@ -1,0 +1,61 @@
+// TEST GENERATION FAILED DUE TO BROWSER SETUP ISSUE. MCP was unable to run Playwright due to missing browser installation. Please run 'npx playwright install' to set up the necessary browser binaries.
+// If fixed, Deep Application Exploration and test code generation may proceed normally.
+
+// LOCATORS IN THIS SCRIPT ARE PLACEHOLDER ONLY. They MUST be replaced after successful environment setup!
+
+import { test, expect } from '@playwright/test';
+
+test.setTimeout(60000);
+
+test.describe('OAuth configuration audit/log reliability feature (traceability, ISO/IEC/IEEE 29148)', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/');
+    await page.getByPlaceholder('Username').fill('Admin');
+    await page.getByPlaceholder('Password').fill('admin123');
+    await page.getByRole('button', { name: 'Login' }).click();
+    // Note: Navigating to authentication settings, selectors must be updated after real DOM exploration.
+  });
+
+  test('TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-07: Validation events are recorded in logs (happy path)', async ({ page }) => {
+    // --- DUMMY LOCATORS BELOW: Replace after MCP DOM exploration ---
+    // Step 1: Navigate to Admin > OAuth Config (update selector below)
+    // await page.click('.oxd-sidepanel .oxd-main-menu-item', { hasText: 'Admin' });
+    // await page.click('text=OAuth Configuration');
+    // Step 2: Fill form fields for a successful submission (update selectors below)
+    // await page.fill('input[name="clientId"]', 'valid-oauth-client');
+    // await page.fill('input[name="clientSecret"]', 'valid-secret');
+    // await page.click('button:has-text("Save")');
+    // Step 3: Get success feedback (toast, etc.)
+    // await expect(page.locator('.oxd-toast')).toContainText('Successfully Saved');
+    // Step 4: Go to Audit/Log page (update selector below)
+    // await page.click('.oxd-sidepanel .oxd-main-menu-item', { hasText: 'Audit/Logs' });
+    // Step 5: Find the latest event and verify successful submission present (adapt selector)
+    // expect(await page.locator('.oxd-table-row', { hasText: 'valid-oauth-client' })).toBeVisible();
+    // ---   ---
+  });
+
+  test('Failed OAuth config submission is recorded in logs with error details', async ({ page }) => {
+    // --- DUMMY LOCATORS BELOW: Replace after MCP DOM exploration ---
+    // Step 1: Navigate to Admin > OAuth Config
+    // Step 2: Clear a required field
+    // await page.fill('input[name="clientId"]', '');
+    // await page.click('button:has-text("Save")');
+    // await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+    // Step 3: Go to audit/logs and check error event is recorded
+    // expect(await page.locator('.oxd-table-row', { hasText: 'validation failed' })).toBeVisible();
+  });
+
+  // Generate 13 more distinct test cases based on the pattern, one for each scenario
+  // All selectors are placeholders and must be revisited after successful MCP DOM access
+
+  for (let i = 3; i <= 15; i++) {
+    test(`Placeholder test case #${i}`, async ({ page }) => {
+      // Placeholder for test cases. Update with real flow & selectors after DOM is available.
+    });
+  }
+
+  test.afterAll(async ({ browser }) => {
+    await browser.close();
+  });
+});

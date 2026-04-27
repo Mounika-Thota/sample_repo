@@ -1,0 +1,42 @@
+Test Case Title: Optional Field Handling: Blank Optional Fields
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-06",
+    "description": "Verify that optional OAuth fields may be left blank and the submission will be processed without error.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "positive",
+    "priority": "P1",
+    "risk_level": "low",
+    "preconditions": [
+        "Super Admin is logged in and on the OAuth configuration screen."
+    ],
+    "steps": [
+        "Complete all required OAuth fields with valid values.",
+        "Leave all optional fields blank.",
+        "Submit the OAuth configuration form."
+    ],
+    "expected_outcomes": [
+        "Form submission is accepted.",
+        "System does not require optional fields for successful submission."
+    ],
+    "data": {
+        "inputs": {
+            "AllRequiredFields": "filled",
+            "OptionalFields": ""
+        }
+    },
+    "tags": [
+        "optional-fields",
+        "positive",
+        "validation"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "Optional fields may be left blank if not required; system proceeds without error."
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 35,
+    "notes": ""
+}

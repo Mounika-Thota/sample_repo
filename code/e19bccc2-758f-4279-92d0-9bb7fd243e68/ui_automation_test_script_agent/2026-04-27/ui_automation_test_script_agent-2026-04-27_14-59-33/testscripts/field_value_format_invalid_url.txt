@@ -1,0 +1,48 @@
+// NOTE: No valid selectors could be generated due to MCP environment not having browsers installed. All locator logic must be manually verified/replaced after MCP and Chromium are working. This test placeholder is provided per instruction.
+
+import { test } from '@playwright/test';
+
+test.setTimeout(60000);
+
+test.describe('OAuth Configuration - Invalid URL Field Validation', () => {
+  // This test does not run against the real app due to environment issues: MCP cannot launch browser headless shell. Locators are placeholders ONLY.
+  test('should show error for invalid Auth URL and block submission', async ({ page }) => {
+    // Placeholder login and navigation steps - replace with real selectors when MCP works.
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.getByPlaceholder('Username').fill('Admin');
+    await page.getByPlaceholder('Password').fill('admin123');
+    await page.getByRole('button', { name: 'Login' }).click();
+    // TODO: Navigate to OAuth config module (menu locators required).
+    // Example: await page.locator('.oxd-sidepanel a:has-text("OAuth")').click();
+    // On config page, fill fields.
+    // Replace below with real locators for inputs.
+    await page.getByLabel('Client ID').fill('oauth-client-125');
+    await page.getByLabel('Client Secret').fill('secretxyz');
+    await page.getByLabel('Auth URL').fill('not-a-url'); // Invalid
+    await page.getByLabel('Token URL').fill('https://partner.com/token');
+    // Replace with real 'Submit' or 'Save' button.
+    await page.getByRole('button', { name: /Submit|Save/ }).click();
+    // Assert error for Auth URL.
+    // Replace with real error message selector & content from DOM.
+    // await expect(page.locator('.oxd-input-field-error-message')).toContainText('Please enter a valid URL');
+  });
+
+  test('should show error for invalid Token URL and block submission', async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.getByPlaceholder('Username').fill('Admin');
+    await page.getByPlaceholder('Password').fill('admin123');
+    await page.getByRole('button', { name: 'Login' }).click();
+    // TODO: Navigate to OAuth config module (menu locators required).
+    // On config page, fill fields.
+    await page.getByLabel('Client ID').fill('oauth-client-125');
+    await page.getByLabel('Client Secret').fill('secretxyz');
+    await page.getByLabel('Auth URL').fill('https://partner.com/auth');
+    await page.getByLabel('Token URL').fill('not-a-url'); // Invalid
+    await page.getByRole('button', { name: /Submit|Save/ }).click();
+    // Assert error for Token URL.
+    // await expect(page.locator('.oxd-input-field-error-message')).toContainText('Please enter a valid URL');
+  });
+
+  // More negative validation cases or happy-paths can be added here once DOM exploration is possible.
+  // Close browser after tests - handled by Playwright.
+});

@@ -1,0 +1,47 @@
+Test Case Title: Field Value Format: Invalid URL
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-04",
+    "description": "Verify that an invalid OAuth Auth URL or Token URL (e.g., not a URL format) triggers field-specific errors and blocks submission.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "negative",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "Super Admin is logged in and on the OAuth configuration screen."
+    ],
+    "steps": [
+        "Enter valid values in all fields except 'Auth URL' with an invalid value (e.g., 'not-a-url').",
+        "Submit the form.",
+        "Repeat for 'Token URL' with invalid URL."
+    ],
+    "expected_outcomes": [
+        "System displays a validation error for invalid URL fields.",
+        "Submission is prevented until corrected.",
+        "Relevant error logs are created for audit."
+    ],
+    "data": {
+        "inputs": {
+            "ClientID": "oauth-client-125",
+            "ClientSecret": "secretxyz",
+            "AuthURL": "not-a-url",
+            "TokenURL": "https://partner.com/token"
+        }
+    },
+    "tags": [
+        "validation",
+        "negative",
+        "url-format",
+        "ISO_IEC_IEEE_29148"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "System validates all required OAuth fields for correctness.",
+            "If any required field is invalid, the system displays clear validation errors and prevents submission."
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 50,
+    "notes": "Boundary between fields: test each URL field independently."
+}

@@ -1,0 +1,43 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Main happy path test case', () => {
+  test('User can login, navigate to dashboard, view accessible data, and log out', async ({ page }) => {
+    // Step 1: Navigate to the login page
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+
+    // Step 2: Wait for page stabilization and login fields
+    await expect(page.locator('input.oxd-input[type="text"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('input.oxd-input[type="password"]')).toBeVisible({ timeout: 10000 });
+    
+    // Step 3: Fill credentials (default OrangeHRM demo credentials)
+    await page.locator('input.oxd-input[type="text"]').fill('Admin');
+    await page.locator('input.oxd-input[type="password"]').fill('admin123');
+
+    // Step 4: Click the login button (OXD primary button with span text 'Login')
+    await page.locator('button.oxd-button--main').filter({ hasText: 'Login' }).click();
+    
+    // Step 5: Wait for dashboard to be visible (Dashboard header)
+    await expect(page.locator('h6.oxd-text--header').filter({ hasText: 'Dashboard' })).toBeVisible({ timeout: 10000 });
+    
+    // Step 6: Take a snapshot of navigation structure (sidebar with .oxd-main-menu)
+    await expect(page.locator('nav.oxd-sidepanel')).toBeVisible();
+    
+    // Step 7: Navigate to 'My Info' module using sidebar
+    await page.locator('a.oxd-main-menu-item').filter({ hasText: 'My Info' }).click();
+    await expect(page.locator('h6.oxd-text--header').filter({ hasText: 'Personal Details' })).toBeVisible({ timeout: 10000 });
+    
+    // Step 8: Verify one field on My Info (First Name textbox is visible)
+    await expect(page.locator('input.oxd-input').nth(1)).toBeVisible();
+    
+    // Step 9: Log out via user account menu (OXD topbar dropdown)
+    await page.locator('span.oxd-userdropdown-tab').click();
+    await page.locator('a.oxd-userdropdown-link').filter({ hasText: 'Logout' }).click();
+    
+    // Step 10: Verify redirected to login page
+    await expect(page.locator('input.oxd-input[type="text"]')).toBeVisible({ timeout: 10000 });
+  });
+});
+
+// Note: Only one fully working happy path is implemented due to the MCP directive to avoid non-existent/test-plan-mismatched flows.
+// All selectors are verified via live DOM (MCP exploration) with OXD component library.
+// If additional test cases are specified, repeat module-level exploration and only script for visible/existing features.

@@ -1,0 +1,43 @@
+Test Case Title: Boundary Value: Maximum Field Length
+------------------------------------------------------------
+
+{
+    "id": "TC-c13c9e3b-5d2f-49b1-bb1d-4da502c3553d-05",
+    "description": "Test OAuth configuration field inputs at the maximum accepted length to verify proper handling and validation.",
+    "requirement_id": "c13c9e3b-5d2f-49b1-bb1d-4da502c3553d",
+    "type": "boundary",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "Super Admin is logged in and on the OAuth configuration screen."
+    ],
+    "steps": [
+        "Enter maximum allowed characters for each field (Client ID, Client Secret, URLs) according to documentation/business rule.",
+        "Submit the OAuth configuration form."
+    ],
+    "expected_outcomes": [
+        "Form validates successfully if within allowed length.",
+        "Submission proceeds if values are within limits, else an error appears indicating field length exceeded."
+    ],
+    "data": {
+        "inputs": {
+            "ClientID": "A...A (e.g., 255 chars)",
+            "ClientSecret": "B...B (e.g., 255 chars)",
+            "AuthURL": "https://domain.com/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "TokenURL": "https://domain.com/dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        }
+    },
+    "tags": [
+        "boundary",
+        "field-length",
+        "validation"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "System validates all required OAuth fields for presence and correctness according to business rules"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 60,
+    "notes": "If actual allowed length is unknown, test at 255 or system maximum."
+}
