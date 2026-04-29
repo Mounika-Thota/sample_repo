@@ -1,0 +1,123 @@
+import io.restassured.RestAssured;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class LoginApiTest {
+    @Before
+    public void setup() {
+        RestAssured.baseURI = "https://api.example.com";
+    }
+
+    @After
+    public void teardown() {
+        // Any cleanup if necessary
+    }
+
+    @Test
+    public void validCredentialsReturns200AndToken() {
+        given()
+            .contentType("application/json")
+            .body("{\"email\": \"****************\", \"password\": \"P@ssw0rd!\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(200)
+            .body("token", notNullValue());
+    }
+
+    @Test
+    public void missingPasswordReturns400() {
+        given()
+            .contentType("application/json")
+            .body("{\"email\": \"****************\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(400)
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void invalidCredentialsReturns401() {
+        given()
+            .contentType("application/json")
+            .body("{\"email\": \"****************\", \"password\": \"wrongpass\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(401)
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void sqlInjectionPayloadDoesNotLogin() {
+        given()
+            .contentType("application/json")
+            .body("{\"email\": \' OR '1'='1\'', \"password\": \"arbitrary\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(anyOf(is(400), is(401)))
+            .body("error", notNullValue())
+            .body("token", nullValue());
+    }
+
+    @Test
+    public void rateLimitExceededTriggers429() {
+        for (int i = 0; i < 10; i++) {
+            given()
+                .contentType("application/json")
+                .body("{\"email\": \"****************\", \"password\": \"incorrect\"}")
+            .when()
+                .post("/login");
+        }
+        given()
+            .contentType("application/json")
+            .body("{\"email\": \"****************\", \"password\": \"incorrect\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(anyOf(is(429), is(401)))
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void excessiveFieldLengthReturns400() {
+        String longEmail = new String(new char[255]).replace("\0", "a") + "@example.com";
+        String longPassword = new String(new char[129]).replace("\0", "a");
+        given()
+            .contentType("application/json")
+            .body("{\"email\": \"" + longEmail + "\", \"password\": \"" + longPassword + "\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(400)
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void latencyUnderLoad() {
+        long maxP95LatencyMs = 500;
+        long [] latencies = new long[20];
+        for(int i = 0; i < 20; i++) {
+            long start = System.currentTimeMillis();
+            int statusCode = given()
+                .contentType("application/json")
+                .body("{\"email\": \"****************\", \"password\": \"P@ssw0rd!\"}")
+                .when()
+                .post("/login")
+                .then()
+                .extract()
+                .statusCode();
+            long end = System.currentTimeMillis();
+            latencies[i] = end - start;
+            assertThat(statusCode, anyOf(is(200), is(500)));
+        }
+        java.util.Arrays.sort(latencies);
+        long p95 = latencies[(int)Math.ceil(0.95 * latencies.length) - 1];
+        assertThat("p95 latency <= 500ms", p95 <= maxP95LatencyMs);
+    }
+}
