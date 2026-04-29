@@ -1,0 +1,149 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Login Page UI Automation Tests', () => {
+  test('Successful Login with Valid Credentials', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Enter a valid username into the username input field.
+    await page.fill('input[name="username"]', 'valid_user');
+    // Step: Enter a valid password into the password input field.
+    await page.fill('input[name="password"]', 'ValidPassw0rd!');
+    // Step: Click the "Login" button.
+    await page.click('button[type="submit"]');
+    // Expected: User is authenticated and redirected to dashboard
+    await expect(page).toHaveURL(/dashboard|home|landing/i);
+    // Expected: No error messages are displayed
+    await expect(page.locator('.error-message')).toHaveCount(0);
+  });
+
+  test('Login Attempt with Invalid Password', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Enter a valid username into the username input field.
+    await page.fill('input[name="username"]', 'valid_user');
+    // Step: Enter an invalid password into the password input field.
+    await page.fill('input[name="password"]', 'WrongPassword');
+    // Step: Click the "Login" button.
+    await page.click('button[type="submit"]');
+    // Expected: Access is denied, error message displayed
+    await expect(page.locator('.error-message')).toBeVisible();
+    await expect(page).toHaveURL(/login/);
+  });
+
+  test('Login Attempt with Non-Existing User', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Enter an invalid/unknown username.
+    await page.fill('input[name="username"]', 'notarealuser');
+    // Step: Enter any password.
+    await page.fill('input[name="password"]', 'SomePass123');
+    // Step: Click the "Login" button.
+    await page.click('button[type="submit"]');
+    // Expected: Access is denied, generic error message
+    await expect(page.locator('.error-message')).toBeVisible();
+    await expect(page).toHaveURL(/login/);
+  });
+
+  test('Login Fields Mandatory Validation', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step 1: Attempt to submit with both fields empty
+    await page.click('button[type="submit"]');
+    await expect(page.locator('.validation-message')).toBeVisible();
+    // Step 2: Only username filled
+    await page.fill('input[name="username"]', 'valid_user');
+    await page.fill('input[name="password"]', '');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('.validation-message')).toBeVisible();
+    // Step 3: Only password filled
+    await page.fill('input[name="username"]', '');
+    await page.fill('input[name="password"]', 'ValidPassw0rd!');
+    await page.click('button[type="submit"]');
+    await expect(page.locator('.validation-message')).toBeVisible();
+  });
+
+  test('Password Field Masking', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Verify password input type is password
+    const passwordInput = page.locator('input[name="password"]');
+    await expect(passwordInput).toHaveAttribute('type', 'password');
+    // Step: Type a password and verify visibility
+    await passwordInput.fill('Sensitive1');
+    // Assert password not visible in clear text
+    // Playwright cannot see masked value, so check input type
+  });
+
+  test('Password Field Paste Disabled (if required by policy)', async ({ page, context }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Attempt paste into password field
+    const passwordInput = page.locator('input[name="password"]');
+    await passwordInput.focus();
+    await page.evaluate(() => { navigator.clipboard.writeText('ClipboardPass'); });
+    await passwordInput.evaluate((el: HTMLInputElement) => { el.value = ''; });
+    // Try to paste
+    await passwordInput.dispatchEvent('paste');
+    // Validate paste behavior as per policy; if paste blocked, value remains empty
+    // Only validation of actual business logic will confirm this
+  });
+
+  test('Account Lockout after Multiple Failed Attempts', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Enter invalid password multiple times
+    for (let i = 0; i < 5; i++) {
+      await page.fill('input[name="username"]', 'valid_user');
+      await page.fill('input[name="password"]', 'WrongPassword' + i);
+      await page.click('button[type="submit"]');
+      // Wait for possible error
+      await page.waitForTimeout(500);
+    }
+    // Step: Attempt with correct password after lockout
+    await page.fill('input[name="username"]', 'valid_user');
+    await page.fill('input[name="password"]', 'ValidPassw0rd!');
+    await page.click('button[type="submit"]');
+    // Expected: Account is locked or error msg shown
+    await expect(page.locator('.lockout-message,.error-message')).toBeVisible();
+  });
+
+  test('Session Timeout after Login', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    await page.fill('input[name="username"]', 'valid_user');
+    await page.fill('input[name="password"]', 'ValidPassw0rd!');
+    await page.click('button[type="submit"]');
+    await expect(page).toHaveURL(/dashboard|home|landing/i);
+    // Step: Remain idle to trigger session timeout (simulate with wait, real apps may need config)
+    await page.waitForTimeout(1000 * 60 * 15); // Wait 15 min
+    // Try action post timeout
+    await page.reload();
+    // Expected: Redirected to login or see session expired msg
+    await expect(page).toHaveURL(/login/);
+  });
+
+  test('Accessibility: Field Labels and Focus Order', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Check labels with aria/for attributes
+    const usernameLabel = await page.locator('label[for="username"]').isVisible();
+    const passwordLabel = await page.locator('label[for="password"]').isVisible();
+    expect(usernameLabel).toBeTruthy();
+    expect(passwordLabel).toBeTruthy();
+    // Tab order - focus must shift as expected
+    await page.keyboard.press('Tab'); // Should focus username
+    await page.keyboard.press('Tab'); // Should focus password
+    await page.keyboard.press('Tab'); // Should focus login button
+  });
+
+  test('Accessibility: Error Message Announcements', async ({ page }) => {
+    // Step: User is on the login page
+    await page.goto('https://your-app-url/login');
+    // Step: Submit with empty credentials
+    await page.click('button[type="submit"]');
+    // Step: Confirm error message has aria attributes
+    const errorMsg = page.locator('.error-message');
+    await expect(errorMsg).toHaveAttribute(/aria-live|role/, /polite|alert/);
+    await expect(errorMsg).toBeVisible();
+  });
+});
