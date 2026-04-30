@@ -1,0 +1,65 @@
+Test Case Title: GET /api/agents/ with excess query parameters returns correct response or error
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-feb8d5e2-08",
+    "description": "Validate GET /api/agents/ with unexpected query parameters handles gracefully (either ignores or returns validation error).",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?foo=bar&skip=0&limit=10 with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 200 or 422",
+        "If status 200: response ignores unknown parameters",
+        "If status 422: error body matches HTTPValidationError schema"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "foo",
+                "type": "string",
+                "required": false,
+                "example": "bar"
+            },
+            {
+                "name": "skip",
+                "type": "integer",
+                "required": false,
+                "example": 0
+            },
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": 10
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            200,
+            422
+        ],
+        "expected_response_schema": {},
+        "test_type": "boundary",
+        "tags": [
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "feb8d5e2",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "low",
+        "automation_candidate": true
+    }
+}
