@@ -1,0 +1,50 @@
+Test Case Title: Error Handling: Improper Modal Announcement Results in Alternative Accessible Notification
+------------------------------------------------------------
+
+{
+    "id": "TC-US-001-04",
+    "description": "Verify if a confirmation modal or notification is not announced by the screen reader, the system provides an alternative accessible notification (e.g., ARIA live region).",
+    "requirement_id": "US-001",
+    "type": "error-handling",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "User is a manager with screen reader enabled.",
+        "Pending leave request exists."
+    ],
+    "steps": [
+        "Log in and navigate to Pending Leave Requests.",
+        "Approve or reject a request.",
+        "Observe whether the confirmation modal/notification is properly announced by the screen reader.",
+        "If not announced, monitor for alternative notification via ARIA live region or similar."
+    ],
+    "expected_outcomes": [
+        "If standard modal/notification announcement fails, an alternative accessible notification is triggered and announced by the screen reader."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "accessibility",
+        "aria-live",
+        "error-notification"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "6"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": [
+            "4.1.2"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 90,
+    "notes": "Focus on modals, ARIA live regions per WCAG and user story compliance."
+}
