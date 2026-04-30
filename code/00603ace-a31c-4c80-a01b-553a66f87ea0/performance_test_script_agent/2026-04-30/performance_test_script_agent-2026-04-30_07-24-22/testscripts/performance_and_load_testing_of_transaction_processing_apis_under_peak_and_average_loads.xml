@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Transaction Processing API Load and Performance Test" enabled="true">
+      <stringProp name="TestPlan.comments">Performance and load testing of all transaction processing APIs for banking/financial context. Simulates both average and peak loads, using parameterized transaction test data. Monitors response times, throughput, and error rates in real-time and collects all results for reporting as per NFR-001.</stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments">
+        <collectionProp name="Arguments.arguments">
+          <!-- BaseURL or Environment-specific Properties can be set here -->
+        </collectionProp>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <!-- Test Data Setup -->
+      <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Transaction Test Data" enabled="true">
+        <stringProp name="filename">transaction_testdata.csv</stringProp>
+        <stringProp name="fileEncoding">UTF-8</stringProp>
+        <boolProp name="ignoreFirstLine">false</boolProp>
+        <stringProp name="delimiter">,</stringProp>
+        <boolProp name="quotedData">false</boolProp>
+        <boolProp name="recycle">true</boolProp>
+        <boolProp name="stopThread">false</boolProp>
+        <stringProp name="shareMode">all</stringProp>
+      </CSVDataSet>
+      <hashTree/>
+      <!-- AVERAGE LOAD PHASE -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Average Load: Transaction Processing" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">10</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">30</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time(,)}</longProp>
+        <longProp name="ThreadGroup.end_time">${__timeShift(600,,)}</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- TODO: Repeat HTTPSamplerProxy for each endpoint as specified in API spec. Below is a template. -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="[TEMPLATE] Transaction API Endpoint (REPLACE WITH ACTUAL)" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+            <!-- Populate with required arguments/parameters from CSV or constants -->
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(api_domain)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(api_port,443)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(api_protocol,https)}</stringProp>
+          <stringProp name="HTTPSampler.path">/api/transaction</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${transaction_payload}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <!-- TODO: Populate required HTTP headers or authentication, e.g.,
+              <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+              -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+
+          <!-- Status/Response Time Assertion -->
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="HTTP 2xx Status Assertion" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp>2</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Transaction Response SLA (≤2s)" enabled="true">
+            <stringProp name="DurationAssertion.duration">2000</stringProp>
+          </DurationAssertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <!-- PEAK LOAD PHASE -->
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Peak Load: Transaction Processing" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">1</stringProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">60</stringProp>
+        <longProp name="ThreadGroup.start_time">${__time(,)}</longProp>
+        <longProp name="ThreadGroup.end_time">${__timeShift(600,,)}</longProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <!-- TODO: Repeat HTTPSamplerProxy for each endpoint as specified in API spec. Below is a template. -->
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="[TEMPLATE] Transaction API Endpoint (REPLACE WITH ACTUAL)" enabled="true">
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">${__P(api_domain)}</stringProp>
+          <stringProp name="HTTPSampler.port">${__P(api_port,443)}</stringProp>
+          <stringProp name="HTTPSampler.protocol">${__P(api_protocol,https)}</stringProp>
+          <stringProp name="HTTPSampler.path">/api/transaction</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.postBodyRaw" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${transaction_payload}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+            <collectionProp name="HeaderManager.headers">
+              <!-- TODO: Populate required HTTP headers or authentication -->
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="HTTP 2xx Status Assertion" enabled="true">
+            <collectionProp name="Asserion.test_strings">
+              <stringProp>2</stringProp>
+            </collectionProp>
+            <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+            <boolProp name="Assertion.assume_success">false</boolProp>
+            <intProp name="Assertion.test_type">2</intProp>
+          </ResponseAssertion>
+          <hashTree/>
+          <DurationAssertion guiclass="DurationAssertionGui" testclass="DurationAssertion" testname="Transaction Response SLA (≤2s)" enabled="true">
+            <stringProp name="DurationAssertion.duration">2000</stringProp>
+          </DurationAssertion>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <!-- Monitoring & Results -->
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <bytes>true</bytes>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <encoding>false</encoding>
+            <url>true</url>
+            <fileName>false</fileName>
+          </value>
+        </objProp>
+        <stringProp name="filename">results_tree.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="StatGraphVisualizer" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>false</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>false</code>
+            <message>false</message>
+            <threadName>false</threadName>
+            <dataType>false</dataType>
+            <bytes>false</bytes>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <assertions>true</assertions>
+            <subresults>false</subresults>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <encoding>false</encoding>
+            <url>false</url>
+            <fileName>false</fileName>
+          </value>
+        </objProp>
+        <stringProp name="filename">summary_report.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Raw CSV Metric Log" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>false</message>
+            <threadName>true</threadName>
+            <dataType>false</dataType>
+            <bytes>false</bytes>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <assertions>true</assertions>
+            <subresults>false</subresults>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <encoding>false</encoding>
+            <url>false</url>
+            <fileName>false</fileName>
+          </value>
+        </objProp>
+        <stringProp name="filename">perftest_metrics.csv</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
