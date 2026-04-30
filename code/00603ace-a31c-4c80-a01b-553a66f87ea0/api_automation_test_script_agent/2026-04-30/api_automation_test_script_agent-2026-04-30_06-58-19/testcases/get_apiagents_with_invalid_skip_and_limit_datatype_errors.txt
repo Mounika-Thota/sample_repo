@@ -1,0 +1,79 @@
+Test Case Title: GET /api/agents/ with invalid skip and limit (datatype errors)
+------------------------------------------------------------
+
+{
+    "id": "TC-GET-feb8d5e2-03",
+    "description": "Validate GET /api/agents/ returns 422 Validation Error for invalid skip and limit datatypes (e.g., skip=abc, limit=-1, skip=1.5).",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send GET request to /api/agents/?skip=abc&limit=20 with Authorization header",
+        "Send GET request to /api/agents/?skip=10&limit=-1 with Authorization header",
+        "Send GET request to /api/agents/?skip=1.5&limit=10 with Authorization header"
+    ],
+    "expected_outcome": [
+        "Status 422",
+        "Response content-type is application/json",
+        "Error body matches HTTPValidationError schema",
+        "Error detail specifies problem in skip/limit"
+    ],
+    "automation_metadata": {
+        "method": "GET",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [
+            {
+                "name": "skip",
+                "type": "string",
+                "required": false,
+                "example": "abc"
+            },
+            {
+                "name": "limit",
+                "type": "integer",
+                "required": false,
+                "example": -1
+            },
+            {
+                "name": "skip",
+                "type": "float",
+                "required": false,
+                "example": 1.5
+            }
+        ],
+        "body_parameters": [],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "query",
+                        "skip"
+                    ],
+                    "msg": "value is not a valid integer",
+                    "type": "type_error.integer"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression",
+            "input_validation"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "feb8d5e2",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "medium",
+        "automation_candidate": true
+    }
+}
