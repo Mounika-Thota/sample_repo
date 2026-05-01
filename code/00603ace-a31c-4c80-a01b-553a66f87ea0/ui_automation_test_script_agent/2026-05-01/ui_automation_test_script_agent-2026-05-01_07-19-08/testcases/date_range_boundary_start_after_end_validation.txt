@@ -1,0 +1,51 @@
+Test Case Title: Date range boundary (start after end) validation
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-10",
+    "description": "Verify the filter rejects a date range where the start date is after the end date.",
+    "requirement_id": "SCRUM-3601",
+    "type": "boundary",
+    "priority": "P2",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in as an administrator.",
+        "User is on the Login Activity/Audit Log page."
+    ],
+    "steps": [
+        "Open date range filter.",
+        "Set the start date to a date after the end date.",
+        "Apply filter."
+    ],
+    "expected_outcomes": [
+        "System displays a validation error or does not apply invalid filter."
+    ],
+    "data": {
+        "inputs": {
+            "startDate": "2027-05-05",
+            "endDate": "2027-05-01"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Boundary",
+        "Date",
+        "Validation",
+        "LoginActivity"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 20,
+    "notes": ""
+}

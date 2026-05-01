@@ -1,0 +1,65 @@
+import { test, expect } from '@playwright/test';
+
+// Test Plan Adaptation Note:
+// Unable to perform full live DOM exploration due to MCP environment config error (Playwright module missing).
+// ALL selectors below are placeholders and MUST be replaced with real selectors after successful MCP session and DOM exploration.
+// No success, error, or validation messages are assumed from the app; these should be updated when real values are available.
+
+test.describe('Login Activity/Audit Log - Date Range Filter Validation', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+    await page.getByLabel('Username').fill('Admin');
+    await page.getByLabel('Password').fill('admin123');
+    await page.getByRole('button', { name: 'Login' }).click();
+    // Wait for possible dashboard/main navigation
+    await page.waitForLoadState('networkidle');
+  });
+
+  test('Happy path: Filter Login Activity by valid date range', async ({ page }) => {
+    // Navigation selectors should be updated after MCP-based DOM confirmation
+    await page.getByRole('navigation').getByText('Admin').click();
+    await page.getByRole('menuitem').getByText('Login Activity').click();
+    await page.waitForLoadState('domcontentloaded');
+    // Date picker selectors placeholder
+    await page.getByLabel('From').fill('2023-01-01');
+    await page.getByLabel('To').fill('2023-01-31');
+    await page.getByRole('button', { name: /Filter|Search/ }).click();
+    // Validate all visible log rows fall in date range (update selectors per MCP)
+    // Placeholder - update with real row/date cell locator
+    // Example: const rowDates = await page.locator('.log-row .log-date').allTextContents();
+    // for (const dateStr of rowDates) { expect(new Date(dateStr) >= new Date('2023-01-01')).toBeTruthy(); expect(new Date(dateStr) <= new Date('2023-01-31')).toBeTruthy(); }
+  });
+
+  test('Validation: Invalid date range (From > To)', async ({ page }) => {
+    // Navigate to page
+    await page.getByRole('navigation').getByText('Admin').click();
+    await page.getByRole('menuitem').getByText('Login Activity').click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.getByLabel('From').fill('2023-02-01');
+    await page.getByLabel('To').fill('2023-01-01');
+    await page.getByRole('button', { name: /Filter|Search/ }).click();
+    // Placeholder: update with actual validation message
+    await expect(page.getByText(/From date should not be after To date|Invalid date range/)).toBeVisible();
+  });
+
+  test('Validation: Date fields blank (should show all or show validation)', async ({ page }) => {
+    await page.getByRole('navigation').getByText('Admin').click();
+    await page.getByRole('menuitem').getByText('Login Activity').click();
+    await page.waitForLoadState('domcontentloaded');
+    await page.getByLabel('From').fill('');
+    await page.getByLabel('To').fill('');
+    await page.getByRole('button', { name: /Filter|Search/ }).click();
+    // Placeholder: Expected to see all records or validation
+    // Adjust after live DOM check
+    // expect(await page.locator('.log-row').count()).toBeGreaterThan(0);
+    // OR
+    // expect(page.getByText(/Please enter a date range/)).toBeVisible();
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Log out (Selector placeholder)
+    await page.getByRole('button', { name: /User Menu|Account/ }).click();
+    await page.getByRole('menuitem', { name: /Logout/ }).click();
+    await page.waitForURL('**/auth/login');
+  });
+});

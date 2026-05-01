@@ -1,0 +1,45 @@
+Test Case Title: System handles rapid filter changes gracefully
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-11",
+    "description": "Verify the login activity page remains responsive when filters are changed rapidly.",
+    "requirement_id": "SCRUM-3601",
+    "type": "performance",
+    "priority": "P2",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in as an administrator.",
+        "User is on the Login Activity/Audit Log page."
+    ],
+    "steps": [
+        "Rapidly change the filter criteria (e.g., alternate usernames and date ranges quickly).",
+        "Observe UI and filter result updates."
+    ],
+    "expected_outcomes": [
+        "UI remains responsive.",
+        "No crashes, freezes, or unhandled errors are observed."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Performance",
+        "Filter",
+        "LoginActivity"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2"
+        ],
+        "nfr_refs": [],
+        "standards": [],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 25,
+    "notes": ""
+}

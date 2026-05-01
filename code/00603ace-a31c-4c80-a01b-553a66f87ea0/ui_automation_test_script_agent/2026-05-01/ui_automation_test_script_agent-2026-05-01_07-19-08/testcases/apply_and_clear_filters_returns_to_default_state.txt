@@ -1,0 +1,48 @@
+Test Case Title: Apply and clear filters returns to default state
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-06",
+    "description": "Verify that after filter(s) are cleared, the login activity list returns to unfiltered state.",
+    "requirement_id": "SCRUM-3601",
+    "type": "usability",
+    "priority": "P2",
+    "risk_level": "low",
+    "preconditions": [
+        "User is logged in as an administrator.",
+        "User is on the Login Activity/Audit Log page."
+    ],
+    "steps": [
+        "Apply any filter (e.g., by username).",
+        "Clear the filter or click 'Reset'.",
+        "Observe the login attempt list."
+    ],
+    "expected_outcomes": [
+        "All unfiltered login attempts reappear.",
+        "UI reflects a cleared/initial state for filter fields."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Filter",
+        "Reset",
+        "Usability",
+        "LoginActivity"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 20,
+    "notes": ""
+}

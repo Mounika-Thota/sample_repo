@@ -1,0 +1,56 @@
+Test Case Title: Filter login attempts by username
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-03",
+    "description": "Verify that login attempts can be filtered by specific username.",
+    "requirement_id": "SCRUM-3601",
+    "type": "positive",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in as an administrator.",
+        "User is on the Login Activity/Audit Log page."
+    ],
+    "steps": [
+        "Locate the username filter input/search bar.",
+        "Enter a valid username.",
+        "Apply the filter or press enter.",
+        "Observe the result list update."
+    ],
+    "expected_outcomes": [
+        "Only login attempts for the entered username are displayed.",
+        "Username is matched partial/full as supported by UI."
+    ],
+    "data": {
+        "inputs": {
+            "username": "Admin"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Filter",
+        "User",
+        "Audit",
+        "LoginActivity"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2.4"
+        ],
+        "wcag": [
+            "2.2.1"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 25,
+    "notes": ""
+}

@@ -1,0 +1,55 @@
+Test Case Title: Admin views list of all recent login attempts
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-01",
+    "description": "Verify that an administrator can access and see the list of successful, failed, and locked-out login attempts from the login activity page.",
+    "requirement_id": "SCRUM-3601",
+    "type": "positive",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "User is logged in as an administrator with valid credentials (Admin/admin123).",
+        "User is on the main dashboard/homepage."
+    ],
+    "steps": [
+        "Navigate to the 'Admin' or 'Security' module from the main menu or sidebar.",
+        "Open 'Login Activity', 'Audit', or the equivalent page showing login attempts.",
+        "Observe the default list/table of login attempts displayed."
+    ],
+    "expected_outcomes": [
+        "A table or list of login attempts is displayed.",
+        "Each entry includes at minimum: Username, Date/Time, IP Address, Status (Successful, Failed, Locked-Out)."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Audit",
+        "Admin",
+        "LoginActivity",
+        "Security",
+        "Smoke"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "1"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2.1",
+            "V7.1"
+        ],
+        "wcag": [
+            "2.2.1"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 45,
+    "notes": "Table fields may vary; validate only present ones relevant to identity/event/status"
+}

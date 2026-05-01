@@ -1,0 +1,411 @@
+// NOTE: The MCP generator tool failed with a Playwright dependency error (Cannot find module '@playwright/test').
+// This script uses LOCATOR strategy and scaffolding per real OrangeHRM demo instance and Playwright best practices,
+// but all selectors SHOULD BE re-validated with actual MCP DOM exploration and logs after MCP service is fixed.
+
+import { test, expect } from '@playwright/test';
+
+const BASE_URL = 'https://opensource-demo.orangehrmlive.com/web/index.php/';
+const ADMIN_USER = 'Admin';
+const ADMIN_PASS = 'admin123';
+
+test.describe('SCRUM-3601: Login Activity - Username Filter E2E', () => {
+  test.setTimeout(60000);
+
+  test.beforeEach(async ({ page }) => {
+    // Go to Login Page
+    await page.goto(BASE_URL + 'auth/login', { waitUntil: 'domcontentloaded' });
+    // Wait for the login form inputs
+    const userInput = page.locator('input[placeholder="Username"]');
+    const passInput = page.locator('input[placeholder="Password"]');
+    await expect(userInput).toBeVisible();
+    await expect(passInput).toBeVisible();
+    // Fill credentials and login (OrangeHRM demo: login button has type="submit")
+    await userInput.fill(ADMIN_USER);
+    await passInput.fill(ADMIN_PASS);
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+      page.locator('button[type="submit"]').click()
+    ]);
+    // Wait for main dashboard to load: Look for distinctive sidebar, topbar or dashboard widget
+    await expect(page.locator('.oxd-topbar-header-breadcrumb, .oxd-main-menu, .orangehrm-dashboard-widget')).toBeVisible();
+  });
+
+  test('TC-SCRUM-3601-03: Should filter Login Attempts by Username', async ({ page }) => {
+    // Navigate to Admin > User Management > Login Activity
+    // OrangeHRM Admin menu uses .oxd-sidepanel-body or .oxd-main-menu-item
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    // Wait for submenu to load
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    // Audit/Activity/Log might be under "Admin" > topbar-menu
+    // Find Login Activity tab (could be "User Activity Log" or similar on this instance)
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    // Wait for the activity/audit log table to be visible
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+
+    // Locate the Username filter
+    // In OrangeHRM 4.7+: filter row above table, input with placeholder or label "Username"
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    // Re-validate with field labels if multiple .oxd-input fields
+
+    // Enter username to filter for: 'Admin' (demo value from test case)
+    await expect(userInput).toBeVisible();
+    await userInput.fill('Admin');
+
+    // Find and click the filter/search/apply button (usually "Search", .oxd-button)
+    // If pressing Enter does submit, use .press('Enter') as alternative
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+
+    // Wait for filtered results table to update
+    await page.waitForTimeout(1000); // OrangeHRM sometimes animates tables; if debounce/async occurs
+    // Validate that each row contains 'Admin' in Username column
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1); // OrangeHRM: usually username is second cell
+      await expect(usernameCell).toContainText('Admin');
+    }
+    // -- If no results, validate the empty state message accurately.
+  });
+
+  // Duplicating the scenario 15 times (as required; they can all be similar but NOT in a loop)
+  test('TC-SCRUM-3601-03-1: Filter - Enter partial username', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('Ad');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText(/Ad/i); // partial match
+    }
+  });
+
+  test('TC-SCRUM-3601-03-2: Filter - Enter full username (case insensitive)', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('ADMIN');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText(/ADMIN/i);
+    }
+  });
+
+  test('TC-SCRUM-3601-03-3: Filter - Enter invalid username', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('WRONG_USER');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    // OrangeHRM empty state: 'No Records Found' (may vary)
+    await expect(dataTable).toContainText(/No Records Found|No Data/i);
+  });
+
+  test('TC-SCRUM-3601-03-4: Filter - Username with trailing spaces', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('Admin   ');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText('Admin');
+    }
+  });
+
+  test('TC-SCRUM-3601-03-5: Filter - Username with leading spaces', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('   Admin');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText('Admin');
+    }
+  });
+
+  test('TC-SCRUM-3601-03-6: Filter - Username with mixed case', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('aDmIn');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText(/admin/i);
+    }
+  });
+
+  test('TC-SCRUM-3601-03-7: Filter - Username as substring', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('dmi');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText(/dmi/i);
+    }
+  });
+
+  test('TC-SCRUM-3601-03-8: Filter - Username empty input', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    // OrangeHRM: Should return all records
+    const resultRows = dataTable.locator('.oxd-table-row');
+    expect(await resultRows.count()).toBeGreaterThan(0);
+  });
+
+  test('TC-SCRUM-3601-03-9: Filter - Username special characters', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('!@#$%^&*()');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    await expect(dataTable).toContainText(/No Records Found|No Data/i);
+  });
+
+  test('TC-SCRUM-3601-03-10: Filter - Username in result not exact match', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('min');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    const resultRows = dataTable.locator('.oxd-table-row');
+    const rowsCount = await resultRows.count();
+    for (let i = 0; i < rowsCount; ++i) {
+      const usernameCell = resultRows.nth(i).locator('div').nth(1);
+      await expect(usernameCell).toContainText(/min/i);
+    }
+  });
+
+  test('TC-SCRUM-3601-03-11: Filter - Username with numeric', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('1234');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    await expect(dataTable).toContainText(/No Records Found|No Data/i);
+  });
+
+  test('TC-SCRUM-3601-03-12: Filter - Clear search after filtering', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('Admin');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    // Now clear
+    await userInput.fill('');
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    expect(await dataTable.locator('.oxd-table-row').count()).toBeGreaterThan(0);
+  });
+
+  test('TC-SCRUM-3601-03-13: Filter - Username with unicode', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('Ådmin');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    await expect(dataTable).toContainText(/No Records Found|No Data/i);
+  });
+
+  test('TC-SCRUM-3601-03-14: Filter - Multiple spaces between username chars', async ({ page }) => {
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-body-nav-tab')).toBeVisible();
+    const loginActivityTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: /Login Activity|Activity Log|Audit/i });
+    await loginActivityTab.first().click();
+    const dataTable = page.locator('.oxd-table, .oxd-table-card');
+    await expect(dataTable).toBeVisible();
+    const userInput = page.locator('input[placeholder="Username"], .oxd-input').nth(0);
+    await expect(userInput).toBeVisible();
+    await userInput.fill('Ad   min');
+    const searchButton = page.locator('button').filter({ hasText: /Search|Apply|Filter/i });
+    if (await searchButton.count()) {
+      await searchButton.first().click();
+    } else {
+      await userInput.press('Enter');
+    }
+    await page.waitForTimeout(1000);
+    await expect(dataTable).toContainText(/No Records Found|No Data/i);
+  });
+});
+
+// NOTE: All selectors above are based on currently published OrangeHRM demo conventions
+// and should be strictly MCP-verified on the deployed AUT. Replace with real locator logs/snapshots before use.
+// The feature is implemented as an end-to-end scenario with 15 test cases as required.
+// All test case functions start with a clean login session per Playwright's beforeEach.
+// Close browser instance is handled by Playwright test runner.
+
+// When MCP is fully operational, re-run DOM exploration for all selectors with live AUT and replace above if necessary.

@@ -1,0 +1,46 @@
+// NOTE: Test code generation cannot complete because Playwright dependencies (@playwright/test) are missing or misconfigured in the MCP environment. Unable to proceed with real page exploration or generate runtime-verified selectors. Please ensure the environment is set up correctly and retry.
+
+// The code below is only an example shell and WILL NOT WORK UNTIL the above dependency/config problem is resolved. You must change selectors and step logic after successful MCP-based exploration.
+
+import { test, expect } from '@playwright/test';
+
+test.describe('SCRUM-3601 - Login Activity Filter Reset Usability', () => {
+  test.setTimeout(60000);
+
+  test('TC-SCRUM-3601-06: Verify filters cleared returns Login Activity list to unfiltered state', async ({ page }) => {
+    // WARNING: Placeholders below - selectors and flow WILL BE INCORRECT without real MCP exploration. Update after MCP runs.
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/');
+    await page.fill('input[name="username"]', 'Admin'); // <-- Change selector after MCP
+    await page.fill('input[name="password"]', 'admin123'); // <-- Change selector
+    await page.click('button[type="submit"]'); // <-- Change selector
+    await page.waitForLoadState('domcontentloaded');
+
+    // NAVIGATE to Login Activity/Audit Log (adjust selectors after exploration)
+    // Example: Sidebar nav
+    await page.click('a.oxd-main-menu-item:has-text("Admin")'); // CHANGE
+    await page.waitForTimeout(1500); // for SPA navigation
+    await page.click('span:has-text("Login Activity")'); // CHANGE: update with MCP
+    await page.waitForTimeout(1000);
+
+    // Apply any available filter (ex: Username). CHANGE selectors after MCP.
+    await page.fill('input[placeholder="Type for hints..."]', 'Admin'); // CHANGE
+    await page.click('button:has-text("Search")'); // CHANGE
+    await page.waitForTimeout(1500);
+
+    // Click reset/clear
+    await page.click('button:has-text("Reset")'); // CHANGE
+    await page.waitForTimeout(1200);
+
+    // Validate all entries reappear (NO assertion here as per instructions)
+    // Validate filter fields are empty (NO assertion here)
+
+    // Cleanup
+    await page.close();
+  });
+
+  // Repeat for any additional variations needed (each test as a dedicated test case)
+  // ...
+});
+
+// NOTE: Update all selectors, navigation flow, waits and validations after you can successfully run MCP-based DOM exploration with dependencies fixed.
+// Do NOT use or check in this file as working E2E — rerun after a valid MCP session and update for true selectors and flows.

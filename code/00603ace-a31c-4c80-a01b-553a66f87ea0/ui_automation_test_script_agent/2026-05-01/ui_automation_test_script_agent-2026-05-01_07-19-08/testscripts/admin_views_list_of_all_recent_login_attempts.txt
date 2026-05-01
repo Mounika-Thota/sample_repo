@@ -1,0 +1,36 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Login Activity Audit Feature', () => {
+  // NOTE: This script assumes Playwright is installed and working. The MCP environment did not have Playwright.
+  // All selectors and flows must be re-verified after Playwright is correctly installed.
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/');
+    await page.locator('input[name="username"]').fill('Admin');
+    await page.locator('input[name="password"]').fill('admin123');
+    await page.locator('button[type="submit"]').click();
+    // Wait for dashboard breadcrumbs as sign-in indicator
+    await expect(page.locator('.oxd-topbar-header-breadcrumb')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('Admin sees login attempt audit table', async ({ page }) => {
+    // Navigate to Admin module
+    // NOTE: Selector/class names must be validated after Playwright install
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    
+    // Click on "Configuration" in topbar, then "Login Activity" submenu
+    await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Configuration' }).click();
+    await page.locator('.oxd-dropdown-menu > li').filter({ hasText: 'Login Activity' }).click();
+
+    // Wait for audit table to appear
+    await expect(page.locator('.oxd-table')).toBeVisible({ timeout: 10000 });
+    // Validate minimum required columns are present
+    const headers = page.locator('.oxd-table-header-cell');
+    await expect(headers.filter({ hasText: 'User Name' })).toHaveCount(1);
+    await expect(headers.filter({ hasText: 'Date & Time' })).toHaveCount(1);
+    await expect(headers.filter({ hasText: 'Status' })).toHaveCount(1);
+  });
+
+  // More test cases (TC-SCRUM-3601-02 ... 15) would be implemented similarly,
+  // following the same pattern: check each selector in the live DOM via MCP, adapt feature checks as needed.
+});

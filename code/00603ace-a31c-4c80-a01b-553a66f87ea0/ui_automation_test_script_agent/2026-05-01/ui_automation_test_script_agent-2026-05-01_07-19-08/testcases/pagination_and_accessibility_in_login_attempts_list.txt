@@ -1,0 +1,54 @@
+Test Case Title: Pagination and accessibility in login attempts list
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-09",
+    "description": "Verify the login attempts list supports pagination and is accessible via keyboard navigation and screen reader.",
+    "requirement_id": "SCRUM-3601",
+    "type": "accessibility",
+    "priority": "P2",
+    "risk_level": "low",
+    "preconditions": [
+        "User is logged in as an administrator.",
+        "Login Activity/Audit Log page displays enough records for pagination.",
+        "User is on the Login Activity/Audit Log page."
+    ],
+    "steps": [
+        "Navigate to the last, middle, and first pages using pagination controls.",
+        "Tab through the page and verify all controls are accessible via keyboard.",
+        "Verify the results table reads properly with a screen reader."
+    ],
+    "expected_outcomes": [
+        "Pagination functions and results change as expected.",
+        "All visible elements are accessible and can be operated with keyboard.",
+        "Screen reader reads meaningful content for table headers and rows."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Pagination",
+        "Accessibility",
+        "LoginActivity"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "1"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "WCAG 2.2.1"
+        ],
+        "owasp_asvs": [],
+        "wcag": [
+            "2.2.1",
+            "2.4.3",
+            "2.1.1"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 35,
+    "notes": ""
+}

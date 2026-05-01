@@ -1,0 +1,55 @@
+Test Case Title: Filter login attempts by date range
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3601-02",
+    "description": "Verify that filtering login attempts by date range updates the list as expected.",
+    "requirement_id": "SCRUM-3601",
+    "type": "positive",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in as an administrator.",
+        "User is on the Login Activity/Audit Log page."
+    ],
+    "steps": [
+        "Locate the date range filter input/calendar on the page.",
+        "Select a specific date range (e.g., last 7 days).",
+        "Apply the filter and observe the table/list update."
+    ],
+    "expected_outcomes": [
+        "Only login attempts within the specified date range are shown.",
+        "List updates without page errors."
+    ],
+    "data": {
+        "inputs": {
+            "dateRange": "last 7 days"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "Filter",
+        "Date",
+        "Audit",
+        "LoginActivity"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2.4"
+        ],
+        "wcag": [
+            "2.2.1"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 30,
+    "notes": "Verify filter handles date boundaries."
+}
