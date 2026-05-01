@@ -1,0 +1,72 @@
+Test Case Title: Create Agent with duplicate slug
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-9a0eda3c-007",
+    "description": "Validate that attempting to create an agent with an existing slug returns an appropriate error or prevents duplicate records.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available",
+        "An agent with slug 'duplicate-agent' already exists"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with slug set as 'duplicate-agent', valid display_name, and category."
+    ],
+    "expected_outcome": [
+        "Status 422 or appropriate error is returned",
+        "Response body indicates duplication/uniqueness violation"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "duplicate-agent",
+                "constraints": "unique"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Duplicate Agent",
+                "constraints": "non-empty"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "testing",
+                "constraints": "enum"
+            }
+        ],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "msg": "slug must be unique"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "create_agent_api_agents__post",
+        "owasp_asvs_refs": [
+            "V5"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}

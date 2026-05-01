@@ -1,0 +1,70 @@
+Test Case Title: Create Agent with missing required field 'category'
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-9a0eda3c-004",
+    "description": "Ensure that omitting 'category' from the request payload results in a 422 error.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with slug and display_name, omitting category."
+    ],
+    "expected_outcome": [
+        "Status 422 returned",
+        "Response details missing 'category' field"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "agent123",
+                "constraints": "non-empty"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Agent 123",
+                "constraints": "non-empty"
+            }
+        ],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "body",
+                        "category"
+                    ],
+                    "msg": "field required",
+                    "type": "value_error.missing"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "create_agent_api_agents__post",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}

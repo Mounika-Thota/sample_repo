@@ -1,0 +1,71 @@
+Test Case Title: Create Agent with missing required field 'slug'
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-9a0eda3c-002",
+    "description": "Verify the API returns a 422 error when the required 'slug' field is missing from the payload.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token is available"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with display_name and category, omitting slug."
+    ],
+    "expected_outcome": [
+        "Status 422 returned",
+        "Response body contains an error about missing 'slug' field"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Pytest Agent",
+                "constraints": "non-empty"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "testing",
+                "constraints": "enum"
+            }
+        ],
+        "expected_status_codes": [
+            422
+        ],
+        "expected_response_schema": {
+            "detail": [
+                {
+                    "loc": [
+                        "body",
+                        "slug"
+                    ],
+                    "msg": "field required",
+                    "type": "value_error.missing"
+                }
+            ]
+        },
+        "test_type": "negative",
+        "tags": [
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "create_agent_api_agents__post",
+        "owasp_asvs_refs": [
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
