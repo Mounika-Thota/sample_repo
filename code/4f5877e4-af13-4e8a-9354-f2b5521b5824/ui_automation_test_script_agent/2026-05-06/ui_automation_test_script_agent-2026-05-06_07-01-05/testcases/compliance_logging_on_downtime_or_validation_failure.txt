@@ -1,0 +1,44 @@
+Test Case Title: Compliance Logging on Downtime or Validation Failure
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-12",
+    "description": "System must log downtime events or validation failures according to compliance standards.",
+    "requirement_id": "SCRUM-3834",
+    "type": "reliability",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "System is accessible to an Admin user."
+    ],
+    "steps": [
+        "Attempt to submit a vacancy form when a validation error is intentionally triggered.",
+        "Submit a form when the system is temporarily offline or encounters a backend error.",
+        "Review system logs or compliance view for respective events."
+    ],
+    "expected_outcomes": [
+        "Validation failures and system downtime events are registered in compliance logs.",
+        "Logged entries contain relevant details as per organizational standards."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "compliance",
+        "logging"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "15"
+        ],
+        "nfr_refs": [],
+        "standards": [],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": false,
+    "estimated_duration_sec": 180,
+    "notes": "Log review step may be manual depending on application."
+}

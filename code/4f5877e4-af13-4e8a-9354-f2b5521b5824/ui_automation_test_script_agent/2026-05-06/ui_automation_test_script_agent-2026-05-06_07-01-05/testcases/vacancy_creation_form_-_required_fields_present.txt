@@ -1,0 +1,54 @@
+Test Case Title: Vacancy Creation Form - Required Fields Present
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-01",
+    "description": "Verify that the vacancy creation form displays all required fields: job title, qualifications, hiring manager, status, etc.",
+    "requirement_id": "SCRUM-3834",
+    "type": "positive",
+    "priority": "P0",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in using Admin/admin123 and is an HR Administrator.",
+        "Organization structure (departments, roles) exists.",
+        "User navigates to the Recruitment or Vacancies module after login."
+    ],
+    "steps": [
+        "On the dashboard, locate and navigate to the 'Recruitment' or 'Vacancies' module.",
+        "Click the button/link to initiate 'Add Vacancy' or 'Create Vacancy'.",
+        "Observe the presented form."
+    ],
+    "expected_outcomes": [
+        "Form displays required fields: job title, qualifications, hiring manager, status, and any other necessary attributes.",
+        "Options for job-relevant dropdowns (such as department, roles, hiring manager) are available and populated."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "UI",
+        "form",
+        "vacancy",
+        "fields",
+        "recruitment"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "1",
+            "11"
+        ],
+        "nfr_refs": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 60,
+    "notes": "Assumes HR Admin access and navigation to recruitment module is possible."
+}

@@ -1,0 +1,59 @@
+Test Case Title: Edit Vacancy Record - Happy Path
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-03",
+    "description": "Ensure an existing vacancy can be edited, updated attributes reflect in the listing, and user receives confirmation.",
+    "requirement_id": "SCRUM-3834",
+    "type": "positive",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "At least one vacancy exists.",
+        "User is logged in as HR Admin and can access vacancy list."
+    ],
+    "steps": [
+        "Navigate to Vacancies list.",
+        "Identify and select an existing vacancy record.",
+        "Click the 'Edit' option.",
+        "Change one or more attributes (e.g., status, hiring manager, qualifications).",
+        "Submit the changes."
+    ],
+    "expected_outcomes": [
+        "Vacancy is updated.",
+        "User receives a success message/feedback.",
+        "Edits and updates are reflected in real time in the vacancy listing/view."
+    ],
+    "data": {
+        "inputs": {
+            "status": "Filled"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "edit",
+        "vacancy",
+        "recruitment",
+        "update"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2",
+            "5",
+            "6",
+            "12"
+        ],
+        "nfr_refs": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 90,
+    "notes": "Focus on update ability and immediate feedback."
+}

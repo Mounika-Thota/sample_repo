@@ -1,0 +1,58 @@
+Test Case Title: Required Field Validation on Vacancy Form
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-04",
+    "description": "Ensure all required fields are enforced; form cannot be submitted if any required field is missing.",
+    "requirement_id": "SCRUM-3834",
+    "type": "negative",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "User is logged in as HR Admin.",
+        "Recruitment/Vacancy creation form is accessible."
+    ],
+    "steps": [
+        "Open the vacancy creation form.",
+        "Leave one or more required fields blank.",
+        "Attempt to submit the form."
+    ],
+    "expected_outcomes": [
+        "System prevents submission.",
+        "User is shown clear and informative error messages indicating required fields missing.",
+        "User is prompted to correct input."
+    ],
+    "data": {
+        "inputs": {
+            "job_title": "",
+            "qualifications": "",
+            "hiring_manager": "",
+            "status": ""
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "validation",
+        "error-handling",
+        "form",
+        "vacancy"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "3",
+            "9"
+        ],
+        "nfr_refs": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 60,
+    "notes": "Test all combinations of missing required fields (pairwise where possible)."
+}

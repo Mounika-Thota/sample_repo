@@ -1,0 +1,61 @@
+Test Case Title: Create New Vacancy - Happy Path
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-02",
+    "description": "Ensure a vacancy can be successfully created when all required fields are input correctly.",
+    "requirement_id": "SCRUM-3834",
+    "type": "positive",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "User is logged in as HR Admin.",
+        "Organization structure exists.",
+        "Recruitment/Vacancies page is open."
+    ],
+    "steps": [
+        "Click on 'Add Vacancy' or similar button.",
+        "Enter valid, unique values for all mandatory fields: job title, qualifications, hiring manager, status, etc.",
+        "Select appropriate options from dropdowns where applicable.",
+        "Submit the form."
+    ],
+    "expected_outcomes": [
+        "Vacancy is created successfully.",
+        "Success message is shown.",
+        "Vacancy appears in the vacancy management/listing view and is available for candidate applications."
+    ],
+    "data": {
+        "inputs": {
+            "job_title": "QA Automation Engineer",
+            "qualifications": "Bachelor\u2019s degree in CS or equivalent",
+            "hiring_manager": "John Doe",
+            "status": "Open"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "create",
+        "happy-path",
+        "vacancy",
+        "recruitment"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "2",
+            "4",
+            "12"
+        ],
+        "nfr_refs": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 120,
+    "notes": "Checks main vacancy creation flow."
+}

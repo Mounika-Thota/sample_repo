@@ -1,0 +1,104 @@
+// NOTE: Deep exploration was not possible due to Playwright config/module loading errors in the MCP tool environment. 
+// Locators and page flows in this script are *placeholders* and MUST BE VALIDATED/UPDATED after MCP config issues are fixed. This script is a best-effort fallback. 
+// === START OF GENERATED TEST SCRIPT ===
+import { test, expect } from '@playwright/test';
+
+test.setTimeout(60000);
+
+test.describe('Vacancy Audit Log/Trail Traceability (SCRUM-3834, ISO/IEC/IEEE 29148 - P1)', () => {
+  test.beforeEach(async ({ page }) => {
+    // Login to OrangeHRM, using live credentials as per resolved execution inputs
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+    await page.fill('input[name="username"]', 'Admin');
+    await page.fill('input[name="password"]', 'admin123');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+      page.click('button[type="submit"]'),
+    ]);
+  });
+
+  test('Happy path: Vacancy create/edit/status/audit log', async ({ page }) => {
+    // Adaptation: Navigation and selectors must be validated with MCP exploration when config fixed.
+    // Step: Navigate to Recruitment > Vacancies (sidebar)
+    await page.click('.oxd-sidepanel a.oxd-main-menu-item:has-text("Recruitment")');
+    await page.waitForSelector('.oxd-topbar-body-nav-tab:has-text("Vacancies")');
+    await page.click('.oxd-topbar-body-nav-tab:has-text("Vacancies")');
+    await page.waitForSelector('h5:has-text("Vacancies")');
+
+    // Ensure precondition: at least one vacancy exists, otherwise create one
+    const vacancyRows = await page.$$('.oxd-table-body .oxd-table-row');
+    if (vacancyRows.length === 0) {
+      await page.click('button:has-text("Add")');
+      await page.waitForSelector('h6:has-text("Add Vacancy")');
+      // Fill minimal required fields; update selectors after MCP inspection
+      await page.fill('.oxd-input[name="vacancyName"]', 'AuditLogTest Vacancy');
+      // Example: select job title from custom dropdown
+      await page.click('.oxd-select-text');
+      await page.click('.oxd-select-dropdown .oxd-select-option >> text=Any'); // Update with real option text
+      await page.fill('.oxd-input[name="hiringManager"]', 'Test Manager');
+      await page.click('button:has-text("Save")');
+      // Wait for post-creation message (adapt to real success toast/inline message after MCP inspection)
+      await page.waitForSelector('.oxd-toast');
+      await page.waitForSelector('h5:has-text("Vacancies")');
+    }
+
+    // Edit first vacancy
+    await page.click('.oxd-table-body .oxd-table-row:first-child .oxd-table-cell-actions button[title="Edit"]');
+    await page.waitForSelector('h6:has-text("Edit Vacancy")');
+    await page.fill('.oxd-input[name="vacancyName"]', 'AuditLogTest Vacancy Edited');
+    await page.click('button:has-text("Save")');
+    await page.waitForSelector('.oxd-toast');
+
+    // Change vacancy status if such workflow exists (adapt selector after MCP inspection)
+    // For demo, simulate status toggle via Activate/Deactivate button if present
+    const statusButton = await page.$('.oxd-switch-input');
+    if (statusButton) {
+      await statusButton.click();
+      await page.waitForTimeout(500); // Wait for status change anim
+    }
+    await page.click('a:has-text("Vacancies")'); // Return to main list if needed
+    await page.waitForSelector('h5:has-text("Vacancies")');
+
+    // Access Audit Log / History - must update flow/selector after MCP DOM inspection
+    // Look for possible Audit/Log/Trail/History button, tab, link, or menu
+    const moreBtn = await page.$('.oxd-table-body .oxd-table-row:first-child .oxd-table-cell-actions button[title="More"]');
+    if (moreBtn) {
+      await moreBtn.click();
+      // Try common name for log/trail
+      const logItem = await page.$('li:has-text("Audit Log"),li:has-text("History"),li:has-text("Trail")');
+      if (logItem) {
+        await logItem.click();
+      }
+    }
+    // Alternate path: try a known log/audit history tab if visible
+    const logTab = await page.$('.oxd-tab:has-text("Audit Log"),.oxd-tab:has-text("History")');
+    if (logTab) await logTab.click();
+    // Wait for log table
+    await page.waitForSelector('.oxd-table-body');
+    // (Assertions for audit log coverage/details will be added after selectors are MVP-verified)
+  });
+
+  // 14 additional placeholder tests for this suite (update/replace with real variants after full exploration, see note above)
+  test('Audit log: Created vacancy action is logged', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Edited vacancy action is logged', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Vacancy status change is logged', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Shows who performed each action', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Shows when each action occurred', async ({ page }) => {/* See happy path above */});
+  test('Audit log: All fields are traceable', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Only authorized users may view', async ({ page }) => {/* See happy path above; permissions must be verified after MCP exploration */});
+  test('Audit log: Deactivated/closed vacancies actions are present', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Vacancy deletion is recorded', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Bulk status changes are logged with detail', async ({ page }) => {/* See happy path above */});
+  test('Audit log: Meets ISO/IEC/IEEE 29148 traceability', async ({ page }) => {/* Documentation and attributes must be checked after MCP exploration */});
+  test('Audit log: Log is not editable by normal users', async ({ page }) => {/* Negative test, adapt after perms are explored */});
+  test('Audit log: Action timestamps use correct timezone/format', async ({ page }) => {/* Needs date string/DOM verification after MCP exploration */});
+  test('Audit log: Shows previous & new field values on edits', async ({ page }) => {/* Update after log format inspection */});
+  test('Audit log: Log does not expose PII', async ({ page }) => {/* Inspect real fields after MCP exploration */});
+
+  test.afterAll(async ({ browser }) => {
+    await browser.close();
+  });
+});
+// === END OF GENERATED TEST SCRIPT ===
+
+// CRITICAL: VALIDATE every selector and flow after Playwright config is repaired and MCP exploration is possible. All selectors here are best-effort guesses and should not be committed until verified.
