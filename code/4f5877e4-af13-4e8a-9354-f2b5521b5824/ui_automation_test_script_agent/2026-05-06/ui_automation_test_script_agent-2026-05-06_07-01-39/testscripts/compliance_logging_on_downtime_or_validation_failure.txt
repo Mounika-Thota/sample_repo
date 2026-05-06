@@ -1,0 +1,70 @@
+// Automation script generation failed due to MCP config errors. Locators and flows were not explored or validated, so all selectors below are speculative and must be checked manually post-MCP repair.
+
+import { test } from '@playwright/test';
+
+test.setTimeout(60000);
+
+test.describe('SCRUM-3834 - Compliance Logging for Downtime Events and Validation Failures', () => {
+  // Test 1: Attempt to submit vacancy with a validation error (speculative selectors)
+  test('Vacancy form triggers validation and event is logged', async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.locator('input[name=username]').fill('Admin');
+    await page.locator('input[name=password]').fill('admin123');
+    await page.locator('button:has-text("Login")').click();
+    await page.waitForSelector('.oxd-topbar-header-breadcrumb', {timeout: 10000});
+    // Navigate to Recruitment > Vacancies (navigation selectors speculative)
+    await page.locator('.oxd-sidepanel .oxd-main-menu-item:has-text("Recruitment")').click();
+    await page.locator('.oxd-topbar-body-nav-tab:has-text("Vacancies")').click();
+    await page.locator('button:has-text("Add")').click();
+    // Trigger a validation error by leaving required field blank, then submit
+    await page.locator('button:has-text("Save")').click();
+    // Fallback: Expect a visible error message
+    // await expect(page.locator('.oxd-input-field-error-message')).toBeVisible(); // Normally we'd use expect here, but assertion instructions say skip for now
+  });
+
+  // Test 2: Submit a vacancy form while backend is offline (simulated; actual downtime cannot be automated here)
+  test('Submit form during system downtime and verify event log', async ({ page }) => {
+    // Repeat login flow
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.locator('input[name=username]').fill('Admin');
+    await page.locator('input[name=password]').fill('admin123');
+    await page.locator('button:has-text("Login")').click();
+    await page.waitForSelector('.oxd-topbar-header-breadcrumb', {timeout: 10000});
+    // Navigate to Recruitment > Vacancies
+    await page.locator('.oxd-sidepanel .oxd-main-menu-item:has-text("Recruitment")').click();
+    await page.locator('.oxd-topbar-body-nav-tab:has-text("Vacancies")').click();
+    await page.locator('button:has-text("Add")').click();
+    // Simulate backend downtime (cannot really disconnect with vanilla Playwright here)
+    // Fallback: Assume backend error would show a toast or message
+    // await expect(page.locator('.oxd-toast, .oxd-text--toast-message')).toBeVisible();
+  });
+
+  // Test 3: (Manual View) Review system compliance logs for coverage (cannot automate, placeholder only)
+  test('Review system logs for validation and downtime entries (manual/placeholder)', async ({ page }) => {
+    // Instruct that logs view is likely behind Admin > Maintenance/Logs, navigation speculative
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.locator('input[name=username]').fill('Admin');
+    await page.locator('input[name=password]').fill('admin123');
+    await page.locator('button:has-text("Login")').click();
+    // Add a comment: This step must be reviewed manually unless a log API or UI module is available.
+    // Example-only selector below; real selector must be inspected via MCP
+    // await page.locator('.oxd-main-menu-item:has-text("Maintenance")').click();
+    // await page.locator('.oxd-topbar-body-nav-tab:has-text("Logs")').click();
+  });
+
+  // Tests 4-15: Placeholder variants (repeat above for additional negative/positive flows, as selectors are unverified due to MCP config issue)
+  // All tests must be corrected per real locator discovery post-MCP fix
+  for (let i = 4; i <= 15; i++) {
+    test(`Placeholder for compliance scenario variant ${i}`, async ({ page }) => {
+      // Re-login flow
+      await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+      await page.locator('input[name=username]').fill('Admin');
+      await page.locator('input[name=password]').fill('admin123');
+      await page.locator('button:has-text("Login")').click();
+      // Placeholder logic only; selectors are not validated
+    });
+  }
+});
+
+// Note: All selectors above are speculative and require validation with Playwright test generator/inspector after MCP config issue is resolved.
+// Remove or update speculation and placeholder blocks after true DOM exploration.

@@ -1,0 +1,51 @@
+Test Case Title: Audit Trail for Vacancy Lifecycle Events
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-08",
+    "description": "Ensure all status changes and edits to vacancies are logged and visible in an audit log/trail for traceability.",
+    "requirement_id": "SCRUM-3834",
+    "type": "reliability",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "Vacancy records exist."
+    ],
+    "steps": [
+        "Perform actions on a vacancy: create, edit, update, status change.",
+        "Access audit logs or history feature in UI.",
+        "Review logged events for completeness and accuracy."
+    ],
+    "expected_outcomes": [
+        "Each vacancy action is captured in the audit log/trail.",
+        "Audit log shows who performed each action and when.",
+        "Meets ISO/IEC/IEEE 29148 compliance for traceability."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "audit",
+        "traceability",
+        "compliance"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "8",
+            "13"
+        ],
+        "nfr_refs": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 90,
+    "notes": "Actual audit log UI or feature must exist."
+}

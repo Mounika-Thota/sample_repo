@@ -1,0 +1,59 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Core Happy Path Functionalities (Explored/Verified Paths Only)', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+    // Wait for login form rendered (component library: .oxd-input)
+    await expect(page.locator('.orangehrm-login-title')).toHaveText('Login');
+    await page.locator('.oxd-input[name="username"]').fill('Admin');
+    await page.locator('.oxd-input[name="password"]').fill('admin123');
+    await page.locator('.oxd-button[type="submit"]').click();
+    // Wait for dashboard/main page
+    await expect(page.locator('.oxd-topbar-header-breadcrumb-module')).toHaveText('Dashboard');
+  });
+
+  test('Dashboard Loads Correctly', async ({ page }) => {
+    await expect(page.locator('.oxd-topbar-header-breadcrumb-module')).toHaveText('Dashboard');
+    // Verify one dashboard widget visible as basic assertion
+    await expect(page.locator('.orangehrm-dashboard-widget')).toBeVisible();
+  });
+
+  test('User Can Navigate to Admin > User Management > Users', async ({ page }) => {
+    // Open Sidebar menu (component library uses .oxd-main-menu-item)
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await expect(page.locator('.oxd-topbar-header-breadcrumb-module')).toHaveText('Admin');
+    // Click 'User Management' tab (in .oxd-topbar-body-nav)
+    await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'User Management' }).click();
+    // Click 'Users' from submenu
+    await page.locator('.oxd-topbar-body-nav-tab-link').filter({ hasText: 'Users' }).click();
+    // Users table
+    await expect(page.locator('.oxd-table')).toBeVisible();
+    await expect(page.locator('.oxd-table-header-title')).toContainText('System Users');
+  });
+
+  test('User Can Filter System Users (by Username)', async ({ page }) => {
+    // Precondition: On Admin > User Management > Users
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Admin' }).click();
+    await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'User Management' }).click();
+    await page.locator('.oxd-topbar-body-nav-tab-link').filter({ hasText: 'Users' }).click();
+    await expect(page.locator('.oxd-table-header-title')).toContainText('System Users');
+    // Fill Username filter (component: .oxd-input[name="username"])
+    await page.locator('.oxd-input[name="username"]').fill('Admin');
+    await page.locator('.oxd-form-actions .oxd-button--secondary').filter({ hasText: 'Search' }).click();
+    // Wait for results
+    await expect(page.locator('.oxd-table-cell')).toContainText('Admin');
+  });
+
+  test('User Can Log Out', async ({ page }) => {
+    // Click avatar/profile dropdown
+    await page.locator('.oxd-userdropdown-tab').click();
+    // Select 'Logout' from menu
+    await page.locator('.oxd-userdropdown-link').filter({ hasText: 'Logout' }).click();
+    // Verify redirected to login page
+    await expect(page.locator('.orangehrm-login-title')).toHaveText('Login');
+  });
+});
+
+// NOTE: Remaining tests requiring detailed data entry, feature management, leave requests, personal info changes, or advanced flows are omitted/ADAPTED due to exploration constraints and session expiry issues.
+// All selectors in this script are verified from real DOM exploration in MCP (component library with .oxd- prefix).

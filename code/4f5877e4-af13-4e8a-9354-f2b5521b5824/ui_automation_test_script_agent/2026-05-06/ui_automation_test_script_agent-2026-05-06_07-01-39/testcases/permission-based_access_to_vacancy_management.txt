@@ -1,0 +1,49 @@
+Test Case Title: Permission-based Access to Vacancy Management
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3834-06",
+    "description": "Ensure only users with correct permissions can create, edit, or manage vacancies.",
+    "requirement_id": "SCRUM-3834",
+    "type": "security",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "At least two users exist: one with HR admin permissions, one without."
+    ],
+    "steps": [
+        "Login as user without HR Admin/recruitment access.",
+        "Attempt to access vacancy management features (view, create, edit vacancy)."
+    ],
+    "expected_outcomes": [
+        "User is denied access to create/edit/manage vacancies.",
+        "Permission boundaries are enforced; vacancy management UI is hidden or access is blocked."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "security",
+        "permissions",
+        "access",
+        "vacancy"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "10"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "1.1.1"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 60,
+    "notes": "Requires multiple roles/accounts in the system."
+}

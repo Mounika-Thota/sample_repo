@@ -1,0 +1,193 @@
+// NOTE: The generated code will not be functional until Playwright is installed and successfully configured on the environment. Please ensure the @playwright/test module is present and proper configuration is set.
+import { test, expect } from '@playwright/test';
+
+test.describe('Recruitment Vacancy Creation Required Field Validation', () => {
+  test.setTimeout(60000);
+  // Shared login and navigation code
+  test.beforeEach(async ({ page }) => {
+    // Login flow (as verified on OrangeHRM OXD demo site)
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login', { waitUntil: 'domcontentloaded' });
+    await page.locator('.oxd-input[name="username"]').fill('Admin');
+    await page.locator('.oxd-input[name="password"]').fill('admin123');
+    await page.locator('.oxd-button[type="submit"]').click();
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
+    // Click Recruitment in left sidebar
+    await page.locator('.oxd-main-menu-item').filter({ hasText: 'Recruitment' }).click();
+    await page.waitForURL('**/recruitment/viewCandidates', { timeout: 10000 });
+    // Click Vacancies tab in the topbar
+    await page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Vacancies' }).click();
+    await expect(page).toHaveURL(/.*recruitment\/viewVacancy/);
+    // Click Add button
+    await page.locator('.oxd-button').filter({ hasText: 'Add' }).click();
+    await expect(page).toHaveURL(/.*recruitment\/addVacancy/);
+    await expect(page.locator('h6.oxd-text.oxd-text--h6.orangehrm-main-title')).toHaveText('Add Vacancy');
+  });
+
+  test('Cannot submit the form with all required fields empty', async ({ page }) => {
+    // Attempt to submit directly
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    // Check for the error messages -- REAL classes used for errors
+    // OrangeHRM OXD error messages for required: .oxd-input-field-error-message
+    const errorElements = await page.locator('.oxd-input-field-error-message');
+    await expect(errorElements.nth(0)).toBeVisible();
+    await expect(errorElements.nth(0)).toHaveText('Required');
+    // All required fields show error? (at least 3: Job Title, Vacancy Name, Hiring Manager)
+    await expect(page.locator('form')).toContainText('Required');
+    // The form is NOT submitted, we remain on the form
+    await expect(page).toHaveURL(/.*recruitment\/addVacancy/);
+  });
+
+  test('Cannot submit if Job Title is missing', async ({ page }) => {
+    // Fill all except Job Title
+    // Vacancy Name
+    await page.locator('.oxd-input[name="name"]').fill('Automation Vacancy');
+    // Hiring Manager (custom oxd-autocomplete-text-input)
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    // Click Save without setting Job Title
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    // Check error on Job Title
+    await expect(page.locator('.oxd-input-field-error-message').first()).toBeVisible();
+  });
+
+  test('Cannot submit if Vacancy Name is missing', async ({ page }) => {
+    // Job Title - select first
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown').locator('div').nth(1).click();
+    // Hiring Manager
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    // Leave Vacancy Name blank
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    // Vacancy Name error
+    await expect(page.locator('.oxd-input-field-error-message').nth(1)).toBeVisible();
+  });
+
+  test('Cannot submit if Hiring Manager is missing', async ({ page }) => {
+    // Job Title
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    // Vacancy Name
+    await page.locator('.oxd-input[name="name"]').fill('Backend Engineer');
+    // Leave Hiring Manager blank
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    // Error, must be at position 2
+    await expect(page.locator('.oxd-input-field-error-message').nth(2)).toBeVisible();
+  });
+
+  test('Cannot submit if both Job Title & Vacancy Name missing', async ({ page }) => {
+    // Only Hiring Manager is filled
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message').first()).toBeVisible();
+    await expect(page.locator('.oxd-input-field-error-message').nth(1)).toBeVisible();
+  });
+
+  test('Cannot submit if both Job Title & Hiring Manager missing', async ({ page }) => {
+    // Only Vacancy Name filled
+    await page.locator('.oxd-input[name="name"]').fill('Backoffice Position');
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message').first()).toBeVisible();
+    await expect(page.locator('.oxd-input-field-error-message').nth(2)).toBeVisible();
+  });
+
+  test('Cannot submit if both Vacancy Name & Hiring Manager missing', async ({ page }) => {
+    // Only Job Title filled
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message').nth(1)).toBeVisible();
+    await expect(page.locator('.oxd-input-field-error-message').nth(2)).toBeVisible();
+  });
+
+  test('Cannot submit with ALL fields missing except one', async ({ page }) => {
+    // Try Job Title only
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    // Only one Valid, check
+    await expect(page.locator('.oxd-input-field-error-message')).toHaveCount(2);
+    // Now try Vacancy Name only
+    await page.reload();
+    await page.waitForSelector('.oxd-input[name="name"]');
+    await page.locator('.oxd-input[name="name"]').fill('Backend QA');
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toHaveCount(2);
+    // Now try Hiring Manager only
+    await page.reload();
+    await page.waitForSelector('.oxd-autocomplete-text-input input');
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-option');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toHaveCount(2);
+  });
+
+  test('Happy path: successful creation when all required fields filled', async ({ page }) => {
+    // Fill all fields (required ones)
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    // Vacancy Name
+    await page.locator('.oxd-input[name="name"]').fill('Frontend QA Automated');
+    // Hiring Manager
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    // Save
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    // Success is visible as a toast with selector .oxd-toast .oxd-text--toast-title and .oxd-text--toast-message
+    await expect(page.locator('.oxd-toast')).toBeVisible();
+    await expect(page.locator('.oxd-text--toast-title')).toHaveText('Success');
+    await expect(page.locator('.oxd-text--toast-message')).toContainText('Successfully Saved');
+  });
+
+  // Adaptations below - negative test path permutations for 8 further pairwise missing field permutations
+  test('Cannot submit with only Job Title field present', async ({ page }) => {
+    // Only fill Job Title
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+  test('Cannot submit with only Vacancy Name field present', async ({ page }) => {
+    await page.locator('.oxd-input[name="name"]').fill('V1');
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+  test('Cannot submit with only Hiring Manager field present', async ({ page }) => {
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+  test('Cannot submit with only Job Title and Vacancy Name field present', async ({ page }) => {
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    await page.locator('.oxd-input[name="name"]').fill('V2');
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+  test('Cannot submit with only Job Title and Hiring Manager field present', async ({ page }) => {
+    await page.locator('.oxd-select-text').first().click();
+    await page.locator('.oxd-select-dropdown div').nth(1).click();
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+  test('Cannot submit with only Vacancy Name and Hiring Manager field present', async ({ page }) => {
+    await page.locator('.oxd-input[name="name"]').fill('V3');
+    await page.locator('.oxd-autocomplete-text-input input').fill('Linda Anderson');
+    await page.waitForSelector('.oxd-autocomplete-dropdown');
+    await page.locator('.oxd-autocomplete-dropdown .oxd-autocomplete-option').filter({ hasText: 'Linda Anderson' }).click();
+    await page.locator('.oxd-button').filter({ hasText: 'Save' }).click();
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+});
+// NOTE: OrangeHRM OXD demo UI is used: selectors may require tweaking if base classes or label text changes. Please verify selectors with live DOM if the test fails unexpectedly.
