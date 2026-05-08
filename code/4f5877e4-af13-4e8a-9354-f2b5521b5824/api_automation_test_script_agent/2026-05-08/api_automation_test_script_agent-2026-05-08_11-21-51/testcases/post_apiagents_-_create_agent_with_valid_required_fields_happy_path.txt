@@ -1,0 +1,69 @@
+Test Case Title: POST /api/agents/ - Create agent with valid required fields (happy path)
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-6edb57c7-001",
+    "description": "Ensure a new agent is created successfully when all required fields are present and valid.",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with valid token and body containing 'slug', 'display_name', and a valid 'category'"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response JSON is valid",
+        "New agent is persisted with provided details"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json"
+        },
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "agent-slug-123",
+                "constraints": "Non-empty string, unique among agents"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Agent Display Name",
+                "constraints": "Non-empty string"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "testing",
+                "constraints": "Enum: usg, testing, api_doc_testing, performance_testing, deployment, req_synthesizer, ui_automation, documentation"
+            }
+        ],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "smoke",
+            "regression",
+            "sanity"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "create_agent_api_agents__post",
+        "owasp_asvs_refs": [
+            "V2",
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
