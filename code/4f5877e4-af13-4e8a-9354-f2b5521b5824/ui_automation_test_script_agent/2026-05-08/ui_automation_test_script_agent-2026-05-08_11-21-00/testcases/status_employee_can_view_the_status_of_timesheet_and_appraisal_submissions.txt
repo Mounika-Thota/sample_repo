@@ -1,0 +1,46 @@
+Test Case Title: Status: Employee can view the status of timesheet and appraisal submissions
+------------------------------------------------------------
+
+{
+    "id": "TC-US-002-07",
+    "description": "Verify that the employee can see real-time status indicators for each timesheet/appraisal submission (e.g., approved, pending review, needs correction).",
+    "requirement_id": "US-002",
+    "type": "positive",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "Employee has submitted at least one timesheet and one appraisal."
+    ],
+    "steps": [
+        "Navigate to the Timesheet module and review the status field for the current/previous submission.",
+        "Navigate to the Appraisal module and review the status of the current/previous cycle submission."
+    ],
+    "expected_outcomes": [
+        "Each module displays an accurate status (e.g., 'Pending', 'Approved', 'Requires Correction')."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "status",
+        "reporting",
+        "timesheet",
+        "appraisal"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "Employees see the current status of their timesheets and appraisals (e.g., pending review, approved, requires correction)."
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 50,
+    "notes": ""
+}
