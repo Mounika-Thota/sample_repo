@@ -1,0 +1,50 @@
+Test Case Title: Accessibility: Dashboard widgets and navigation
+------------------------------------------------------------
+
+{
+    "id": "TC-US001-12",
+    "description": "Verify that dashboard widgets and navigation controls meet basic accessibility standards, including keyboard navigation and ARIA labeling.",
+    "requirement_id": "US-001",
+    "type": "accessibility",
+    "priority": "P2",
+    "risk_level": "low",
+    "preconditions": [
+        "User is authenticated and dashboard is visible"
+    ],
+    "steps": [
+        "Tab through dashboard widgets and navigation links using keyboard",
+        "Check for accessible labels and ARIA attributes for widgets and shortcuts"
+    ],
+    "expected_outcomes": [
+        "All dashboard widgets and navigation are keyboard-accessible",
+        "Widgets have suitable accessible names/labels"
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "accessibility",
+        "keyboard",
+        "ARIA"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [],
+        "nfr_refs": [
+            "Accessibility"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": [
+            "2.1.1",
+            "1.3.1",
+            "2.4.6"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 35,
+    "notes": "Accessibility check via keyboard and ARIA attributes."
+}
