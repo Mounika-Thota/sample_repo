@@ -1,0 +1,50 @@
+Test Case Title: Audit Log Entry for Failed Login Attempt
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3717-04",
+    "description": "Verify that audit logs capture failed login attempts for traceability.",
+    "requirement_id": "SCRUM-3717",
+    "type": "negative",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "Audit logging is configured and enabled."
+    ],
+    "steps": [
+        "Navigate to the application URL: https://opensource-demo.orangehrmlive.com/web/index.php/",
+        "Enter invalid credentials (e.g., Username: Admin, Password: wrongpass).",
+        "Submit the login form.",
+        "Access the audit log module/section as Admin user."
+    ],
+    "expected_outcomes": [
+        "Audit log contains an entry for failed login attempt with attempted username, timestamp, and failure status."
+    ],
+    "data": {
+        "inputs": {
+            "username": "Admin",
+            "password": "wrongpass"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "audit",
+        "security",
+        "failed-login"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [],
+        "nfr_refs": [],
+        "standards": [
+            "OWASP ASVS"
+        ],
+        "owasp_asvs": [
+            "V7.1"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 30,
+    "notes": "Requires accessibility to audit log as Admin."
+}
