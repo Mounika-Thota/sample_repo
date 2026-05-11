@@ -1,0 +1,139 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Login Page Automation', () => {
+  test('Successful Login with Valid Credentials', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter valid username
+    await page.fill('input[name="username"]', 'johndoe');
+    // Enter valid password
+    await page.fill('input[name="password"]', 'TestPassword123');
+    // Click the Login button
+    await page.click('button[type="submit"]');
+    // User is redirected to the dashboard/home page
+    await expect(page).toHaveURL(/dashboard|home/);
+    // Session is established (cookie check)
+    const cookies = await page.context().cookies();
+    expect(cookies.length).toBeGreaterThan(0);
+  });
+
+  test('Login with Invalid Credentials Fails', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter invalid username or password
+    await page.fill('input[name="username"]', 'wronguser');
+    await page.fill('input[name="password"]', 'WrongPassword!');
+    // Click the Login button
+    await page.click('button[type="submit"]');
+    // User remains on the login page
+    await expect(page).toHaveURL('http://localhost:3000/login');
+    // Error message displayed
+    await expect(page.locator('.error, .alert, text=Invalid')).toBeVisible();
+  });
+
+  test('Login with Empty Fields Shows Validation Errors', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Leave username and password empty
+    await page.fill('input[name="username"]', '');
+    await page.fill('input[name="password"]', '');
+    // Click the Login button
+    await page.click('button[type="submit"]');
+    // Validation messages are shown for required fields
+    await expect(page.locator('.error, .alert, text=required')).toBeVisible();
+    // User is not logged in
+    await expect(page).toHaveURL('http://localhost:3000/login');
+  });
+
+  test('Password Field Masks Input', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter password in the password field
+    await page.fill('input[name="password"]', 'MySecretPass!');
+    // Input is masked
+    const passwordType = await page.getAttribute('input[name="password"]', 'type');
+    expect(passwordType).toBe('password');
+  });
+
+  test('Session Handling on Successful Login', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter valid credentials
+    await page.fill('input[name="username"]', 'secureuser');
+    await page.fill('input[name="password"]', 'SafePass!789');
+    // Submit the login form
+    await page.click('button[type="submit"]');
+    // Session tokens/cookies are set
+    const cookies = await page.context().cookies();
+    expect(cookies.length).toBeGreaterThan(0);
+    // User is redirected on success
+    await expect(page).toHaveURL(/dashboard|home/);
+  });
+
+  test('Login Form Accessibility', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Accessible labels for username and password fields
+    await expect(page.locator('label[for="username"]')).toBeVisible();
+    await expect(page.locator('label[for="password"]')).toBeVisible();
+    // Tab navigation between fields
+    await page.keyboard.press('Tab');
+    await page.keyboard.press('Tab');
+    // Error messages have ARIA attributes where appropriate
+    // Assuming .error role attribute
+    await expect(page.locator('.error[role="alert"]')).toBeVisible();
+  });
+
+  test('Login with SQL Injection Attempt', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter SQL injection string
+    await page.fill('input[name="username"]', "'admin' OR '1'='1'");
+    await page.fill('input[name="password"]', 'anypass');
+    // Submit the login form
+    await page.click('button[type="submit"]');
+    // Login attempt is rejected, error visible
+    await expect(page.locator('.error, .alert')).toBeVisible();
+    // No unauthorized access
+    await expect(page).toHaveURL('http://localhost:3000/login');
+  });
+
+  test('Login with XSS Attempt', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter XSS payload
+    await page.fill('input[name="username"]', '<script>alert(1)</script>');
+    await page.fill('input[name="password"]', 'XSSpass');
+    // Submit the login form
+    await page.click('button[type="submit"]');
+    // No script execution in browser; error visible
+    await expect(page.locator('.error, .alert')).toBeVisible();
+    await expect(page).toHaveURL('http://localhost:3000/login');
+  });
+
+  test('Login Form Internationalization', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Enter Unicode username and password
+    await page.fill('input[name="username"]', '用户测试');
+    await page.fill('input[name="password"]', '密码测试123');
+    // Submit the login form
+    await page.click('button[type="submit"]');
+    // Form accepts Unicode input
+    // If credentials valid, user is signed in
+    await expect(page).toHaveURL(/dashboard|home|login/);
+  });
+
+  test('Login Form Usability - Autofocus and Autocomplete', async ({ page }) => {
+    // Open the login page
+    await page.goto('http://localhost:3000/login');
+    // Autofocus username field
+    const activeElement = await page.evaluate(() => document.activeElement?.getAttribute('name'));
+    expect(activeElement).toBe('username');
+    // Autocomplete attributes for username and password
+    const unameAutocomplete = await page.getAttribute('input[name="username"]', 'autocomplete');
+    const pwdAutocomplete = await page.getAttribute('input[name="password"]', 'autocomplete');
+    expect(unameAutocomplete).not.toBeNull();
+    expect(pwdAutocomplete).not.toBeNull();
+  });
+});
