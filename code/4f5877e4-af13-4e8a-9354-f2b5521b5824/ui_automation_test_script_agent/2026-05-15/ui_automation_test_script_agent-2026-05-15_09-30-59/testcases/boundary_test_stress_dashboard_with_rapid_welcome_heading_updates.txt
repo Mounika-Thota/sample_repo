@@ -1,0 +1,52 @@
+Test Case Title: Boundary Test: Stress Dashboard with Rapid Welcome Heading Updates
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3902-03",
+    "description": "Stress test by updating the welcome heading multiple times rapidly to ensure system does not spike API calls or degrade in performance.",
+    "requirement_id": "SCRUM-3902",
+    "type": "boundary",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is authenticated using provided credentials (Admin/admin123)",
+        "User is on the dashboard",
+        "Dashboard allows heading edits"
+    ],
+    "steps": [
+        "Clear or observe the current API network log.",
+        "Update the welcome heading with a new value.",
+        "Immediately update the heading again with another value within a short interval (e.g., 1-2 seconds).",
+        "Repeat 3-5 times.",
+        "Observe backend API call volume each time.",
+        "Compare call spike/trend to baseline single update."
+    ],
+    "expected_outcomes": [
+        "No excessive increase in backend API calls per update event.",
+        "No performance degradation during rapid successive heading updates."
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "boundary",
+        "api",
+        "performance"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "1"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 180,
+    "notes": "Skip if heading edit is not user-accessible. Review network logs for API spamming or API call batching."
+}
