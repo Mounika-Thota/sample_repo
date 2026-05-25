@@ -1,0 +1,50 @@
+Test Case Title: System Enforces Viewing Permissions - Employee
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3911-11",
+    "description": "Verify employee cannot see other users' leave data.",
+    "requirement_id": "SCRUM-3911",
+    "type": "security",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "User is logged in as employee",
+        "User is on Leave dashboard"
+    ],
+    "steps": [
+        "Open Leave dashboard",
+        "Attempt to view another user's or team's leave data",
+        "Record behavior and validate no access"
+    ],
+    "expected_outcomes": [
+        "Employee is restricted to own leave data",
+        "No unauthorized access to other users' information"
+    ],
+    "data": {
+        "inputs": {},
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "permission",
+        "employee",
+        "security"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "6"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 18,
+    "notes": ""
+}

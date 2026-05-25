@@ -1,0 +1,53 @@
+Test Case Title: Audit Logging of Data Changes to Filters and Scope
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3911-17",
+    "description": "Verify all filter changes and scope adjustments are logged for audit purposes.",
+    "requirement_id": "SCRUM-3911",
+    "type": "reliability",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in",
+        "User is on Leave dashboard"
+    ],
+    "steps": [
+        "Change filter (e.g., date range, leave type)",
+        "Adjust team/org scope (manager/HR roles)",
+        "Review audit logs for record of changes"
+    ],
+    "expected_outcomes": [
+        "All filter and scope changes are logged",
+        "Audit logs are accessible and accurate"
+    ],
+    "data": {
+        "inputs": {
+            "filter": "date-range",
+            "scope": "team/org"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "audit-log",
+        "filter",
+        "scope"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "10"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 13,
+    "notes": ""
+}

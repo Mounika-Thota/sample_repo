@@ -1,0 +1,50 @@
+Test Case Title: Leave History Filtering by Leave Type
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3911-07",
+    "description": "Verify user can filter leave history by leave type (e.g., annual, sick, etc.).",
+    "requirement_id": "SCRUM-3911",
+    "type": "positive",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "User is logged in as employee",
+        "User is on Leave dashboard"
+    ],
+    "steps": [
+        "Locate leave history filter",
+        "Select filter for leave type (e.g., Sick Leave)",
+        "Apply filter and verify only selected leave type is shown"
+    ],
+    "expected_outcomes": [
+        "Leave records of selected leave type are displayed",
+        "Other leave types are excluded from view"
+    ],
+    "data": {
+        "inputs": {
+            "leave_type": "Sick Leave"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "leave-history",
+        "filter",
+        "leave-type"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "5"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 12,
+    "notes": ""
+}

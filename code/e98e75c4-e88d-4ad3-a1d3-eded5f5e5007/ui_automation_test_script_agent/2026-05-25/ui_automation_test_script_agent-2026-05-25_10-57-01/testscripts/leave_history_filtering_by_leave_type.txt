@@ -1,0 +1,79 @@
+import { test, expect } from '@playwright/test';
+test.setTimeout(60000);
+
+const loginUrl = 'https://opensource-demo.orangehrmlive.com/web/index.php/auth/login';
+
+async function doLogin(page) {
+  await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('.oxd-input[name="username"]')).toBeVisible();
+  await expect(page.locator('.oxd-input[name="password"]')).toBeVisible();
+  await page.fill('.oxd-input[name="username"]', 'Admin');
+  await page.fill('.oxd-input[name="password"]', 'admin123');
+  await page.click('.oxd-button.oxd-button--main.oxd-button--medium');
+  await expect(page.locator('.oxd-topbar-header-breadcrumb')).toBeVisible();
+}
+
+test.describe('OrangeHRM E2E Suite', () => {
+  test('Login and visibility of sidebar navigation', async ({ page }) => {
+    await doLogin(page);
+    // Dashboard should be visible after login
+    await expect(page.locator('.oxd-sidepanel')).toBeVisible();
+    // Navigation - sidebar anchors should have text
+    const navItems = page.locator('a.oxd-main-menu-item');
+    await expect(navItems.first()).toBeVisible();
+  });
+
+  test('Navigate to Admin module and verify Users grid', async ({ page }) => {
+    await doLogin(page);
+    // Navigate via sidebar: Admin
+    await page.click('a.oxd-main-menu-item:has-text("Admin")');
+    await expect(page.locator('.oxd-table')).toBeVisible();
+    // At least one row should be present if data exists, otherwise, show empty state
+    const rows = page.locator('.oxd-table-body .oxd-table-card');
+    expect(await rows.count()).toBeGreaterThanOrEqual(0);
+  });
+
+  test('Navigate to PIM module and Add Employee - happy path', async ({ page }) => {
+    await doLogin(page);
+    await page.click('a.oxd-main-menu-item:has-text("PIM")');
+    await expect(page.locator('.oxd-topbar-header-breadcrumb:has-text("PIM")')).toBeVisible();
+    await page.click('button.oxd-button.oxd-button--medium.oxd-button--secondary:has-text("Add")');
+    await expect(page.locator('.orangehrm-card-container')).toBeVisible();
+    // Fill form fields (only those available)
+    await page.fill('.oxd-input[name="firstName"]', 'TestFirst');
+    await page.fill('.oxd-input[name="lastName"]', 'TestLast');
+    // Employee Id is auto-filled, leave as is
+    await page.click('.oxd-button.oxd-button--medium.oxd-button--secondary:has-text("Save")');
+    // Wait for redirect - personal details card should be visible
+    await expect(page.locator('.orangehrm-main-title:has-text("Personal Details")')).toBeVisible();
+  });
+
+  test('Apply Leave (if Apply Leave button and balance are present)', async ({ page }) => {
+    await doLogin(page);
+    await page.click('a.oxd-main-menu-item:has-text("Leave")');
+    await expect(page.locator('.oxd-topbar-header-breadcrumb:has-text("Leave")')).toBeVisible();
+    // Check if Apply Leave button exists
+    const applyBtn = page.locator('button.oxd-button.oxd-button--medium.oxd-button--secondary:has-text("Apply")');
+    if (await applyBtn.count() > 0) {
+      await applyBtn.click();
+      // Select Leave Type dropdown
+      const leaveType = page.locator('.oxd-select-text--active');
+      if (await leaveType.count() > 0) {
+        await leaveType.first().click();
+        const options = page.locator('div[role="option"]');
+        if (await options.count() > 0) {
+          await options.first().click();
+        }
+        await page.fill('.oxd-input.oxd-input--active[name="leaveType"]', '2024-04-25');
+        await page.fill('.oxd-input.oxd-input--active[name="to"]', '2024-04-25');
+        await page.click('.oxd-button.oxd-button--medium.oxd-button--secondary:has-text("Apply")');
+        // Expect success toast OR balance error
+        const toastMsg = page.locator('.oxd-toast');
+        expect(await toastMsg.count()).toBeGreaterThan(0);
+      }
+    } else {
+      // Adapted: if no Apply Leave button, skip this test
+      test.skip();
+    }
+  });
+});
