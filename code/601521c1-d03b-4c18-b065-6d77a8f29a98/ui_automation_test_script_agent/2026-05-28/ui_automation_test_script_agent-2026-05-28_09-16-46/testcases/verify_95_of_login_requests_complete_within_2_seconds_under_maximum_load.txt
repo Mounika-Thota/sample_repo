@@ -1,0 +1,60 @@
+Test Case Title: Verify 95% of login requests complete within 2 seconds under maximum load
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-3800-01",
+    "description": "This test verifies whether the login endpoint responds within two seconds for at least 95% of requests under simulated maximum user load.",
+    "requirement_id": "SCRUM-3800",
+    "type": "performance",
+    "priority": "P0",
+    "risk_level": "high",
+    "preconditions": [
+        "Test environment is set up to reflect production-like hardware and networking.",
+        "Admin test account exists (username: Admin, password: admin123).",
+        "No interfering maintenance or background activity running.",
+        "All caches are cleared before each run."
+    ],
+    "steps": [
+        "Simulate maximum concurrent load via virtual users (10,000/concurrency).",
+        "Each user attempts to log in with valid credentials to the application (https://opensource-demo.orangehrmlive.com/web/index.php/).",
+        "Continue simulation for a statistically significant sample size.",
+        "Collect response times for login endpoint."
+    ],
+    "expected_outcomes": [
+        "At least 95% of all login requests complete in less than or equal to 2000 milliseconds.",
+        "No system resource overutilization or crash occurs during the test."
+    ],
+    "data": {
+        "inputs": {
+            "username": "Admin",
+            "password": "admin123"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "performance",
+        "login",
+        "response-time",
+        "load"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "1",
+            "2"
+        ],
+        "nfr_refs": [
+            "performance"
+        ],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V10"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 900,
+    "notes": "Requires a performance/load test tool; not feasible for UI e2e automation."
+}

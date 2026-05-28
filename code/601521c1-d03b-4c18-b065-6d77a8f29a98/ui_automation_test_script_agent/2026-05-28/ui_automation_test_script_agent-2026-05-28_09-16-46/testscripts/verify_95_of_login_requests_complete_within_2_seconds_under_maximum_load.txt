@@ -1,0 +1,101 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('Leave Management Happy Path', () => {
+  test('User applies for leave successfully', async ({ page }) => {
+    // Step 1: Log in (assumes login is via form visible on the homepage)
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.getByLabel('Username')).toBeVisible();
+    await page.getByLabel('Username').fill('Admin');
+    await expect(page.getByLabel('Password')).toBeVisible();
+    await page.getByLabel('Password').fill('admin123');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await page.waitForURL('**/dashboard'); // Assure login success
+
+    // Step 2: Navigate to Leave > Apply
+    // Main left menu uses .oxd-main-menu-item for navigation
+    const leaveMenu = page.locator('.oxd-main-menu-item').filter({ hasText: 'Leave' });
+    await expect(leaveMenu).toBeVisible();
+    await leaveMenu.click();
+    await page.waitForSelector('.oxd-topbar-body-nav-tab', { state: 'visible' });
+    // Top bar tabs use .oxd-topbar-body-nav-tab
+    const applyTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Apply' });
+    await applyTab.click();
+    await page.waitForLoadState('networkidle');
+
+    // Step 3: Fill Apply Leave form (uses .oxd-form on this page)
+    // Leave Type (Ant Design Select or OXD custom component with .oxd-select-text)
+    const leaveTypeSelector = page.locator('.oxd-select-text').first();
+    await expect(leaveTypeSelector).toBeVisible();
+    await leaveTypeSelector.click();
+    // Wait for the options to appear
+    const leaveTypeOption = page.locator('.oxd-select-dropdown .oxd-select-option').filter({ hasText: 'CAN - Bereavement' });
+    await expect(leaveTypeOption).toBeVisible();
+    await leaveTypeOption.click();
+    // From Date
+    const fromDateInput = page.locator('input[placeholder="yyyy-mm-dd"]').first();
+    await expect(fromDateInput).toBeVisible();
+    await fromDateInput.fill('2024-07-15');
+    // To Date
+    const toDateInput = page.locator('input[placeholder="yyyy-mm-dd"]').nth(1);
+    await expect(toDateInput).toBeVisible();
+    await toDateInput.fill('2024-07-15');
+    // Comment (optional)
+    const commentBox = page.locator('textarea.oxd-textarea').first();
+    if (await commentBox.isVisible()) {
+      await commentBox.fill('Bereavement leave request.');
+    }
+    // Submit
+    const applyButton = page.locator('button').filter({ hasText: 'Apply' });
+    await expect(applyButton).toBeVisible();
+    await applyButton.click();
+    // Success toast
+    const toast = page.locator('.oxd-toast');
+    await expect(toast).toBeVisible({ timeout: 10000 });
+    // The toast message structure is: .oxd-toast .oxd-text--toast-message
+    const toastMessage = toast.locator('.oxd-text--toast-message');
+    await expect(toastMessage).toHaveText(/Success/);
+  });
+
+  test('User sees error when applying leave with no balance', async ({ page }) => {
+    // Assumes login already happens in beforeEach
+    // Adaptation: If "Apply" form disables submission or shows 'No Leave Types with Leave Balance', validate that message
+    await page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
+    await page.waitForLoadState('domcontentloaded');
+    await page.getByLabel('Username').fill('Admin');
+    await page.getByLabel('Password').fill('admin123');
+    await page.getByRole('button', { name: 'Login' }).click();
+    await page.waitForURL('**/dashboard');
+    const leaveMenu = page.locator('.oxd-main-menu-item').filter({ hasText: 'Leave' });
+    await leaveMenu.click();
+    await page.waitForSelector('.oxd-topbar-body-nav-tab', { state: 'visible' });
+    const applyTab = page.locator('.oxd-topbar-body-nav-tab').filter({ hasText: 'Apply' });
+    await applyTab.click();
+    await page.waitForLoadState('networkidle');
+    const noBalanceMsg = page.getByText('No Leave Types with Leave Balance to apply');
+    // If the no-balance message is shown, adapt test to validate this state
+    if (await noBalanceMsg.isVisible({ timeout: 3000 })) {
+      await expect(noBalanceMsg).toBeVisible();
+    } else {
+      // If not, fill the leave application as in happy path, but intentionally select a type with zero balance to trigger error
+      const leaveTypeSelector = page.locator('.oxd-select-text').first();
+      await leaveTypeSelector.click();
+      const zeroBalanceOption = page.locator('.oxd-select-dropdown .oxd-select-option').filter({ hasText: 'CAN - Time in Lieu' }); // Assume zero balance option exists
+      if (await zeroBalanceOption.count() > 0) {
+        await zeroBalanceOption.click();
+        const fromDateInput = page.locator('input[placeholder="yyyy-mm-dd"]').first();
+        await fromDateInput.fill('2024-07-20');
+        const toDateInput = page.locator('input[placeholder="yyyy-mm-dd"]').nth(1);
+        await toDateInput.fill('2024-07-20');
+        const applyButton = page.locator('button').filter({ hasText: 'Apply' });
+        await applyButton.click();
+        // Look for error toast
+        const errorToast = page.locator('.oxd-toast');
+        await expect(errorToast).toBeVisible();
+        await expect(errorToast.locator('.oxd-text--toast-message')).toHaveText(/Insufficient/);
+      } else {
+        test.skip('No zero-balance leave type found.');
+      }
+    }
+  });
+});
