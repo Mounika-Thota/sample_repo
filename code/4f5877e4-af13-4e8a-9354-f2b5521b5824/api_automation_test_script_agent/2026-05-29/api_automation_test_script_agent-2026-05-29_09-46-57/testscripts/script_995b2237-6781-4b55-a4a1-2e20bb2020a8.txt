@@ -1,0 +1,157 @@
+import io.restassured.RestAssured;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import static io.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+public class LoginApiTests {
+    @BeforeClass
+    public static void setup() {
+        RestAssured.baseURI = "https://api.example.com";
+    }
+
+    @AfterClass
+    public static void teardown() {
+        // Implement teardown logic if needed
+    }
+
+    @Test
+    public void testValidLoginReturnsToken() {
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"user@example.com\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(200)
+            .contentType("application/json")
+            .body("token", notNullValue());
+    }
+
+    @Test
+    public void testInvalidLoginReturns401() {
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"wrong@example.com\",\"password\":\"WrongPassword\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(401)
+            .contentType("application/json")
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void testMissingUsernameReturns400() {
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(400)
+            .body("error", containsString("missing username"));
+    }
+
+    @Test
+    public void testMissingPasswordReturns400() {
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"user@example.com\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(400)
+            .body("error", containsString("missing password"));
+    }
+
+    @Test
+    public void testInvalidUsernameFormatReturns400() {
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"invalid_format\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(400)
+            .body("error", containsString("invalid username format"));
+    }
+
+    @Test
+    public void testRateLimitExceedReturns429() {
+        for(int i=0; i<10; i++) {
+            given()
+                .header("Content-Type", "application/json")
+                .body("{\"username\":\"user@example.com\",\"password\":\"P@ssw0rd\"}")
+            .when()
+                .post("/login");
+        }
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"user@example.com\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(429)
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void testServerErrorReturns500() {
+        // Assuming an endpoint or setup triggers server error, e.g., simulate db unavailability
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"user@example.com\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login?simulateError=true")
+        .then()
+            .statusCode(500)
+            .body("error", notNullValue());
+    }
+
+    @Test
+    public void testSQLInjectionUsernameReturns400() {
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"' OR '1'='1'\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(400)
+            .body("error", containsString("invalid input"));
+    }
+
+    @Test
+    public void testAccountLockoutPolicy() {
+        for(int i=0; i<5; i++) {
+            given()
+                .header("Content-Type", "application/json")
+                .body("{\"username\":\"user@example.com\",\"password\":\"InvalidPassword\"}")
+            .when()
+                .post("/login");
+        }
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"user@example.com\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(anyOf(equalTo(429), equalTo(401)))
+            .body("error", containsString("account locked"));
+    }
+
+    @Test
+    public void testLoginResponseTimeUnder500ms() {
+        long start = System.currentTimeMillis();
+        given()
+            .header("Content-Type", "application/json")
+            .body("{\"username\":\"user@example.com\",\"password\":\"P@ssw0rd\"}")
+        .when()
+            .post("/login")
+        .then()
+            .statusCode(200);
+        long duration = System.currentTimeMillis() - start;
+        assert(duration <= 500);
+    }
+}
