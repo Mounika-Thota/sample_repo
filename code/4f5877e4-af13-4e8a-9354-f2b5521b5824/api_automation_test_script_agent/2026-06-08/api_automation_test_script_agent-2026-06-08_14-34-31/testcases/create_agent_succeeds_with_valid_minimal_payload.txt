@@ -1,0 +1,70 @@
+Test Case Title: Create Agent succeeds with valid minimal payload
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-88971010-001",
+    "description": "Validate that POST /api/agents/ creates an agent when required fields are provided and request is authenticated (ISO/IEC/IEEE 29148 verifiable requirement; OWASP ASVS V2/V5).",
+    "preconditions": [
+        "API is reachable",
+        "Valid Bearer token available with permission to create agents"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with Authorization header and JSON body containing valid slug, display_name, and category"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response Content-Type is application/json",
+        "Response body is valid JSON (RFC 8259)"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "agent_min_001",
+                "constraints": "Required; type must be string"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "Agent Minimal 001",
+                "constraints": "Required; type must be string"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "testing",
+                "constraints": "Required; must be one of [usg, testing, api_doc_testing, performance_testing, deployment, req_synthesizer, ui_automation, documentation]"
+            }
+        ],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "smoke",
+            "regression"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "<openapi_document_id>",
+        "owasp_asvs_refs": [
+            "V2",
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
