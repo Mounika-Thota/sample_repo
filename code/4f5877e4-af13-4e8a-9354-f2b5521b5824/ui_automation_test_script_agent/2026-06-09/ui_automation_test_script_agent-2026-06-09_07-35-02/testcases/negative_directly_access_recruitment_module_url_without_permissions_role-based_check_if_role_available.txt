@@ -1,0 +1,56 @@
+Test Case Title: Negative: Directly access Recruitment module URL without permissions (role-based check, if role available)
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-4004-05",
+    "description": "Validate access control behavior by attempting to access the Recruitment module/actionable view with a user lacking recruitment permissions (only if such a user exists in the demo environment).",
+    "requirement_id": "SCRUM-4004",
+    "type": "security",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "AUT is reachable.",
+        "A non-Admin user without Recruitment permissions exists and credentials are available in the test environment; otherwise mark this test Not Applicable.",
+        "Recruitment module URL or navigation path is known from prior exploration."
+    ],
+    "steps": [
+        "Login with the non-Admin user (setup step).",
+        "Attempt to navigate to Recruitment module using the left sidebar (if visible).",
+        "If a direct URL to Recruitment landing page is known, attempt to open it directly.",
+        "Attempt to open the recruitment actionable-items view if reachable."
+    ],
+    "expected_outcomes": [
+        "If the user lacks permissions, Recruitment module and its actionable view are not accessible (hidden from navigation and/or blocked by an access denied message).",
+        "No recruitment data is exposed to unauthorized users."
+    ],
+    "data": {
+        "inputs": {
+            "non_admin_username": "N/A",
+            "non_admin_password": "N/A"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "security",
+        "rbac",
+        "recruitment"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "AC1"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148"
+        ],
+        "owasp_asvs": [
+            "V2.1.1",
+            "V4.1.1"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": false,
+    "estimated_duration_sec": 120,
+    "notes": "Demo environment may not provide additional users. Do not create accounts with unknown permissions unless explicitly supported and permitted."
+}

@@ -1,0 +1,225 @@
+import { test, expect } from '@playwright/test';
+
+/**
+ * TC-SCRUM-4004-05 (Security / RBAC)
+ * NOTE/ADAPTATION:
+ * - MCP browser exploration could not be executed because the MCP environment failed to load Playwright config
+ *   with error: "Cannot find module '@playwright/test'".
+ * - Therefore, live DOM inspection and selector verification were not possible here.
+ * - This script is provided as a production-ready template, but selectors/expectations MUST be verified
+ *   against the real DOM before use.
+ */
+
+test.describe('SCRUM-4004 RBAC: Recruitment module access control', () => {
+  test.setTimeout(60_000);
+
+  const baseURL = 'https://opensource-demo.orangehrmlive.com/web/index.php/';
+  const adminUser = 'Admin';
+  const adminPass = 'admin123';
+
+  // Demo environment usually does not provide a known non-admin user without Recruitment permissions.
+  // If your environment has such credentials, set them via env vars.
+  const nonAdminUser = process.env.NON_ADMIN_USERNAME;
+  const nonAdminPass = process.env.NON_ADMIN_PASSWORD;
+
+  test.beforeEach(async ({ page }) => {
+    // Keep each test isolated; do not rely on shared auth state.
+    await page.goto(baseURL + 'auth/login', { waitUntil: 'domcontentloaded' });
+  });
+
+  test('TC1 - Preconditions: verify non-admin credentials are available, else mark Not Applicable', async ({}) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided for demo environment.');
+  });
+
+  test('TC2 - Login with non-admin user (setup step)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    // TODO: Verify selectors via DOM exploration.
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+
+    // No assertions per instruction.
+    await page.waitForLoadState('domcontentloaded');
+  });
+
+  test('TC3 - Attempt to navigate to Recruitment module using left sidebar (if visible)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    // TODO: Verify sidebar link selector and exact text in real DOM.
+    const recruitmentNav = page.locator('a').filter({ hasText: 'Recruitment' });
+    if (await recruitmentNav.count()) {
+      await recruitmentNav.first().click();
+      await page.waitForLoadState('domcontentloaded');
+    } else {
+      // If hidden, that's consistent with RBAC; continue without failing.
+    }
+  });
+
+  test('TC4 - Attempt to open Recruitment landing page directly via URL', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    // OrangeHRM demo recruitment path (must be verified in DOM exploration).
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+  });
+
+  test('TC5 - Attempt to open recruitment actionable-items view if reachable (best-effort)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    // TODO: Replace with actual actionable view URL or navigation once discovered.
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+
+    // Attempt to click an actionable control if present; do not fail if absent.
+    const actionButtons = page.locator('button').filter({ hasText: 'Actions' });
+    if (await actionButtons.count()) {
+      await actionButtons.first().click();
+    }
+  });
+
+  test('TC6 - Validate Recruitment is not exposed in navigation for unauthorized user (no hard assertion)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    // Capture presence; assertions intentionally omitted.
+    await page.locator('a').filter({ hasText: 'Recruitment' }).count();
+  });
+
+  test('TC7 - Validate direct access is blocked (no hard assertion)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+
+    // Best-effort: record any access-denied content for later assertion after DOM exploration.
+    await page.locator('text=Access Denied').count();
+  });
+
+  test('TC8 - Validate no recruitment data is visible (best-effort, no assertion)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+
+    // Best-effort: look for a candidates table container.
+    await page.locator('table').count();
+  });
+
+  test('TC9 - Admin exploration helper: confirm Recruitment module exists for Admin (happy-path navigation)', async ({ page }) => {
+    await page.locator('input[name="username"]').fill(adminUser);
+    await page.locator('input[name="password"]').fill(adminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    const recruitmentNav = page.locator('a').filter({ hasText: 'Recruitment' });
+    if (await recruitmentNav.count()) {
+      await recruitmentNav.first().click();
+      await page.waitForLoadState('domcontentloaded');
+    }
+  });
+
+  test('TC10 - Admin direct URL to recruitment candidates (happy-path direct nav)', async ({ page }) => {
+    await page.locator('input[name="username"]').fill(adminUser);
+    await page.locator('input[name="password"]').fill(adminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+  });
+
+  test('TC11 - Admin attempt to open a candidate action menu (happy-path best-effort)', async ({ page }) => {
+    await page.locator('input[name="username"]').fill(adminUser);
+    await page.locator('input[name="password"]').fill(adminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+
+    // Best-effort: look for kebab/ellipsis actions; selector must be verified.
+    const possibleKebab = page.locator('button').filter({ hasText: '⋮' });
+    if (await possibleKebab.count()) await possibleKebab.first().click();
+  });
+
+  test('TC12 - Non-admin: attempt sidebar navigation then direct URL (combined flow)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    const recruitmentNav = page.locator('a').filter({ hasText: 'Recruitment' });
+    if (await recruitmentNav.count()) {
+      await recruitmentNav.first().click();
+      await page.waitForLoadState('domcontentloaded');
+    }
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+  });
+
+  test('TC13 - Non-admin: verify URL does not remain on recruitment page (no hard assertion)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+    // Capture URL for later assertion once real behavior is confirmed.
+    void page.url();
+  });
+
+  test('TC14 - Non-admin: attempt to open another recruitment route (best-effort)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    // TODO: Verify actual vacancy route if exists.
+    await page.goto(baseURL + 'recruitment/viewJobVacancy', { waitUntil: 'domcontentloaded' }).catch(() => {});
+  });
+
+  test('TC15 - Non-admin: ensure no sensitive recruitment details are rendered (best-effort)', async ({ page }) => {
+    test.skip(!nonAdminUser || !nonAdminPass, 'Not Applicable: No non-admin credentials provided.');
+
+    await page.locator('input[name="username"]').fill(nonAdminUser);
+    await page.locator('input[name="password"]').fill(nonAdminPass);
+    await page.locator('button[type="submit"]').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.goto(baseURL + 'recruitment/viewCandidates', { waitUntil: 'domcontentloaded' });
+
+    // Example sensitive fields (must be verified): candidate name/email/phone.
+    await page.locator('text=Email').count();
+    await page.locator('text=Phone').count();
+  });
+});
