@@ -1,0 +1,78 @@
+Test Case Title: Create Agent (happy path) with minimal required fields
+------------------------------------------------------------
+
+{
+    "id": "TC-POST-ccfbea19-001",
+    "description": "Validate that an authenticated client can create an agent by providing required fields (slug, display_name, category) and receives a 200 response with JSON content type.",
+    "preconditions": [
+        "API base URL is reachable",
+        "Valid Bearer token available with permission to create agents",
+        "Test slug is not already used (ensure uniqueness for this run)"
+    ],
+    "steps": [
+        "Send POST request to /api/agents/ with Authorization: Bearer <REPLACE_WITH_TOKEN> and Content-Type: application/json",
+        "Use body: {\"slug\":\"qa-agent-min-001\",\"display_name\":\"QA Agent Minimal 001\",\"category\":\"testing\"}"
+    ],
+    "expected_outcome": [
+        "Status 200",
+        "Response Content-Type is application/json",
+        "Response body is valid JSON (RFC 8259)",
+        "No sensitive data is returned in error or success payload"
+    ],
+    "automation_metadata": {
+        "method": "POST",
+        "endpoint": "/api/agents/",
+        "headers": {
+            "Authorization": "Bearer <REPLACE_WITH_TOKEN>",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        "query_parameters": [],
+        "body_parameters": [
+            {
+                "name": "slug",
+                "type": "string",
+                "required": true,
+                "example": "qa-agent-min-001",
+                "constraints": "Required; string"
+            },
+            {
+                "name": "display_name",
+                "type": "string",
+                "required": true,
+                "example": "QA Agent Minimal 001",
+                "constraints": "Required; string"
+            },
+            {
+                "name": "category",
+                "type": "string",
+                "required": true,
+                "example": "testing",
+                "constraints": "Required; enum: usg|testing|api_doc_testing|performance_testing|deployment|req_synthesizer|ui_automation|documentation"
+            }
+        ],
+        "expected_status_codes": [
+            200
+        ],
+        "expected_response_schema": {},
+        "test_type": "functional",
+        "tags": [
+            "smoke",
+            "regression",
+            "iso29148-traceability",
+            "rfc8259",
+            "owasp-asvs-v2",
+            "owasp-asvs-v5",
+            "owasp-asvs-v10"
+        ],
+        "source_type": "openapi_spec",
+        "source_id": "inferred",
+        "owasp_asvs_refs": [
+            "V2",
+            "V5",
+            "V10"
+        ],
+        "risk_level": "high",
+        "automation_candidate": true
+    }
+}
