@@ -1,0 +1,68 @@
+Test Case Title: Ensure documented user flow is an ordered sequence from trigger to outcome (step ordering validation)
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-4068-02",
+    "description": "Validate that the documented user flow is represented as an ordered sequence of steps and that reordering (if supported) preserves order and meaning from trigger to outcome.",
+    "requirement_id": "SCRUM-4068",
+    "type": "boundary",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "Login to AUT with Admin/admin123.",
+        "Editable baseline exists.",
+        "At least one actor/trigger/action set exists in sources.",
+        "User Flow editor supports ordered steps (assumption)."
+    ],
+    "steps": [
+        "Login to the AUT.",
+        "Navigate to baseline editing screen.",
+        "Add a new user flow with actor and trigger selected from sources.",
+        "Enter steps in a deliberately non-sequential manner (e.g., enter Step 2 before Step 1) if the UI allows free entry.",
+        "Use any available UI control to normalize order (e.g., auto-numbering) or manually correct the order.",
+        "Save the baseline.",
+        "View the flow in read-only mode."
+    ],
+    "expected_outcomes": [
+        "Steps are displayed as a clear ordered sequence (e.g., 1..N) without duplicates or gaps, or the UI prevents invalid numbering.",
+        "The first step aligns with the trigger and the final step aligns with the expected outcome.",
+        "If invalid ordering is entered, the system guides correction via validation or auto-ordering."
+    ],
+    "data": {
+        "inputs": {
+            "steps_entered": [
+                "2: System displays baseline editor",
+                "1: Actor navigates to baseline",
+                "3: Actor adds flow content"
+            ]
+        },
+        "fixtures": [
+            "Baseline draft with no flows"
+        ],
+        "mocks": []
+    },
+    "tags": [
+        "requirements",
+        "user-flow",
+        "ordering",
+        "validation"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "AC3",
+            "AC8"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148",
+            "IEEE 830"
+        ],
+        "owasp_asvs": [],
+        "wcag": [
+            "3.3.1"
+        ]
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 150,
+    "notes": "If UI uses a table/list, use stable selectors by role (list, row, textbox) and assert step labels via text/aria. Update once UI is known."
+}

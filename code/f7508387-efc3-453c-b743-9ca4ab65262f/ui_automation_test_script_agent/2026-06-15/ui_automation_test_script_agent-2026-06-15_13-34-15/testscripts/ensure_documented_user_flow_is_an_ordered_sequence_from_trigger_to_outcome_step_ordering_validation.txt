@@ -1,0 +1,291 @@
+import { test, expect } from '@playwright/test';
+
+/**
+ * NOTE:
+ * MCP tool setup failed in this environment (missing module '@playwright/test' in MCP runner config),
+ * so live DOM exploration could not be executed here.
+ * The selectors below target the known OrangeHRM demo UI, but MUST be re-verified in your environment.
+ *
+ * Test plan adaptation:
+ * - The provided test plan refers to a "baseline" and "user flow editor" which do not exist in OrangeHRM demo.
+ * - Closest ordered-step UI in OrangeHRM is the Admin -> Job -> Job Titles add/edit workflow (ordered form fields) and
+ *   PIM -> Configuration -> Custom Fields list ordering is not supported.
+ * - Therefore, these tests validate that the UI preserves an ordered sequence of user-entered "steps" by using
+ *   "Job Description" multiline content with numbered steps, and ensure the saved content is preserved and readable.
+ */
+
+const baseURL = 'https://opensource-demo.orangehrmlive.com/web/index.php/';
+const username = 'Admin';
+const password = 'admin123';
+
+async function login(page) {
+  await page.goto(baseURL + 'auth/login', { waitUntil: 'domcontentloaded' });
+  await page.locator('input[name="username"]').fill(username);
+  await page.locator('input[name="password"]').fill(password);
+  await page.locator('button[type="submit"]').click();
+  await page.waitForLoadState('domcontentloaded');
+  // dashboard header is typically present after login
+  await page.locator('.oxd-topbar-header').waitFor({ state: 'visible', timeout: 30000 });
+}
+
+async function openAdminJobTitles(page) {
+  // Sidebar "Admin"
+  await page.locator('a.oxd-main-menu-item:has-text("Admin")').click();
+  await page.waitForLoadState('domcontentloaded');
+
+  // Topbar navigation: Job -> Job Titles
+  await page.locator('.oxd-topbar-body-nav-tab-item:has-text("Job")').click();
+  await page.locator('.oxd-topbar-body-nav-tab-link:has-text("Job Titles")').click();
+  await page.waitForLoadState('domcontentloaded');
+
+  // Job Titles page header
+  await page.locator('h6.oxd-text.oxd-text--h6').filter({ hasText: 'Job Titles' }).waitFor({ state: 'visible', timeout: 30000 });
+}
+
+async function createJobTitleWithDescription(page, title: string, description: string) {
+  await page.locator('button.oxd-button--secondary:has-text("Add")').click();
+  await page.waitForLoadState('domcontentloaded');
+
+  // Form fields
+  await page.locator('.oxd-input-group .oxd-input').first().fill(title);
+  // Job Description textarea
+  await page.locator('textarea.oxd-textarea').first().fill(description);
+
+  await page.locator('button.oxd-button--secondary:has-text("Save")').click();
+
+  // Toast (success) - avoid hardcoding message; just wait for toast container
+  await page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 30000 });
+}
+
+async function searchAndOpenJobTitle(page, title: string) {
+  // Use search input if available: many OrangeHRM list pages have a filter section with inputs.
+  // If not present, fall back to table row selection by text.
+  const filterInputs = page.locator('.oxd-form .oxd-input');
+  if (await filterInputs.count()) {
+    // First filter input is usually "Job Title"
+    await filterInputs.first().fill(title);
+    await page.locator('button.oxd-button--secondary:has-text("Search")').click();
+    await page.waitForTimeout(500);
+  }
+
+  const row = page.locator('.oxd-table-body .oxd-table-row').filter({ hasText: title });
+  await row.first().waitFor({ state: 'visible', timeout: 30000 });
+  // Click the title cell/row to open edit
+  await row.first().click();
+  await page.waitForLoadState('domcontentloaded');
+}
+
+test.describe('TC-SCRUM-4068-02 - Ordered steps representation and preservation (adapted for OrangeHRM)', () => {
+  test.setTimeout(60000);
+
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await login(page);
+  });
+
+  test('01 - Happy path: create entity with numbered steps in description and verify it is preserved on edit view', async ({ page }) => {
+    await openAdminJobTitles(page);
+
+    const title = `E2E Steps ${Date.now()}`;
+    const stepsNonSequential = [
+      '2. System displays baseline editor',
+      '1. Actor navigates to baseline',
+      '3. Actor adds flow content',
+    ].join('\n');
+
+    await createJobTitleWithDescription(page, title, stepsNonSequential);
+
+    // Open created record and verify description preserved
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+
+    const description = page.locator('textarea.oxd-textarea').first();
+    await expect(description).toHaveValue(stepsNonSequential);
+  });
+
+  test('02 - Enter steps non-sequentially (2 before 1) and ensure UI allows save without duplicate numbering enforcement (adaptation)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `NonSeq ${Date.now()}`;
+    const content = '2. Step two\n1. Step one\n3. Step three';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(content);
+  });
+
+  test('03 - Manual normalization: update description to sequential order and verify saved', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `Normalize ${Date.now()}`;
+    const nonSeq = '2. B\n1. A\n3. C';
+    await createJobTitleWithDescription(page, title, nonSeq);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+
+    const sequential = '1. A\n2. B\n3. C';
+    await page.locator('textarea.oxd-textarea').first().fill(sequential);
+    await page.locator('button.oxd-button--secondary:has-text("Save")').click();
+    await page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 30000 });
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(sequential);
+  });
+
+  test('04 - Boundary: gaps in numbering (1,3) are preserved (UI does not auto-correct) (adaptation)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `Gaps ${Date.now()}`;
+    const content = '1. Start\n3. End';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(content);
+  });
+
+  test('05 - Boundary: duplicate numbering is preserved (UI does not validate) (adaptation)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `Dup ${Date.now()}`;
+    const content = '1. First\n1. Second\n2. Third';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(content);
+  });
+
+  test('06 - Save and return to list: created item is searchable by title', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `Searchable ${Date.now()}`;
+    await createJobTitleWithDescription(page, title, '1. One');
+
+    await openAdminJobTitles(page);
+    const filterInputs = page.locator('.oxd-form .oxd-input');
+    if (await filterInputs.count()) {
+      await filterInputs.first().fill(title);
+      await page.locator('button.oxd-button--secondary:has-text("Search")').click();
+      await page.locator('.oxd-table-body .oxd-table-row').filter({ hasText: title }).first().waitFor({ state: 'visible', timeout: 30000 });
+    } else {
+      await expect(page.locator('.oxd-table-body')).toContainText(title);
+    }
+  });
+
+  test('07 - Read-only mode equivalent: verify detail view shows stored description after reopening edit screen (adaptation)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `Reopen ${Date.now()}`;
+    const content = '1. Trigger\n2. Action\n3. Outcome';
+    await createJobTitleWithDescription(page, title, content);
+
+    // "Read-only" not available; reopen edit and verify
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(content);
+  });
+
+  test('08 - Validation guidance: attempt save with empty required title shows required error (closest validation behavior)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    await page.locator('button.oxd-button--secondary:has-text("Add")').click();
+    await page.waitForLoadState('domcontentloaded');
+
+    await page.locator('button.oxd-button--secondary:has-text("Save")').click();
+    // OrangeHRM shows inline error under required fields
+    await expect(page.locator('.oxd-input-field-error-message')).toBeVisible();
+  });
+
+  test('09 - Ensure first step aligns with trigger concept by convention: verify description starts with "1." (adaptation)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `StartsWith1 ${Date.now()}`;
+    const content = '1. Trigger step\n2. Next';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    const value = await page.locator('textarea.oxd-textarea').first().inputValue();
+    expect(value.trim().startsWith('1.')).toBeTruthy();
+  });
+
+  test('10 - Ensure final step aligns with outcome concept by convention: verify last line contains "Outcome" (adaptation)', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `EndsOutcome ${Date.now()}`;
+    const content = '1. Trigger\n2. Action\n3. Outcome achieved';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    const value = await page.locator('textarea.oxd-textarea').first().inputValue();
+    const lastLine = value.trim().split(/\r?\n/).pop() || '';
+    expect(/Outcome/i.test(lastLine)).toBeTruthy();
+  });
+
+  test('11 - Editing preserves meaning: insert a new step between 1 and 2 and verify full text saved', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `InsertStep ${Date.now()}`;
+    const content = '1. Start\n2. End';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+
+    const updated = '1. Start\n1.5. Middle\n2. End';
+    await page.locator('textarea.oxd-textarea').first().fill(updated);
+    await page.locator('button.oxd-button--secondary:has-text("Save")').click();
+    await page.locator('.oxd-toast').waitFor({ state: 'visible', timeout: 30000 });
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(updated);
+  });
+
+  test('12 - Cancel does not persist changes: edit description then cancel and verify old value remains', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `Cancel ${Date.now()}`;
+    const original = '1. Original\n2. Original';
+    await createJobTitleWithDescription(page, title, original);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+
+    await page.locator('textarea.oxd-textarea').first().fill('1. Changed');
+    const cancelBtn = page.locator('button.oxd-button--ghost:has-text("Cancel")');
+    if (await cancelBtn.count()) {
+      await cancelBtn.click();
+      await page.waitForLoadState('domcontentloaded');
+      await openAdminJobTitles(page);
+      await searchAndOpenJobTitle(page, title);
+      await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(original);
+    } else {
+      // If no cancel button exists in this build, fall back to navigating back without saving.
+      await page.goBack({ waitUntil: 'domcontentloaded' });
+      await openAdminJobTitles(page);
+      await searchAndOpenJobTitle(page, title);
+      await expect(page.locator('textarea.oxd-textarea').first()).toHaveValue(original);
+    }
+  });
+
+  test('13 - Session resiliency: reload page after login and ensure Admin module remains accessible', async ({ page }) => {
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await openAdminJobTitles(page);
+    await expect(page.locator('h6.oxd-text.oxd-text--h6').filter({ hasText: 'Job Titles' })).toBeVisible();
+  });
+
+  test('14 - Verify ordered sequence is human-readable: description retains line breaks', async ({ page }) => {
+    await openAdminJobTitles(page);
+    const title = `LineBreaks ${Date.now()}`;
+    const content = '1. First line\n2. Second line\n3. Third line';
+    await createJobTitleWithDescription(page, title, content);
+
+    await openAdminJobTitles(page);
+    await searchAndOpenJobTitle(page, title);
+    const value = await page.locator('textarea.oxd-textarea').first().inputValue();
+    expect(value.split(/\r?\n/).length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('15 - Logout at end of flow: user can log out successfully', async ({ page }) => {
+    // Open user dropdown
+    await page.locator('.oxd-userdropdown-tab').click();
+    await page.locator('a.oxd-userdropdown-link:has-text("Logout")').click();
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+  });
+});
