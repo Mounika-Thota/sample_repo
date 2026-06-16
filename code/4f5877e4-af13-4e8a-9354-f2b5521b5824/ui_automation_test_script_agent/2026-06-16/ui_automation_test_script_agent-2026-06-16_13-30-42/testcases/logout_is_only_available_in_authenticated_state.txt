@@ -1,0 +1,61 @@
+Test Case Title: Logout is only available in authenticated state
+------------------------------------------------------------
+
+{
+    "id": "TC-SCRUM-4074-02",
+    "description": "Verify logout action cannot be invoked when not authenticated and the user remains in non-authenticated state without exposure of protected data.",
+    "requirement_id": "SCRUM-4074",
+    "type": "negative",
+    "priority": "P1",
+    "risk_level": "medium",
+    "preconditions": [
+        "AUT reachable: https://opensource-demo.orangehrmlive.com/web/index.php/",
+        "User is currently not authenticated (fresh browser context, no prior session)."
+    ],
+    "steps": [
+        "Navigate to https://opensource-demo.orangehrmlive.com/web/index.php/",
+        "Ensure login page (or public landing) is displayed.",
+        "Confirm there is no visible authenticated header user menu and no \"Logout\" option.",
+        "Attempt to directly request a known logout endpoint URL (if discoverable via network logs once tooling is available) or known route pattern (e.g., /web/index.php/auth/logout) in the browser address bar.",
+        "Verify the application stays in non-authenticated state.",
+        "Attempt to navigate directly to a protected page URL (e.g., /web/index.php/dashboard/index)."
+    ],
+    "expected_outcomes": [
+        "Logout control is not visible/available when not authenticated.",
+        "If a logout route is invoked while not authenticated, the system remains non-authenticated and does not expose protected content.",
+        "Direct navigation to a protected page is rejected (redirect to login or 401/403 equivalent)."
+    ],
+    "data": {
+        "inputs": {
+            "protected_url_example": "/web/index.php/dashboard/index",
+            "possible_logout_route_example": "/web/index.php/auth/logout"
+        },
+        "fixtures": [],
+        "mocks": []
+    },
+    "tags": [
+        "logout",
+        "authorization",
+        "access-control"
+    ],
+    "traceability": {
+        "acceptance_criteria_refs": [
+            "AC7",
+            "AC6"
+        ],
+        "nfr_refs": [],
+        "standards": [
+            "ISO/IEC/IEEE 29148",
+            "ISO 27001"
+        ],
+        "owasp_asvs": [
+            "V2.Authentication",
+            "V4.AccessControl",
+            "V3.SessionManagement"
+        ],
+        "wcag": []
+    },
+    "automation_candidate": true,
+    "estimated_duration_sec": 30,
+    "notes": "If the app uses server-side sessions, direct logout URL invocation may still respond with redirect to login. Do not assert audit logging from UI; verify via backend logs if accessible in test environment."
+}

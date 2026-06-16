@@ -1,0 +1,196 @@
+import { test, expect } from '@playwright/test';
+
+/**
+ * TC-SCRUM-4074-02
+ * Negative authz/authn coverage for unauthenticated logout + protected route access.
+ *
+ * NOTE / Adaptation:
+ * - MCP browser exploration could not be executed because the MCP environment failed to load
+ *   the Playwright Test config: "Cannot find module '@playwright/test'".
+ * - Therefore, selectors below are written using OrangeHRM demo's common, historically-stable OXD
+ *   component CSS, but they were NOT verified via MCP DOM inspection in this run.
+ * - If any selector is inaccurate in your environment, update based on live DOM.
+ */
+
+test.describe('SCRUM-4074 - Logout/Access Control (Unauthenticated)', () => {
+  test.setTimeout(60_000);
+
+  const baseURL = 'https://opensource-demo.orangehrmlive.com/web/index.php';
+  const loginURL = `${baseURL}/auth/login`;
+  const logoutURL = `${baseURL}/auth/logout`;
+  const protectedDashboardURL = `${baseURL}/dashboard/index`;
+
+  test('TC-SCRUM-4074-02-01: Navigate to AUT and ensure login page is displayed', async ({ page }) => {
+    await page.goto(loginURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    // Login page container (OXD)
+    await expect(page.locator('.orangehrm-login-layout')).toBeVisible();
+
+    // Username + Password fields are typically OXD inputs within login form.
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+    await expect(page.locator('input[name="password"]')).toBeVisible();
+
+    // Login button
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+  });
+
+  test('TC-SCRUM-4074-02-02: Confirm there is no authenticated user menu and no Logout option (unauthenticated)', async ({ page }) => {
+    await page.goto(loginURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    // Topbar only exists after authentication; assert it is not present.
+    await expect(page.locator('.oxd-topbar')).toHaveCount(0);
+
+    // User dropdown exists after authentication.
+    await expect(page.locator('.oxd-userdropdown')).toHaveCount(0);
+
+    // Logout link text should not appear on login page.
+    await expect(page.getByText('Logout', { exact: true })).toHaveCount(0);
+  });
+
+  test('TC-SCRUM-4074-02-03: Directly invoke logout route while not authenticated; remain non-authenticated and no protected content exposed', async ({ page }) => {
+    await page.goto(loginURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(500);
+
+    // Invoke logout while unauthenticated.
+    await page.goto(logoutURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    // Should remain at or be redirected back to login (non-authenticated state).
+    await expect(page).toHaveURL(/\/auth\/login|\/auth\/logout/);
+
+    // Confirm login UI still present.
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+    await expect(page.locator('input[name="password"]')).toBeVisible();
+
+    // Confirm dashboard/topbar not visible.
+    await expect(page.locator('.oxd-topbar')).toHaveCount(0);
+    await expect(page.locator('.oxd-sidepanel')).toHaveCount(0);
+  });
+
+  test('TC-SCRUM-4074-02-04: Direct navigation to protected page (dashboard) is rejected (redirect back to login)', async ({ page }) => {
+    await page.goto(protectedDashboardURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    // Typically redirected to login when unauthenticated.
+    await expect(page).toHaveURL(/\/auth\/login/);
+
+    // Login UI visible, protected UI absent.
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+    await expect(page.locator('.oxd-topbar')).toHaveCount(0);
+    await expect(page.locator('.oxd-sidepanel')).toHaveCount(0);
+  });
+
+  // --- Additional tests to satisfy instruction "15 different tests" ---
+  // These remain aligned to the same scenario, without loops, using variations of the checks.
+
+  test('TC-SCRUM-4074-02-05: Unauthenticated state - verify login form submit does not expose protected layout without credentials', async ({ page }) => {
+    await page.goto(loginURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await page.locator('button[type="submit"]').click();
+    await page.waitForTimeout(500);
+
+    // Still unauthenticated: no topbar/sidepanel.
+    await expect(page.locator('.oxd-topbar')).toHaveCount(0);
+    await expect(page.locator('.oxd-sidepanel')).toHaveCount(0);
+
+    // Some validation message should appear; do not hardcode text.
+    await expect(page.locator('.oxd-input-field-error-message')).toHaveCountGreaterThan(0);
+  });
+
+  test('TC-SCRUM-4074-02-06: Unauthenticated - verify logout route does not create authenticated cookies', async ({ page, context }) => {
+    await context.clearCookies();
+    await page.goto(logoutURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    const cookies = await context.cookies();
+    // Should not have an authenticated session cookie set merely by visiting logout.
+    // We avoid hardcoding cookie names; assert no cookie has a value that looks like an auth token with long length.
+    const suspicious = cookies.filter(c => (c.value || '').length > 80);
+    expect(suspicious.length).toBe(0);
+
+    await expect(page).toHaveURL(/\/auth\/login|\/auth\/logout/);
+  });
+
+  test('TC-SCRUM-4074-02-07: Unauthenticated - attempt protected URL then attempt logout; remain on login page', async ({ page }) => {
+    await page.goto(protectedDashboardURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+    await expect(page).toHaveURL(/\/auth\/login/);
+
+    await page.goto(logoutURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page).toHaveURL(/\/auth\/login|\/auth\/logout/);
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+  });
+
+  test('TC-SCRUM-4074-02-08: Unauthenticated - verify "Logout" text is not present in DOM after visiting logout route', async ({ page }) => {
+    await page.goto(logoutURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page.getByText('Logout', { exact: true })).toHaveCount(0);
+    await expect(page.locator('.oxd-userdropdown')).toHaveCount(0);
+  });
+
+  test('TC-SCRUM-4074-02-09: Unauthenticated - ensure no sidebar navigation links are visible on login page', async ({ page }) => {
+    await page.goto(loginURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page.locator('.oxd-sidepanel')).toHaveCount(0);
+    await expect(page.locator('a.oxd-main-menu-item')).toHaveCount(0);
+  });
+
+  test('TC-SCRUM-4074-02-10: Unauthenticated - attempt direct /pim/viewEmployeeList protected route redirects to login', async ({ page }) => {
+    await page.goto(`${baseURL}/pim/viewEmployeeList`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page).toHaveURL(/\/auth\/login/);
+    await expect(page.locator('input[name="username"]')).toBeVisible();
+  });
+
+  test('TC-SCRUM-4074-02-11: Unauthenticated - attempt direct /admin/viewSystemUsers protected route redirects to login', async ({ page }) => {
+    await page.goto(`${baseURL}/admin/viewSystemUsers`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page).toHaveURL(/\/auth\/login/);
+    await expect(page.locator('input[name="password"]')).toBeVisible();
+  });
+
+  test('TC-SCRUM-4074-02-12: Unauthenticated - refresh after logout route still shows login (no protected content)', async ({ page }) => {
+    await page.goto(logoutURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(600);
+
+    await expect(page).toHaveURL(/\/auth\/login|\/auth\/logout/);
+    await expect(page.locator('.oxd-topbar')).toHaveCount(0);
+  });
+
+  test('TC-SCRUM-4074-02-13: Unauthenticated - verify page title/header indicates login screen', async ({ page }) => {
+    await page.goto(loginURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    // OrangeHRM login page typically has "Login" header; avoid hardcoding exact structure, check at least the word appears.
+    await expect(page.getByText('Login', { exact: false })).toHaveCountGreaterThan(0);
+  });
+
+  test('TC-SCRUM-4074-02-14: Unauthenticated - ensure protected dashboard widgets are not present on redirected page', async ({ page }) => {
+    await page.goto(protectedDashboardURL, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page).toHaveURL(/\/auth\/login/);
+
+    // Dashboard container class commonly: .orangehrm-dashboard-grid; ensure absent.
+    await expect(page.locator('.orangehrm-dashboard-grid')).toHaveCount(0);
+  });
+
+  test('TC-SCRUM-4074-02-15: Unauthenticated - attempt to access protected page with trailing slash redirects to login', async ({ page }) => {
+    await page.goto(`${protectedDashboardURL}/`, { waitUntil: 'domcontentloaded' });
+    await page.waitForTimeout(800);
+
+    await expect(page).toHaveURL(/\/auth\/login/);
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+  });
+});
